@@ -1,0 +1,1690 @@
+<!DOCTYPE html><html class="dark" lang="ko"><head>
+<script src="init_game.js"></script>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Level Up Life - 던전</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Oswald:wght@500;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline": "#958da1",
+                        "on-primary": "#3f008e",
+                        "legendary-gold": "#FFD700",
+                        "surface-container-high": "#2a292e",
+                        "epic-purple": "#7C3AED",
+                        "surface-tint": "#d2bbff",
+                        "success-green": "#22C55E",
+                        "on-primary-container": "#ede0ff",
+                        "on-tertiary-container": "#ffe2ab",
+                        "primary-container": "#7c3aed",
+                        "on-tertiary": "#402d00",
+                        "surface-bright": "#39393d",
+                        "health-red": "#EF4444",
+                        "secondary": "#adc6ff",
+                        "on-primary-fixed-variant": "#5a00c6",
+                        "shadow-slate": "#23262F",
+                        "surface-container": "#1f1f23",
+                        "on-error-container": "#ffdad6",
+                        "primary-fixed-dim": "#d2bbff",
+                        "secondary-container": "#0566d9",
+                        "on-primary-fixed": "#25005a",
+                        "inverse-surface": "#e4e1e7",
+                        "outline-variant": "#4a4455",
+                        "inverse-on-surface": "#303034",
+                        "tertiary-fixed-dim": "#f9bd22",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "on-background": "#e4e1e7",
+                        "exp-blue": "#3B82F6",
+                        "on-tertiary-fixed": "#261a00",
+                        "tertiary-container": "#836100",
+                        "primary-fixed": "#eaddff",
+                        "on-secondary": "#002e6a",
+                        "on-secondary-container": "#e6ecff",
+                        "dungeon-gray": "#181A20",
+                        "primary": "#d2bbff",
+                        "on-secondary-fixed": "#001a42",
+                        "error": "#ffb4ab",
+                        "surface-container-low": "#1b1b1f",
+                        "secondary-fixed": "#d8e2ff",
+                        "surface-container-highest": "#353439",
+                        "surface-container-lowest": "#0e0e12",
+                        "on-error": "#690005",
+                        "abyss-black": "#0B0B0F",
+                        "on-tertiary-fixed-variant": "#5c4300",
+                        "background": "#131317",
+                        "surface-dim": "#131317",
+                        "mythic-pink": "#FF4D6D",
+                        "on-secondary-fixed-variant": "#004395",
+                        "error-container": "#93000a",
+                        "on-surface": "#e4e1e7",
+                        "tertiary-fixed": "#ffdf9f",
+                        "surface": "#131317",
+                        "inverse-primary": "#732ee4",
+                        "surface-variant": "#353439",
+                        "hunter-surface": "#2C313D",
+                        "on-surface-variant": "#ccc3d8",
+                        "tertiary": "#f9bd22"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "base": "4px",
+                        "xl": "32px",
+                        "lg": "24px",
+                        "sm": "8px",
+                        "md": "16px",
+                        "margin-desktop": "32px",
+                        "xxl": "48px",
+                        "margin-mobile": "16px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "caption": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "card-title": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "quest-title": ["Inter"],
+                        "section-title-mobile": ["Oswald"],
+                        "section-title": ["Oswald"],
+                        "level-display-mobile": ["Oswald"],
+                        "level-display": ["Oswald"],
+                        "boss-display": ["Oswald"]
+                    },
+                    "fontSize": {
+                        "caption": ["12px", { "lineHeight": "1.4", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "body-sm": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "card-title": ["24px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "quest-title": ["18px", { "lineHeight": "1.5", "fontWeight": "600" }],
+                        "section-title-mobile": ["28px", { "lineHeight": "1.3", "fontWeight": "500" }],
+                        "section-title": ["32px", { "lineHeight": "1.3", "fontWeight": "500" }],
+                        "level-display-mobile": ["36px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "level-display": ["48px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "boss-display": ["64px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .ghost-border { box-shadow: inset 0 0 0 1px rgba(204, 195, 216, 0.1); }
+        .glow-epic { box-shadow: 0 0 15px rgba(124, 58, 237, 0.4); }
+        .glow-gold { box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
+        .shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        /* Custom scrollbar for immersive feel */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0B0B0F; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #23262F; 
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #7C3AED; 
+        }
+    </style>
+</head>
+<body class="bg-abyss-black text-on-surface font-body-sm min-h-screen flex flex-col md:flex-row overflow-x-hidden selection:bg-epic-purple selection:text-white">
+<!-- TopAppBar (Mobile & Desktop Header Area) -->
+<header class="bg-abyss-black dark:bg-abyss-black font-boss-display text-boss-display docked full-width top-0 border-b border-outline-variant/30 shadow-[0_0_15px_rgba(124,58,237,0.3)] flex justify-between items-center w-full px-md h-16 fixed z-50">
+<a href="home.html" class="flex items-center gap-sm cursor-pointer hover:opacity-80 transition-opacity">
+<img alt="Level Up Life Logo" class="h-8 w-8 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvVeFzLtZ-Xq9k4cM7sTatF4Oded9MMO6cULtN-y1SefihPn0HcPEKq_JKgO9qOrWbuueKw9hpajqRSOXFrUQK_U5mfwR3lWudiT03alw5RDECZlkx92EIP1j8xXmhsfaPuw582p3YvKVJGFpPOu2ilUzpbWBu-i9vTxi-7QkUka3OokBead-CEcU2AVLWl72lF2rglnMCjk0kvJD5yp4Gv7bBKjvtAOMW-UKswNxog25f-1kREPCFm8MEYzp1RBOdzvZLvsCdKOU">
+<span class="font-boss-display text-section-title text-primary uppercase tracking-tighter hidden sm:block">LEVEL UP LIFE</span>
+</a>
+<div class="flex items-center gap-md font-body-sm text-body-sm">
+
+<div class="flex items-center gap-xs bg-shadow-slate px-sm py-1 rounded-xl ghost-border">
+<span class="material-symbols-outlined text-legendary-gold text-lg" style="font-variation-settings: 'FILL' 1;">monetization_on</span>
+<span class="text-legendary-gold font-bold">0 G</span>
+</div>
+<button class="text-on-surface-variant hover:text-primary-fixed-dim transition-colors scale-95 active:duration-150 relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-health-red rounded-full"></span>
+</button>
+<button class="text-on-surface-variant hover:text-primary-fixed-dim transition-colors scale-95 active:duration-150" onclick="document.getElementById('dungeon-edit-modal-new').classList.remove('hidden')">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+</header>
+<!-- SideNavBar (Desktop) -->
+<aside class="bg-dungeon-gray dark:bg-dungeon-gray docked left-0 h-full w-64 border-r border-outline-variant/20 hidden md:flex flex-col py-lg px-md fixed top-0 z-40">
+<div class="flex flex-col items-center mb-xl pt-16">
+<div class="w-24 h-24 rounded-full bg-shadow-slate ghost-border overflow-hidden mb-sm relative glow-epic">
+<img alt="Sung Jin-Woo Avatar" class="w-full h-full object-cover" data-alt="A striking portrait of an anime-style modern male hunter with dark, messy hair and glowing purple eyes, set against a dark, moody background. He wears a sleek, high-tech black tactical coat. The lighting is cinematic, heavily contrasting deep abyssal blacks with vibrant epic purple rim lights, fitting a high-stakes dungeon crawler RPG aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHTuIx9e5kpkUZYkQdaODnjCmH54Pmd3zhhB59qgLINBgEEUZbXnD7O4i66gY-rFfK8GdGFbCGAPnV_bksPH1jTV6O5OKRXVrVv47__GYXMDjlVtYDYx8ICRHDtvCeoWpMpzQB1JeBm80PeW_KgAkXPfJW5gA-g_nN_o-XtHR5fGviZhLhZgHCWbV5b4hMjstJHjO5iZ1UIsA3zN0nYqnA8KoKpDkY-Id9i6TDihqB8kF6WS1umaLN-BDVf4WTWzVZASpWL4yY65E">
+<div class="absolute inset-0 bg-epic-purple/20 mix-blend-overlay"></div>
+</div>
+<h2 class="font-section-title text-section-title text-primary">성진우</h2>
+<p class="text-on-surface-variant font-caption text-caption">Lv.1</p>
+</div>
+<nav class="flex-1 space-y-sm">
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-shadow-slate hover:text-on-surface transition-all duration-300 ease-in-out rounded-xl" href="dashboard.html">
+<span class="material-symbols-outlined">person</span>
+<span class="font-body-lg text-body-lg">상태창</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm bg-primary-container/20 text-primary border-r-4 border-primary transition-all duration-300 ease-in-out rounded-xl" href="quests.html">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">fort</span>
+<span class="font-body-lg text-body-lg">던전</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-shadow-slate hover:text-on-surface transition-all duration-300 ease-in-out rounded-xl" href="shop.html">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">storefront</span>
+<span class="font-body-lg text-body-lg">상점</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-shadow-slate hover:text-on-surface transition-all duration-300 ease-in-out rounded-xl" href="inventory.html">
+<span class="material-symbols-outlined">backpack</span>
+<span class="font-body-lg text-body-lg">인벤토리</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-shadow-slate hover:text-on-surface transition-all duration-300 ease-in-out rounded-xl" href="achievements.html">
+<span class="material-symbols-outlined">military_tech</span>
+<span class="font-body-lg text-body-lg">업적</span>
+</a>
+</nav>
+<div class="mt-auto pt-lg border-t border-outline-variant/20 flex flex-col gap-2">
+<button class="w-full bg-epic-purple text-white font-bold uppercase py-sm rounded-xl ghost-border hover:shadow-[0_0_12px_rgba(124,58,237,0.8)] transition-all mb-sm">프리미엄 멤버십</button>
+
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-shadow-slate hover:text-on-surface transition-all duration-300 ease-in-out rounded-xl" href="home.html">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-card-title text-body-lg">로그아웃</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main id="view-list" class="flex-1 mt-16 md:ml-64 p-margin-mobile md:p-margin-desktop overflow-y-auto transition-opacity duration-300">
+<div class="max-w-7xl mx-auto space-y-lg pb-24 md:pb-0 w-full">
+<!-- Section Header -->
+<div class="flex flex-col sm:flex-row sm:items-end justify-between border-b border-shadow-slate pb-sm mb-lg gap-4">
+<div>
+<h1 class="font-section-title text-section-title-mobile md:text-section-title text-on-surface uppercase tracking-wider flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="swords">swords</span>
+                            입장 가능한 던전
+                        </h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">목표를 달성하여 경험치와 보상을 획득하세요.</p>
+</div>
+<div class="text-left sm:text-right">
+<p class="font-body-sm text-body-sm text-outline">초기화까지: <span id="reset-timer-display" class="text-primary font-mono">14:23:09</span></p>
+</div>
+</div>
+<!-- Dungeon Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md md:gap-lg">
+<!-- Dungeon Card: Daily Routine (E-Rank) -->
+<div class="cursor-pointer bg-dungeon-gray border border-shadow-slate rounded-lg overflow-hidden relative group hover:border-outline transition-colors flex flex-col" onclick="openQuestView('view-e_rank')">
+<!-- Rarity Stripe (E-Rank Gray) -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-outline-variant z-10"></div>
+<!-- Header / Rarity Badge -->
+<div class="p-md pb-0 flex justify-between items-start z-10 relative">
+<div class="flex items-center gap-2">
+<div class="bg-outline-variant/20 text-outline border border-outline/30 rounded-full px-3 py-1 font-body-sm text-caption uppercase tracking-wider flex items-center gap-1 backdrop-blur-sm">
+                                E급
+</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant" data-icon="schedule">schedule</span>
+</div>
+<!-- Content -->
+<div class="p-md flex-1 z-10 relative">
+<h3 class="font-quest-title text-quest-title text-on-surface mb-2">운동</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">꾸준한 신체 단련 미션입니다.</p>
+<!-- Progress Bar -->
+<div class="mt-4 space-y-1">
+<div class="flex justify-between font-body-sm text-caption text-outline">
+<span class="">진행도</span>
+<span class="">2/3</span>
+</div>
+<div class="h-2 w-full bg-abyss-black rounded-full overflow-hidden border border-shadow-slate">
+<div class="h-full bg-exp-blue w-2/3 shadow-[0_0_8px_rgba(59,130,246,0.6)]"></div>
+</div>
+</div>
+</div>
+<!-- Footer (Rewards & Action) -->
+<div class="p-md pt-sm border-t border-shadow-slate bg-abyss-black/30 flex justify-between items-center z-10 relative">
+<div class="flex items-center space-x-md">
+<div class="flex items-center text-exp-blue font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="arrow_upward">arrow_upward</span>
+<span id="card-exp-e">150 XP</span>
+</div>
+<div class="flex items-center text-legendary-gold font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="monetization_on">monetization_on</span>
+                                    500G
+                                </div>
+</div>
+<button class="bg-epic-purple/80 text-on-primary hover:bg-epic-purple px-4 py-2 rounded font-body-sm text-body-sm font-semibold transition-colors border border-primary/30">
+                                입장
+                            </button>
+</div>
+</div>
+<!-- Dungeon Card: E-Rank 2 -->
+<div class="cursor-pointer bg-dungeon-gray border border-shadow-slate rounded-lg overflow-hidden relative group hover:border-outline transition-colors flex flex-col" onclick="openQuestView('view-c_rank')">
+<!-- Rarity Stripe (E-Rank Gray) -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-outline-variant z-10"></div>
+<!-- Header / Rarity Badge -->
+<div class="p-md pb-0 flex justify-between items-start z-10 relative">
+<div class="flex items-center gap-2">
+<div class="bg-outline-variant/20 text-outline border border-outline/30 rounded-full px-3 py-1 font-body-sm text-caption uppercase tracking-wider flex items-center gap-1 backdrop-blur-sm">
+                                E급
+</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant" data-icon="schedule">schedule</span>
+</div>
+<!-- Content -->
+<div class="p-md flex-1 z-10 relative">
+<h3 class="font-quest-title text-quest-title text-on-surface mb-2">지식</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">꾸준한 지식 습득 미션입니다.</p>
+<!-- Progress Bar -->
+<div class="mt-4 space-y-1">
+<div class="flex justify-between font-body-sm text-caption text-outline">
+<span class="">진행도</span>
+<span class="">0/1</span>
+</div>
+<div class="h-2 w-full bg-abyss-black rounded-full overflow-hidden border border-shadow-slate">
+<div class="h-full bg-exp-blue w-0 shadow-[0_0_8px_rgba(59,130,246,0.6)]"></div>
+</div>
+</div>
+</div>
+<!-- Footer (Rewards & Action) -->
+<div class="p-md pt-sm border-t border-shadow-slate bg-abyss-black/30 flex justify-between items-center z-10 relative">
+<div class="flex items-center space-x-md">
+<div class="flex items-center text-exp-blue font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="arrow_upward">arrow_upward</span>
+<span id="card-exp-c">1200 XP</span>
+</div>
+<div class="flex items-center text-legendary-gold font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="monetization_on">monetization_on</span>
+                                    1,500G
+                                </div>
+</div>
+<button class="bg-epic-purple/80 text-on-primary hover:bg-epic-purple px-4 py-2 rounded font-body-sm text-body-sm font-semibold transition-colors border border-primary/30">
+                                입장
+                            </button>
+</div>
+</div>
+<!-- Dungeon Card: E-Rank 3 -->
+<div id="card-s-rank" class="cursor-pointer bg-dungeon-gray border border-shadow-slate rounded-lg overflow-hidden relative group hover:border-outline transition-colors flex flex-col" onclick="openQuestView('view-s_rank')">
+<!-- Rarity Stripe (E-Rank Gray) -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-outline-variant z-10"></div>
+<!-- Header / Rarity Badge -->
+<div class="p-md pb-0 flex justify-between items-start z-10 relative">
+<div class="flex items-center gap-2">
+<div class="bg-outline-variant/20 text-outline border border-outline/30 rounded-full px-3 py-1 font-body-sm text-caption uppercase tracking-wider flex items-center gap-1 backdrop-blur-sm">
+                                E급
+</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant" data-icon="schedule">schedule</span>
+</div>
+<!-- Content -->
+<div class="p-md flex-1 z-10 relative">
+<h3 class="font-quest-title text-quest-title text-on-surface mb-2">총합테스트</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">종합적인 능력을 테스트하는 미션입니다.</p>
+<!-- Progress Bar -->
+<div class="mt-4 space-y-1">
+<div class="flex justify-between font-body-sm text-caption text-outline">
+<span class="">진행도</span>
+<span class="">0/3</span>
+</div>
+<div class="h-2 w-full bg-abyss-black rounded-full overflow-hidden border border-shadow-slate">
+<div class="h-full bg-exp-blue w-0 shadow-[0_0_8px_rgba(59,130,246,0.6)]"></div>
+</div>
+</div>
+</div>
+<!-- Footer (Rewards & Action) -->
+<div class="p-md pt-sm border-t border-shadow-slate bg-abyss-black/30 flex justify-between items-center z-10 relative">
+<div class="flex items-center space-x-md">
+<div class="flex items-center text-exp-blue font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="arrow_upward">arrow_upward</span>
+<span id="card-exp-s">5000 XP</span>
+</div>
+<div class="flex items-center text-legendary-gold font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="monetization_on">monetization_on</span>
+                                    5000G
+                                </div>
+</div>
+<button class="bg-epic-purple/80 text-on-primary hover:bg-epic-purple px-4 py-2 rounded font-body-sm text-body-sm font-semibold transition-colors border border-primary/30">
+                                입장
+                            </button>
+</div>
+</div>
+<!-- Dungeon Card: D-Rank 1 -->
+<div class="cursor-pointer bg-dungeon-gray border border-shadow-slate rounded-lg overflow-hidden relative group hover:border-success-green/50 transition-colors flex flex-col" onclick="openQuestView('view-d_rank')">
+<!-- Rarity Stripe (D-Rank Green) -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-success-green z-10"></div>
+<!-- Ambient Glow -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-success-green/10 rounded-full blur-3xl group-hover:bg-success-green/20 transition-all"></div>
+<!-- Header / Rarity Badge -->
+<div class="p-md pb-0 flex justify-between items-start z-10 relative">
+<div class="flex items-center gap-2">
+<div class="bg-success-green/15 text-success-green border border-success-green/30 rounded-full px-3 py-1 font-body-sm text-caption uppercase tracking-wider flex items-center gap-1 backdrop-blur-sm">
+                                D급
+</div>
+</div>
+<span class="material-symbols-outlined text-success-green/70" data-icon="bug_report">bug_report</span>
+</div>
+<!-- Content -->
+<div class="p-md flex-1 z-10 relative">
+<h3 class="font-quest-title text-quest-title text-on-surface mb-2">운동</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">꾸준한 신체 단련 미션입니다.</p>
+<!-- Progress Bar -->
+<div class="mt-4 space-y-1">
+<div class="flex justify-between font-body-sm text-caption text-outline">
+<span class="">진행도</span>
+<span class="">0/5</span>
+</div>
+<div class="h-2 w-full bg-abyss-black rounded-full overflow-hidden border border-shadow-slate">
+<div class="h-full bg-success-green w-0 shadow-[0_0_8px_rgba(74,222,128,0.6)]"></div>
+</div>
+</div>
+</div>
+<!-- Footer (Rewards & Action) -->
+<div class="p-md pt-sm border-t border-shadow-slate bg-abyss-black/30 flex justify-between items-center z-10 relative">
+<div class="flex items-center space-x-md">
+<div class="flex items-center text-exp-blue font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="arrow_upward">arrow_upward</span>
+<span id="card-exp-d">400 XP</span>
+</div>
+<div class="flex items-center text-legendary-gold font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="monetization_on">monetization_on</span>
+                                    800G
+                                </div>
+</div>
+<button class="bg-epic-purple/80 text-on-primary hover:bg-epic-purple px-4 py-2 rounded font-body-sm text-body-sm font-semibold transition-colors border border-primary/30">
+                                입장
+                            </button>
+</div>
+</div>
+<!-- Dungeon Card: D-Rank 2 -->
+<div class="cursor-pointer bg-dungeon-gray border border-shadow-slate rounded-lg overflow-hidden relative group hover:border-success-green/50 transition-colors flex flex-col">
+<!-- Rarity Stripe (D-Rank Green) -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-success-green z-10"></div>
+<!-- Ambient Glow -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-success-green/10 rounded-full blur-3xl group-hover:bg-success-green/20 transition-all"></div>
+<!-- Header / Rarity Badge -->
+<div class="p-md pb-0 flex justify-between items-start z-10 relative">
+<div class="flex items-center gap-2">
+<div class="bg-success-green/15 text-success-green border border-success-green/30 rounded-full px-3 py-1 font-body-sm text-caption uppercase tracking-wider flex items-center gap-1 backdrop-blur-sm">
+                                D급
+</div>
+</div>
+<span class="material-symbols-outlined text-success-green/70" data-icon="bug_report">bug_report</span>
+</div>
+<!-- Content -->
+<div class="p-md flex-1 z-10 relative">
+<h3 class="font-quest-title text-quest-title text-on-surface mb-2">지식</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">꾸준한 지식 습득 미션입니다.</p>
+<!-- Progress Bar -->
+<div class="mt-4 space-y-1">
+<div class="flex justify-between font-body-sm text-caption text-outline">
+<span class="">진행도</span>
+<span class="">0/3</span>
+</div>
+<div class="h-2 w-full bg-abyss-black rounded-full overflow-hidden border border-shadow-slate">
+<div class="h-full bg-success-green w-0 shadow-[0_0_8px_rgba(74,222,128,0.6)]"></div>
+</div>
+</div>
+</div>
+<!-- Footer (Rewards & Action) -->
+<div class="p-md pt-sm border-t border-shadow-slate bg-abyss-black/30 flex justify-between items-center z-10 relative">
+<div class="flex items-center space-x-md">
+<div class="flex items-center text-exp-blue font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="arrow_upward">arrow_upward</span>
+<span>450 XP</span>
+</div>
+<div class="flex items-center text-legendary-gold font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="monetization_on">monetization_on</span>
+                                    900G
+                                </div>
+</div>
+<button class="bg-epic-purple/80 text-on-primary hover:bg-epic-purple px-4 py-2 rounded font-body-sm text-body-sm font-semibold transition-colors border border-primary/30">
+                                입장
+                            </button>
+</div>
+</div>
+<!-- Dungeon Card: D-Rank 3 -->
+<div class="cursor-pointer bg-dungeon-gray border border-shadow-slate rounded-lg overflow-hidden relative group hover:border-success-green/50 transition-colors flex flex-col">
+<!-- Rarity Stripe (D-Rank Green) -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-success-green z-10"></div>
+<!-- Ambient Glow -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-success-green/10 rounded-full blur-3xl group-hover:bg-success-green/20 transition-all"></div>
+<!-- Header / Rarity Badge -->
+<div class="p-md pb-0 flex justify-between items-start z-10 relative">
+<div class="flex items-center gap-2">
+<div class="bg-success-green/15 text-success-green border border-success-green/30 rounded-full px-3 py-1 font-body-sm text-caption uppercase tracking-wider flex items-center gap-1 backdrop-blur-sm">
+                                D급
+</div>
+</div>
+<span class="material-symbols-outlined text-success-green/70" data-icon="bug_report">bug_report</span>
+</div>
+<!-- Content -->
+<div class="p-md flex-1 z-10 relative">
+<h3 class="font-quest-title text-quest-title text-on-surface mb-2">총합테스트</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">종합적인 능력을 테스트하는 미션입니다.</p>
+<!-- Progress Bar -->
+<div class="mt-4 space-y-1">
+<div class="flex justify-between font-body-sm text-caption text-outline">
+<span class="">진행도</span>
+<span class="">0/1</span>
+</div>
+<div class="h-2 w-full bg-abyss-black rounded-full overflow-hidden border border-shadow-slate">
+<div class="h-full bg-success-green w-0 shadow-[0_0_8px_rgba(74,222,128,0.6)]"></div>
+</div>
+</div>
+</div>
+<!-- Footer (Rewards & Action) -->
+<div class="p-md pt-sm border-t border-shadow-slate bg-abyss-black/30 flex justify-between items-center z-10 relative">
+<div class="flex items-center space-x-md">
+<div class="flex items-center text-exp-blue font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="arrow_upward">arrow_upward</span>
+<span>500 XP</span>
+</div>
+<div class="flex items-center text-legendary-gold font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="monetization_on">monetization_on</span>
+                                    1000G
+                                </div>
+</div>
+<button class="bg-epic-purple/80 text-on-primary hover:bg-epic-purple px-4 py-2 rounded font-body-sm text-body-sm font-semibold transition-colors border border-primary/30">
+                                입장
+                            </button>
+</div>
+</div>
+
+<!-- Dungeon Card: C-Rank 1 -->
+<div class="cursor-pointer bg-dungeon-gray border border-shadow-slate rounded-lg overflow-hidden relative group hover:border-exp-blue/50 transition-colors flex flex-col">
+<!-- Rarity Stripe -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-exp-blue z-10"></div>
+<!-- Ambient Glow -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-exp-blue/10 rounded-full blur-3xl group-hover:bg-exp-blue/20 transition-all"></div>
+<!-- Header / Rarity Badge -->
+<div class="p-md pb-0 flex justify-between items-start z-10 relative">
+<div class="flex items-center gap-2">
+<div class="bg-exp-blue/15 text-exp-blue border border-exp-blue/30 rounded-full px-3 py-1 font-body-sm text-caption uppercase tracking-wider flex items-center gap-1 backdrop-blur-sm">
+                                C급
+</div>
+</div>
+<span class="material-symbols-outlined text-exp-blue/70" data-icon="event">event</span>
+</div>
+<!-- Content -->
+<div class="p-md flex-1 z-10 relative">
+<h3 class="font-quest-title text-quest-title text-on-surface mb-2">지식</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">꾸준한 지식 습득 미션입니다.</p>
+<!-- Progress Bar -->
+<div class="mt-4 space-y-1">
+<div class="flex justify-between font-body-sm text-caption text-outline">
+<span class="">진행도</span>
+<span class="">0/3</span>
+</div>
+<div class="h-2 w-full bg-abyss-black rounded-full overflow-hidden border border-shadow-slate">
+<div class="h-full bg-exp-blue w-0 shadow-[0_0_8px_rgba(255,255,255,0.2)]"></div>
+</div>
+</div>
+</div>
+<!-- Footer (Rewards & Action) -->
+<div class="p-md pt-sm border-t border-shadow-slate bg-abyss-black/30 flex justify-between items-center z-10 relative">
+<div class="flex items-center space-x-md">
+<div class="flex items-center text-exp-blue font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="arrow_upward">arrow_upward</span>
+<span>1200 XP</span>
+</div>
+<div class="flex items-center text-legendary-gold font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="monetization_on">monetization_on</span>
+                                    1500G
+                                </div>
+</div>
+<button class="bg-epic-purple/80 text-on-primary hover:bg-epic-purple px-4 py-2 rounded font-body-sm text-body-sm font-semibold transition-colors border border-primary/30">
+                                입장
+                            </button>
+</div>
+</div>
+<!-- Dungeon Card: C-Rank 2 -->
+<div class="cursor-pointer bg-dungeon-gray border border-shadow-slate rounded-lg overflow-hidden relative group hover:border-exp-blue/50 transition-colors flex flex-col">
+<!-- Rarity Stripe -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-exp-blue z-10"></div>
+<!-- Ambient Glow -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-exp-blue/10 rounded-full blur-3xl group-hover:bg-exp-blue/20 transition-all"></div>
+<!-- Header / Rarity Badge -->
+<div class="p-md pb-0 flex justify-between items-start z-10 relative">
+<div class="flex items-center gap-2">
+<div class="bg-exp-blue/15 text-exp-blue border border-exp-blue/30 rounded-full px-3 py-1 font-body-sm text-caption uppercase tracking-wider flex items-center gap-1 backdrop-blur-sm">
+                                C급
+</div>
+</div>
+<span class="material-symbols-outlined text-exp-blue/70" data-icon="event">event</span>
+</div>
+<!-- Content -->
+<div class="p-md flex-1 z-10 relative">
+<h3 class="font-quest-title text-quest-title text-on-surface mb-2">지식</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">꾸준한 지식 습득 미션입니다.</p>
+<!-- Progress Bar -->
+<div class="mt-4 space-y-1">
+<div class="flex justify-between font-body-sm text-caption text-outline">
+<span class="">진행도</span>
+<span class="">0/3</span>
+</div>
+<div class="h-2 w-full bg-abyss-black rounded-full overflow-hidden border border-shadow-slate">
+<div class="h-full bg-exp-blue w-0 shadow-[0_0_8px_rgba(255,255,255,0.2)]"></div>
+</div>
+</div>
+</div>
+<!-- Footer (Rewards & Action) -->
+<div class="p-md pt-sm border-t border-shadow-slate bg-abyss-black/30 flex justify-between items-center z-10 relative">
+<div class="flex items-center space-x-md">
+<div class="flex items-center text-exp-blue font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="arrow_upward">arrow_upward</span>
+<span>1300 XP</span>
+</div>
+<div class="flex items-center text-legendary-gold font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="monetization_on">monetization_on</span>
+                                    1700G
+                                </div>
+</div>
+<button class="bg-epic-purple/80 text-on-primary hover:bg-epic-purple px-4 py-2 rounded font-body-sm text-body-sm font-semibold transition-colors border border-primary/30">
+                                입장
+                            </button>
+</div>
+</div>
+<!-- Dungeon Card: C-Rank 3 -->
+<div class="cursor-pointer bg-dungeon-gray border border-shadow-slate rounded-lg overflow-hidden relative group hover:border-exp-blue/50 transition-colors flex flex-col">
+<!-- Rarity Stripe -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-exp-blue z-10"></div>
+<!-- Ambient Glow -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-exp-blue/10 rounded-full blur-3xl group-hover:bg-exp-blue/20 transition-all"></div>
+<!-- Header / Rarity Badge -->
+<div class="p-md pb-0 flex justify-between items-start z-10 relative">
+<div class="flex items-center gap-2">
+<div class="bg-exp-blue/15 text-exp-blue border border-exp-blue/30 rounded-full px-3 py-1 font-body-sm text-caption uppercase tracking-wider flex items-center gap-1 backdrop-blur-sm">
+                                C급
+</div>
+</div>
+<span class="material-symbols-outlined text-exp-blue/70" data-icon="event">event</span>
+</div>
+<!-- Content -->
+<div class="p-md flex-1 z-10 relative">
+<h3 class="font-quest-title text-quest-title text-on-surface mb-2">총합테스트</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">종합적인 능력을 테스트하는 미션입니다.</p>
+<!-- Progress Bar -->
+<div class="mt-4 space-y-1">
+<div class="flex justify-between font-body-sm text-caption text-outline">
+<span class="">진행도</span>
+<span class="">0/3</span>
+</div>
+<div class="h-2 w-full bg-abyss-black rounded-full overflow-hidden border border-shadow-slate">
+<div class="h-full bg-exp-blue w-0 shadow-[0_0_8px_rgba(255,255,255,0.2)]"></div>
+</div>
+</div>
+</div>
+<!-- Footer (Rewards & Action) -->
+<div class="p-md pt-sm border-t border-shadow-slate bg-abyss-black/30 flex justify-between items-center z-10 relative">
+<div class="flex items-center space-x-md">
+<div class="flex items-center text-exp-blue font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="arrow_upward">arrow_upward</span>
+<span>1400 XP</span>
+</div>
+<div class="flex items-center text-legendary-gold font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="monetization_on">monetization_on</span>
+                                    1900G
+                                </div>
+</div>
+<button class="bg-epic-purple/80 text-on-primary hover:bg-epic-purple px-4 py-2 rounded font-body-sm text-body-sm font-semibold transition-colors border border-primary/30">
+                                입장
+                            </button>
+</div>
+</div>
+<!-- Dungeon Card: B-Rank 1 -->
+<div class="cursor-pointer bg-dungeon-gray border border-shadow-slate rounded-lg overflow-hidden relative group hover:border-epic-purple/50 transition-colors flex flex-col">
+<!-- Rarity Stripe -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-epic-purple z-10"></div>
+<!-- Ambient Glow -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-epic-purple/10 rounded-full blur-3xl group-hover:bg-epic-purple/20 transition-all"></div>
+<!-- Header / Rarity Badge -->
+<div class="p-md pb-0 flex justify-between items-start z-10 relative">
+<div class="flex items-center gap-2">
+<div class="bg-epic-purple/15 text-epic-purple border border-epic-purple/30 rounded-full px-3 py-1 font-body-sm text-caption uppercase tracking-wider flex items-center gap-1 backdrop-blur-sm">
+                                B급
+</div>
+</div>
+<span class="material-symbols-outlined text-epic-purple/70" data-icon="swords">swords</span>
+</div>
+<!-- Content -->
+<div class="p-md flex-1 z-10 relative">
+<h3 class="font-quest-title text-quest-title text-on-surface mb-2">운동</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">꾸준한 신체 단련 미션입니다.</p>
+<!-- Progress Bar -->
+<div class="mt-4 space-y-1">
+<div class="flex justify-between font-body-sm text-caption text-outline">
+<span class="">진행도</span>
+<span class="">0/3</span>
+</div>
+<div class="h-2 w-full bg-abyss-black rounded-full overflow-hidden border border-shadow-slate">
+<div class="h-full bg-epic-purple w-0 shadow-[0_0_8px_rgba(255,255,255,0.2)]"></div>
+</div>
+</div>
+</div>
+<!-- Footer (Rewards & Action) -->
+<div class="p-md pt-sm border-t border-shadow-slate bg-abyss-black/30 flex justify-between items-center z-10 relative">
+<div class="flex items-center space-x-md">
+<div class="flex items-center text-exp-blue font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="arrow_upward">arrow_upward</span>
+<span>2500 XP</span>
+</div>
+<div class="flex items-center text-legendary-gold font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="monetization_on">monetization_on</span>
+                                    3000G
+                                </div>
+</div>
+<button class="bg-epic-purple/80 text-on-primary hover:bg-epic-purple px-4 py-2 rounded font-body-sm text-body-sm font-semibold transition-colors border border-primary/30">
+                                입장
+                            </button>
+</div>
+</div>
+<!-- Dungeon Card: B-Rank 2 -->
+<div class="cursor-pointer bg-dungeon-gray border border-shadow-slate rounded-lg overflow-hidden relative group hover:border-epic-purple/50 transition-colors flex flex-col">
+<!-- Rarity Stripe -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-epic-purple z-10"></div>
+<!-- Ambient Glow -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-epic-purple/10 rounded-full blur-3xl group-hover:bg-epic-purple/20 transition-all"></div>
+<!-- Header / Rarity Badge -->
+<div class="p-md pb-0 flex justify-between items-start z-10 relative">
+<div class="flex items-center gap-2">
+<div class="bg-epic-purple/15 text-epic-purple border border-epic-purple/30 rounded-full px-3 py-1 font-body-sm text-caption uppercase tracking-wider flex items-center gap-1 backdrop-blur-sm">
+                                B급
+</div>
+</div>
+<span class="material-symbols-outlined text-epic-purple/70" data-icon="swords">swords</span>
+</div>
+<!-- Content -->
+<div class="p-md flex-1 z-10 relative">
+<h3 class="font-quest-title text-quest-title text-on-surface mb-2">지식</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">꾸준한 지식 습득 미션입니다.</p>
+<!-- Progress Bar -->
+<div class="mt-4 space-y-1">
+<div class="flex justify-between font-body-sm text-caption text-outline">
+<span class="">진행도</span>
+<span class="">0/3</span>
+</div>
+<div class="h-2 w-full bg-abyss-black rounded-full overflow-hidden border border-shadow-slate">
+<div class="h-full bg-epic-purple w-0 shadow-[0_0_8px_rgba(255,255,255,0.2)]"></div>
+</div>
+</div>
+</div>
+<!-- Footer (Rewards & Action) -->
+<div class="p-md pt-sm border-t border-shadow-slate bg-abyss-black/30 flex justify-between items-center z-10 relative">
+<div class="flex items-center space-x-md">
+<div class="flex items-center text-exp-blue font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="arrow_upward">arrow_upward</span>
+<span>2600 XP</span>
+</div>
+<div class="flex items-center text-legendary-gold font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="monetization_on">monetization_on</span>
+                                    3200G
+                                </div>
+</div>
+<button class="bg-epic-purple/80 text-on-primary hover:bg-epic-purple px-4 py-2 rounded font-body-sm text-body-sm font-semibold transition-colors border border-primary/30">
+                                입장
+                            </button>
+</div>
+</div>
+<!-- Dungeon Card: B-Rank 3 -->
+<div class="cursor-pointer bg-dungeon-gray border border-shadow-slate rounded-lg overflow-hidden relative group hover:border-epic-purple/50 transition-colors flex flex-col">
+<!-- Rarity Stripe -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-epic-purple z-10"></div>
+<!-- Ambient Glow -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-epic-purple/10 rounded-full blur-3xl group-hover:bg-epic-purple/20 transition-all"></div>
+<!-- Header / Rarity Badge -->
+<div class="p-md pb-0 flex justify-between items-start z-10 relative">
+<div class="flex items-center gap-2">
+<div class="bg-epic-purple/15 text-epic-purple border border-epic-purple/30 rounded-full px-3 py-1 font-body-sm text-caption uppercase tracking-wider flex items-center gap-1 backdrop-blur-sm">
+                                B급
+</div>
+</div>
+<span class="material-symbols-outlined text-epic-purple/70" data-icon="swords">swords</span>
+</div>
+<!-- Content -->
+<div class="p-md flex-1 z-10 relative">
+<h3 class="font-quest-title text-quest-title text-on-surface mb-2">총합테스트</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">종합적인 능력을 테스트하는 미션입니다.</p>
+<!-- Progress Bar -->
+<div class="mt-4 space-y-1">
+<div class="flex justify-between font-body-sm text-caption text-outline">
+<span class="">진행도</span>
+<span class="">0/3</span>
+</div>
+<div class="h-2 w-full bg-abyss-black rounded-full overflow-hidden border border-shadow-slate">
+<div class="h-full bg-epic-purple w-0 shadow-[0_0_8px_rgba(255,255,255,0.2)]"></div>
+</div>
+</div>
+</div>
+<!-- Footer (Rewards & Action) -->
+<div class="p-md pt-sm border-t border-shadow-slate bg-abyss-black/30 flex justify-between items-center z-10 relative">
+<div class="flex items-center space-x-md">
+<div class="flex items-center text-exp-blue font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="arrow_upward">arrow_upward</span>
+<span>2700 XP</span>
+</div>
+<div class="flex items-center text-legendary-gold font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="monetization_on">monetization_on</span>
+                                    3400G
+                                </div>
+</div>
+<button class="bg-epic-purple/80 text-on-primary hover:bg-epic-purple px-4 py-2 rounded font-body-sm text-body-sm font-semibold transition-colors border border-primary/30">
+                                입장
+                            </button>
+</div>
+</div>
+<!-- Dungeon Card: A-Rank 1 -->
+<div class="cursor-pointer bg-dungeon-gray border border-shadow-slate rounded-lg overflow-hidden relative group hover:border-health-red/50 transition-colors flex flex-col">
+<!-- Rarity Stripe -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-health-red z-10"></div>
+<!-- Ambient Glow -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-health-red/10 rounded-full blur-3xl group-hover:bg-health-red/20 transition-all"></div>
+<!-- Header / Rarity Badge -->
+<div class="p-md pb-0 flex justify-between items-start z-10 relative">
+<div class="flex items-center gap-2">
+<div class="bg-health-red/15 text-health-red border border-health-red/30 rounded-full px-3 py-1 font-body-sm text-caption uppercase tracking-wider flex items-center gap-1 backdrop-blur-sm">
+                                A급
+</div>
+</div>
+<span class="material-symbols-outlined text-health-red/70" data-icon="local_fire_department">local_fire_department</span>
+</div>
+<!-- Content -->
+<div class="p-md flex-1 z-10 relative">
+<h3 class="font-quest-title text-quest-title text-on-surface mb-2">운동</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">꾸준한 신체 단련 미션입니다.</p>
+<!-- Progress Bar -->
+<div class="mt-4 space-y-1">
+<div class="flex justify-between font-body-sm text-caption text-outline">
+<span class="">진행도</span>
+<span class="">0/3</span>
+</div>
+<div class="h-2 w-full bg-abyss-black rounded-full overflow-hidden border border-shadow-slate">
+<div class="h-full bg-health-red w-0 shadow-[0_0_8px_rgba(255,255,255,0.2)]"></div>
+</div>
+</div>
+</div>
+<!-- Footer (Rewards & Action) -->
+<div class="p-md pt-sm border-t border-shadow-slate bg-abyss-black/30 flex justify-between items-center z-10 relative">
+<div class="flex items-center space-x-md">
+<div class="flex items-center text-exp-blue font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="arrow_upward">arrow_upward</span>
+<span>5000 XP</span>
+</div>
+<div class="flex items-center text-legendary-gold font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="monetization_on">monetization_on</span>
+                                    6000G
+                                </div>
+</div>
+<button class="bg-epic-purple/80 text-on-primary hover:bg-epic-purple px-4 py-2 rounded font-body-sm text-body-sm font-semibold transition-colors border border-primary/30">
+                                입장
+                            </button>
+</div>
+</div>
+<!-- Dungeon Card: A-Rank 2 -->
+<div class="cursor-pointer bg-dungeon-gray border border-shadow-slate rounded-lg overflow-hidden relative group hover:border-health-red/50 transition-colors flex flex-col">
+<!-- Rarity Stripe -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-health-red z-10"></div>
+<!-- Ambient Glow -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-health-red/10 rounded-full blur-3xl group-hover:bg-health-red/20 transition-all"></div>
+<!-- Header / Rarity Badge -->
+<div class="p-md pb-0 flex justify-between items-start z-10 relative">
+<div class="flex items-center gap-2">
+<div class="bg-health-red/15 text-health-red border border-health-red/30 rounded-full px-3 py-1 font-body-sm text-caption uppercase tracking-wider flex items-center gap-1 backdrop-blur-sm">
+                                A급
+</div>
+</div>
+<span class="material-symbols-outlined text-health-red/70" data-icon="local_fire_department">local_fire_department</span>
+</div>
+<!-- Content -->
+<div class="p-md flex-1 z-10 relative">
+<h3 class="font-quest-title text-quest-title text-on-surface mb-2">지식</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">꾸준한 지식 습득 미션입니다.</p>
+<!-- Progress Bar -->
+<div class="mt-4 space-y-1">
+<div class="flex justify-between font-body-sm text-caption text-outline">
+<span class="">진행도</span>
+<span class="">0/3</span>
+</div>
+<div class="h-2 w-full bg-abyss-black rounded-full overflow-hidden border border-shadow-slate">
+<div class="h-full bg-health-red w-0 shadow-[0_0_8px_rgba(255,255,255,0.2)]"></div>
+</div>
+</div>
+</div>
+<!-- Footer (Rewards & Action) -->
+<div class="p-md pt-sm border-t border-shadow-slate bg-abyss-black/30 flex justify-between items-center z-10 relative">
+<div class="flex items-center space-x-md">
+<div class="flex items-center text-exp-blue font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="arrow_upward">arrow_upward</span>
+<span>5100 XP</span>
+</div>
+<div class="flex items-center text-legendary-gold font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="monetization_on">monetization_on</span>
+                                    6200G
+                                </div>
+</div>
+<button class="bg-epic-purple/80 text-on-primary hover:bg-epic-purple px-4 py-2 rounded font-body-sm text-body-sm font-semibold transition-colors border border-primary/30">
+                                입장
+                            </button>
+</div>
+</div>
+<!-- Dungeon Card: A-Rank 3 -->
+<div class="cursor-pointer bg-dungeon-gray border border-shadow-slate rounded-lg overflow-hidden relative group hover:border-health-red/50 transition-colors flex flex-col">
+<!-- Rarity Stripe -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-health-red z-10"></div>
+<!-- Ambient Glow -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-health-red/10 rounded-full blur-3xl group-hover:bg-health-red/20 transition-all"></div>
+<!-- Header / Rarity Badge -->
+<div class="p-md pb-0 flex justify-between items-start z-10 relative">
+<div class="flex items-center gap-2">
+<div class="bg-health-red/15 text-health-red border border-health-red/30 rounded-full px-3 py-1 font-body-sm text-caption uppercase tracking-wider flex items-center gap-1 backdrop-blur-sm">
+                                A급
+</div>
+</div>
+<span class="material-symbols-outlined text-health-red/70" data-icon="local_fire_department">local_fire_department</span>
+</div>
+<!-- Content -->
+<div class="p-md flex-1 z-10 relative">
+<h3 class="font-quest-title text-quest-title text-on-surface mb-2">총합테스트</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">잠에서 깬 총합테스트를 정벌하고 평화를 되찾으세요.</p>
+<!-- Progress Bar -->
+<div class="mt-4 space-y-1">
+<div class="flex justify-between font-body-sm text-caption text-outline">
+<span class="">진행도</span>
+<span class="">0/3</span>
+</div>
+<div class="h-2 w-full bg-abyss-black rounded-full overflow-hidden border border-shadow-slate">
+<div class="h-full bg-health-red w-0 shadow-[0_0_8px_rgba(255,255,255,0.2)]"></div>
+</div>
+</div>
+</div>
+<!-- Footer (Rewards & Action) -->
+<div class="p-md pt-sm border-t border-shadow-slate bg-abyss-black/30 flex justify-between items-center z-10 relative">
+<div class="flex items-center space-x-md">
+<div class="flex items-center text-exp-blue font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="arrow_upward">arrow_upward</span>
+<span>5200 XP</span>
+</div>
+<div class="flex items-center text-legendary-gold font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="monetization_on">monetization_on</span>
+                                    6400G
+                                </div>
+</div>
+<button class="bg-epic-purple/80 text-on-primary hover:bg-epic-purple px-4 py-2 rounded font-body-sm text-body-sm font-semibold transition-colors border border-primary/30">
+                                입장
+                            </button>
+</div>
+</div>
+<!-- Dungeon Card: S-Rank 1 -->
+<div class="cursor-pointer bg-dungeon-gray border border-shadow-slate rounded-lg overflow-hidden relative group hover:border-legendary-gold/50 transition-colors flex flex-col">
+<!-- Rarity Stripe -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-legendary-gold z-10"></div>
+<!-- Ambient Glow -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-legendary-gold/10 rounded-full blur-3xl group-hover:bg-legendary-gold/20 transition-all"></div>
+<!-- Header / Rarity Badge -->
+<div class="p-md pb-0 flex justify-between items-start z-10 relative">
+<div class="flex items-center gap-2">
+<div class="bg-legendary-gold/15 text-legendary-gold border border-legendary-gold/30 rounded-full px-3 py-1 font-body-sm text-caption uppercase tracking-wider flex items-center gap-1 backdrop-blur-sm">
+                                S급
+</div>
+</div>
+<span class="material-symbols-outlined text-legendary-gold/70" data-icon="diamond">diamond</span>
+</div>
+<!-- Content -->
+<div class="p-md flex-1 z-10 relative">
+<h3 class="font-quest-title text-quest-title text-on-surface mb-2">운동</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">꾸준한 신체 단련 미션입니다.</p>
+<!-- Progress Bar -->
+<div class="mt-4 space-y-1">
+<div class="flex justify-between font-body-sm text-caption text-outline">
+<span class="">진행도</span>
+<span class="">0/3</span>
+</div>
+<div class="h-2 w-full bg-abyss-black rounded-full overflow-hidden border border-shadow-slate">
+<div class="h-full bg-legendary-gold w-0 shadow-[0_0_8px_rgba(255,255,255,0.2)]"></div>
+</div>
+</div>
+</div>
+<!-- Footer (Rewards & Action) -->
+<div class="p-md pt-sm border-t border-shadow-slate bg-abyss-black/30 flex justify-between items-center z-10 relative">
+<div class="flex items-center space-x-md">
+<div class="flex items-center text-exp-blue font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="arrow_upward">arrow_upward</span>
+<span>10000 XP</span>
+</div>
+<div class="flex items-center text-legendary-gold font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="monetization_on">monetization_on</span>
+                                    15000G
+                                </div>
+</div>
+<button class="bg-epic-purple/80 text-on-primary hover:bg-epic-purple px-4 py-2 rounded font-body-sm text-body-sm font-semibold transition-colors border border-primary/30">
+                                입장
+                            </button>
+</div>
+</div>
+<!-- Dungeon Card: S-Rank 2 -->
+<div class="cursor-pointer bg-dungeon-gray border border-shadow-slate rounded-lg overflow-hidden relative group hover:border-legendary-gold/50 transition-colors flex flex-col">
+<!-- Rarity Stripe -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-legendary-gold z-10"></div>
+<!-- Ambient Glow -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-legendary-gold/10 rounded-full blur-3xl group-hover:bg-legendary-gold/20 transition-all"></div>
+<!-- Header / Rarity Badge -->
+<div class="p-md pb-0 flex justify-between items-start z-10 relative">
+<div class="flex items-center gap-2">
+<div class="bg-legendary-gold/15 text-legendary-gold border border-legendary-gold/30 rounded-full px-3 py-1 font-body-sm text-caption uppercase tracking-wider flex items-center gap-1 backdrop-blur-sm">
+                                S급
+</div>
+</div>
+<span class="material-symbols-outlined text-legendary-gold/70" data-icon="diamond">diamond</span>
+</div>
+<!-- Content -->
+<div class="p-md flex-1 z-10 relative">
+<h3 class="font-quest-title text-quest-title text-on-surface mb-2">지식</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">꾸준한 지식 습득 미션입니다.</p>
+<!-- Progress Bar -->
+<div class="mt-4 space-y-1">
+<div class="flex justify-between font-body-sm text-caption text-outline">
+<span class="">진행도</span>
+<span class="">0/3</span>
+</div>
+<div class="h-2 w-full bg-abyss-black rounded-full overflow-hidden border border-shadow-slate">
+<div class="h-full bg-legendary-gold w-0 shadow-[0_0_8px_rgba(255,255,255,0.2)]"></div>
+</div>
+</div>
+</div>
+<!-- Footer (Rewards & Action) -->
+<div class="p-md pt-sm border-t border-shadow-slate bg-abyss-black/30 flex justify-between items-center z-10 relative">
+<div class="flex items-center space-x-md">
+<div class="flex items-center text-exp-blue font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="arrow_upward">arrow_upward</span>
+<span>10100 XP</span>
+</div>
+<div class="flex items-center text-legendary-gold font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="monetization_on">monetization_on</span>
+                                    15200G
+                                </div>
+</div>
+<button class="bg-epic-purple/80 text-on-primary hover:bg-epic-purple px-4 py-2 rounded font-body-sm text-body-sm font-semibold transition-colors border border-primary/30">
+                                입장
+                            </button>
+</div>
+</div>
+<!-- Dungeon Card: S-Rank 3 -->
+<div class="cursor-pointer bg-dungeon-gray border border-shadow-slate rounded-lg overflow-hidden relative group hover:border-legendary-gold/50 transition-colors flex flex-col">
+<!-- Rarity Stripe -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-legendary-gold z-10"></div>
+<!-- Ambient Glow -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-legendary-gold/10 rounded-full blur-3xl group-hover:bg-legendary-gold/20 transition-all"></div>
+<!-- Header / Rarity Badge -->
+<div class="p-md pb-0 flex justify-between items-start z-10 relative">
+<div class="flex items-center gap-2">
+<div class="bg-legendary-gold/15 text-legendary-gold border border-legendary-gold/30 rounded-full px-3 py-1 font-body-sm text-caption uppercase tracking-wider flex items-center gap-1 backdrop-blur-sm">
+                                S급
+</div>
+</div>
+<span class="material-symbols-outlined text-legendary-gold/70" data-icon="diamond">diamond</span>
+</div>
+<!-- Content -->
+<div class="p-md flex-1 z-10 relative">
+<h3 class="font-quest-title text-quest-title text-on-surface mb-2">총합테스트</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">종합적인 능력을 테스트하는 미션입니다.</p>
+<!-- Progress Bar -->
+<div class="mt-4 space-y-1">
+<div class="flex justify-between font-body-sm text-caption text-outline">
+<span class="">진행도</span>
+<span class="">0/3</span>
+</div>
+<div class="h-2 w-full bg-abyss-black rounded-full overflow-hidden border border-shadow-slate">
+<div class="h-full bg-legendary-gold w-0 shadow-[0_0_8px_rgba(255,255,255,0.2)]"></div>
+</div>
+</div>
+</div>
+<!-- Footer (Rewards & Action) -->
+<div class="p-md pt-sm border-t border-shadow-slate bg-abyss-black/30 flex justify-between items-center z-10 relative">
+<div class="flex items-center space-x-md">
+<div class="flex items-center text-exp-blue font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="arrow_upward">arrow_upward</span>
+<span>10200 XP</span>
+</div>
+<div class="flex items-center text-legendary-gold font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="monetization_on">monetization_on</span>
+                                    15400G
+                                </div>
+</div>
+<button class="bg-epic-purple/80 text-on-primary hover:bg-epic-purple px-4 py-2 rounded font-body-sm text-body-sm font-semibold transition-colors border border-primary/30">
+                                입장
+                            </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile) -->
+<nav class="bg-dungeon-gray/90 backdrop-blur-md docked full-width bottom-0 rounded-t-xl border-t border-outline-variant/30 shadow-[0_-4px_20px_rgba(0,0,0,0.5)] fixed bottom-0 w-full z-50 flex justify-around items-center h-16 md:hidden font-caption text-caption tap-highlight-transparent overflow-x-auto no-scrollbar">
+<a href="dashboard.html" class="flex flex-col items-center justify-center text-on-surface-variant active:bg-shadow-slate p-2 rounded min-w-[4rem] h-full">
+<span class="material-symbols-outlined">person</span>
+<span class="mt-1">상태창</span>
+</a>
+<a href="quests.html" class="flex flex-col items-center justify-center text-primary filter drop-shadow-[0_0_8px_#7C3AED] active:bg-shadow-slate p-2 rounded min-w-[4rem] h-full border-t-2 border-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">fort</span>
+<span class="mt-1 font-bold">던전</span>
+</a>
+<a href="shop.html" class="flex flex-col items-center justify-center text-on-surface-variant active:bg-shadow-slate p-2 rounded min-w-[4rem] h-full">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">storefront</span>
+<span class="mt-1">상점</span>
+</a>
+<a href="inventory.html" class="flex flex-col items-center justify-center text-on-surface-variant active:bg-shadow-slate p-2 rounded min-w-[4rem] h-full">
+<span class="material-symbols-outlined">backpack</span>
+<span class="mt-1">인벤토리</span>
+</a>
+<a href="achievements.html" class="flex flex-col items-center justify-center text-on-surface-variant active:bg-shadow-slate p-2 rounded min-w-[4rem] h-full">
+<span class="material-symbols-outlined">military_tech</span>
+<span class="mt-1">업적</span>
+</a>
+</nav>
+
+
+
+<!-- ================= VIEW SWAP: QUEST DETAILS ================= -->
+<main id="view-e_rank" class="flex-1 w-full md:pl-64 mt-16 p-margin-mobile md:p-margin-desktop overflow-y-auto hidden">
+
+<!-- Ambient Glow Effects -->
+<div class="fixed top-1/4 left-1/3 w-[600px] h-[600px] bg-epic-purple/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
+<div class="fixed bottom-0 right-0 w-[400px] h-[400px] bg-secondary-container/10 rounded-full blur-[100px] pointer-events-none z-0"></div>
+<div class="max-w-7xl mx-auto relative z-10 flex flex-col h-full min-h-[calc(100vh-80px)] w-full">
+<!-- Cinematic Header Area -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-xl gap-lg">
+<div class="flex flex-col">
+<div class="flex items-center gap-sm mb-2">
+<span class="material-symbols-outlined text-epic-purple text-xl animate-pulse" style="font-variation-settings: 'FILL' 1;">crisis_alert</span>
+<span class="font-quest-title text-quest-title text-epic-purple uppercase tracking-[0.2em] text-glow">퀘스트 진행 중</span>
+</div>
+<h1 class="font-boss-display text-boss-display md:text-[80px] text-white leading-none">아침 루틴 고블린 동굴</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-sm max-w-2xl border-l-2 border-primary/50 pl-md">이 던전은 플레이어님의 기본적인 근력과 지구력을 시험합니다. 제한 시간 내에 모든 몬스터(운동)를 처치하십시오.</p>
+</div>
+<!-- Digital Countdown Timer -->
+<div class="bg-surface-container-high/80 backdrop-blur-sm border border-health-red/30 p-lg rounded-xl flex flex-col items-center shadow-[0_0_30px_rgba(239,68,68,0.15)] min-w-[200px]">
+<span class="font-caption text-caption text-health-red/80 uppercase tracking-widest mb-xs">남은 시간</span>
+<div class="font-level-display text-level-display text-health-red flex items-center gap-2 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]">
+<span class="material-symbols-outlined text-4xl">timer</span>
+                        44:59
+                    </div>
+</div>
+</div>
+<!-- Wide Progress Bars Container -->
+<div class="flex flex-col gap-lg flex-1 mb-xl">
+<!-- Progress Row 1: Push-ups -->
+<div class="bg-dungeon-gray border border-shadow-slate rounded-xl p-lg relative overflow-hidden group hover:border-primary/50 transition-colors">
+<!-- Ghost Inner Border -->
+<div class="absolute inset-0 border border-white/5 rounded-xl pointer-events-none"></div>
+<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-md relative z-10">
+<div class="flex items-center gap-lg w-full md:w-1/4">
+<div class="w-16 h-16 rounded-lg bg-surface-container-highest flex items-center justify-center border border-outline-variant/30 text-primary">
+<span class="material-symbols-outlined text-3xl">fitness_center</span>
+</div>
+<div>
+<h3 class="font-card-title text-card-title text-white">푸시업</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Rank E / 근력 성장</p>
+</div>
+</div>
+<div class="w-full md:w-1/2 flex flex-col gap-sm">
+<div class="flex justify-between font-level-display text-[24px]">
+<span class="text-white">0 <span class="text-on-surface-variant text-[16px]">회</span></span>
+<span class="text-primary">100 <span class="text-on-surface-variant text-[16px]">목표</span></span>
+</div>
+<div class="h-6 w-full bg-abyss-black rounded-full overflow-hidden border border-outline-variant/20">
+<div class="h-full bg-gradient-to-r from-primary-container to-primary shimmer-bar transition-all duration-500 ease-out" style="width: 0%;"></div>
+</div>
+</div>
+<div class="w-full md:w-auto flex justify-end">
+<button class="bg-epic-purple text-white font-bold uppercase py-3 px-xl rounded-lg hover:shadow-[0_0_15px_rgba(124,58,237,0.6)] active:scale-95 transition-all w-full md:w-auto flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">swords</span>
+                                +10 기록
+                            </button>
+</div>
+</div>
+</div>
+<!-- Progress Row 2: Sit-ups -->
+<div class="bg-dungeon-gray border border-shadow-slate rounded-xl p-lg relative overflow-hidden group hover:border-exp-blue/50 transition-colors">
+<div class="absolute inset-0 border border-white/5 rounded-xl pointer-events-none"></div>
+<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-md relative z-10">
+<div class="flex items-center gap-lg w-full md:w-1/4">
+<div class="w-16 h-16 rounded-lg bg-surface-container-highest flex items-center justify-center border border-outline-variant/30 text-exp-blue">
+<span class="material-symbols-outlined text-3xl">accessibility_new</span>
+</div>
+<div>
+<h3 class="font-card-title text-card-title text-white">윗몸일으키기</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Rank F / 코어 성장</p>
+</div>
+</div>
+<div class="w-full md:w-1/2 flex flex-col gap-sm">
+<div class="flex justify-between font-level-display text-[24px]">
+<span class="text-white">0 <span class="text-on-surface-variant text-[16px]">회</span></span>
+<span class="text-exp-blue">100 <span class="text-on-surface-variant text-[16px]">목표</span></span>
+</div>
+<div class="h-6 w-full bg-abyss-black rounded-full overflow-hidden border border-outline-variant/20">
+<div class="h-full bg-gradient-to-r from-secondary-container to-exp-blue shimmer-bar transition-all duration-500 ease-out" style="width: 0%;"></div>
+</div>
+</div>
+<div class="w-full md:w-auto flex justify-end">
+<button class="bg-exp-blue text-white font-bold uppercase py-3 px-xl rounded-lg hover:shadow-[0_0_15px_rgba(59,130,246,0.6)] active:scale-95 transition-all w-full md:w-auto flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">swords</span>
+                                +20 기록
+                            </button>
+</div>
+</div>
+</div>
+<!-- Progress Row 3: Running -->
+<div class="bg-dungeon-gray border border-outline-variant/30 rounded-xl p-lg relative overflow-hidden group shadow-[0_0_20px_rgba(34,197,94,0.1)]">
+<div class="absolute inset-0 border border-white/5 rounded-xl pointer-events-none"></div>
+<!-- Success Flash Overlay (Hidden by default, shown when complete) -->
+<div class="absolute inset-0 bg-primary/5 pointer-events-none"></div>
+<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-md relative z-10">
+<div class="flex items-center gap-lg w-full md:w-1/4">
+<div class="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center border border-success-green/50 text-on-surface-variant relative">
+<span class="material-symbols-outlined text-3xl">directions_run</span>
+<div class="absolute -top-2 -right-2 bg-primary text-abyss-black text-[10px] font-bold px-2 py-1 rounded-full uppercase">클리어</div>
+</div>
+<div>
+<h3 class="font-card-title text-card-title text-white">런닝</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Rank D / 지구력 성장</p>
+</div>
+</div>
+<div class="w-full md:w-1/2 flex flex-col gap-sm">
+<div class="flex justify-between font-level-display text-[24px]">
+<span class="text-on-surface-variant">0.0 <span class="text-on-surface-variant text-[16px]">KM</span></span>
+<span class="text-on-surface-variant">0.0 <span class="text-on-surface-variant text-[16px]">목표</span></span>
+</div>
+<div class="h-6 w-full bg-abyss-black rounded-full overflow-hidden border border-outline-variant/30">
+<div class="h-full bg-primary shimmer-bar transition-all duration-500 ease-out" style="width: 0%;"></div>
+</div>
+</div>
+<div class="w-full md:w-auto flex justify-end">
+<button class="bg-surface-container-highest text-on-surface-variant font-bold uppercase py-3 px-xl rounded-lg cursor-pointer hover:bg-primary/20 w-full md:w-auto flex items-center justify-center gap-2 border border-outline-variant/20" >
+<span class="material-symbols-outlined">check_circle</span>
+                                +1 기록
+                            </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Predicted Rewards Section -->
+<div class="mt-auto border-t border-outline-variant/20 pt-lg pb-md">
+<h4 class="font-quest-title text-quest-title text-on-surface-variant uppercase mb-md flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">inventory_2</span>
+                    예상 클리어 보상
+                </h4>
+<div class="flex flex-wrap gap-md">
+<!-- EXP Reward -->
+<div class="bg-dungeon-gray/50 border border-shadow-slate p-md rounded-lg flex items-center gap-md min-w-[200px]">
+<div class="w-12 h-12 rounded-full bg-exp-blue/10 flex items-center justify-center border border-exp-blue/30 shadow-[0_0_10px_rgba(59,130,246,0.2)]">
+<span class="material-symbols-outlined text-exp-blue">trending_up</span>
+</div>
+<div>
+<p class="font-caption text-caption text-on-surface-variant uppercase">경험치</p>
+<p id="reward-exp-e" class="font-level-display text-[28px] text-exp-blue drop-shadow-[0_0_5px_rgba(59,130,246,0.5)]">+1,500</p>
+</div>
+</div>
+<!-- Gold Reward -->
+<div class="bg-dungeon-gray/50 border border-shadow-slate p-md rounded-lg flex items-center gap-md min-w-[200px]">
+<div class="w-12 h-12 rounded-full bg-legendary-gold/10 flex items-center justify-center border border-legendary-gold/30 shadow-[0_0_10px_rgba(255,215,0,0.2)]">
+<span class="material-symbols-outlined text-legendary-gold">monetization_on</span>
+</div>
+<div>
+<p class="font-caption text-caption text-on-surface-variant uppercase">골드</p>
+<p class="font-level-display text-[28px] text-legendary-gold drop-shadow-[0_0_5px_rgba(255,215,0,0.5)]">+500G</p>
+</div>
+</div>
+<!-- Item Reward (Hidden/Mystery) -->
+<div class="bg-dungeon-gray/50 border border-shadow-slate p-md rounded-lg flex items-center gap-md min-w-[200px] opacity-70">
+<div class="w-12 h-12 rounded-full bg-surface-variant flex items-center justify-center border border-outline-variant/30">
+<span class="material-symbols-outlined text-on-surface-variant">help_center</span>
+</div>
+<div>
+<p class="font-caption text-caption text-on-surface-variant uppercase">전리품 상자</p>
+<p class="font-body-lg text-body-lg text-on-surface italic mt-1">E ~ C 랭크</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</main>
+<main id="view-c_rank" class="flex-1 w-full md:pl-64 mt-16 p-margin-mobile md:p-margin-desktop overflow-y-auto hidden">
+
+<!-- Background Image -->
+<div class="absolute inset-0 bg-cover bg-center z-0 opacity-40 mix-blend-screen" data-alt="A wide cinematic view of a dark cyberpunk matrix dungeon. Deep blue and neon purple glowing geometric circuits and floating digital code structures run along dark stone walls. High contrast, volumetric fog, dramatic neon lighting, intricate tech-fantasy details. Modern manhwa style dungeon background." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCLjm447ibuEwulzVZbiWjfggwT6fZq4AK7NMmgUTpc_5s4cqCUPvNEgeqCjdhQQdjkBTDcie7b7w4SwhbmuZzevBl9pan2Dt-av4BUy-LyGE4hBLHo0yOuhWTBkjtYu8lsn-YC3e6VpHvf-KYSOd8NS8n4LfplzJYR41F8c6euICRjmu0bEZyLGBMwIGNTg_H0FIUsK58B5g7lgKOljRoM6ADDXgE4BFaWbNMy1qJZGALq6HsIqktiUQ3ddkIuuVc6wSBvxY7RgKU')"></div>
+<!-- Gradient Overlay for depth -->
+<div class="absolute inset-0 bg-gradient-to-t from-abyss-black via-abyss-black/80 to-transparent z-0 pointer-events-none"></div>
+<!-- Ambient Glow Effects -->
+<div class="fixed top-1/4 left-1/3 w-[600px] h-[600px] bg-epic-purple/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
+<div class="fixed bottom-0 right-0 w-[400px] h-[400px] bg-secondary-container/10 rounded-full blur-[100px] pointer-events-none z-0"></div>
+<div class="max-w-7xl mx-auto relative z-10 flex flex-col h-full min-h-[calc(100vh-80px)] w-full">
+<!-- Cinematic Header Area -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-xl gap-lg">
+<div class="flex flex-col">
+<h1 class="font-boss-display text-boss-display md:text-[80px] text-white leading-none text-primary uppercase" data-text="지식 (Rank C)">지식 (Rank C)</h1>
+<p class="font-body-lg text-body-lg text-secondary-fixed-dim mt-sm max-w-2xl border-l-2 border-primary/50 pl-md tracking-widest uppercase">SYSTEM: WARNING - ABNORMAL ACTIVITY DETECTED</p>
+</div>
+</div>
+<!-- Wide Progress Bars Container -->
+<div class="flex flex-col gap-lg flex-1 mb-xl">
+<!-- Progress Row 1: Code Analysis -->
+<div class="bg-dungeon-gray border border-shadow-slate rounded-xl p-lg relative overflow-hidden group hover:border-primary/50 transition-colors">
+<div class="absolute inset-0 border border-white/5 rounded-xl pointer-events-none"></div>
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-epic-purple shadow-[0_0_10px_#7C3AED]"></div>
+<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-md relative z-10">
+<div class="flex items-center gap-lg w-full md:w-1/4">
+<div class="w-16 h-16 rounded-lg bg-surface-container-highest flex items-center justify-center border border-outline-variant/30 text-primary">
+<span class="material-symbols-outlined text-3xl">search</span>
+</div>
+<div>
+<h3 class="font-card-title text-card-title text-white">코드 분석</h3>
+<span class="font-caption text-caption text-primary/80 bg-primary/10 px-xs rounded mt-1 inline-block">In Progress</span>
+</div>
+</div>
+<div class="w-full md:w-1/2 flex flex-col gap-sm">
+<div class="flex justify-between font-level-display text-[24px]">
+<span class="text-white">0</span>
+<span class="text-primary">100 <span class="text-on-surface-variant text-[16px]">목표</span></span>
+</div>
+<div class="h-6 w-full bg-abyss-black rounded-full overflow-hidden border border-outline-variant/20">
+<div class="h-full bg-exp-blue shimmer-bar transition-all duration-500 ease-out" style="width: 0%;"></div>
+</div>
+</div>
+<div class="w-full md:w-auto flex justify-end">
+<button class="bg-primary-container/20 text-primary border border-primary/50 font-bold uppercase py-3 px-xl rounded-lg hover:bg-primary-container hover:text-on-primary-container hover:shadow-[0_0_15px_rgba(124,58,237,0.6)] active:scale-95 transition-all w-full md:w-auto flex items-center justify-center gap-2">
+                                +10 분석하기
+                            </button>
+</div>
+</div>
+</div>
+<!-- Progress Row 2: Debugging -->
+<div class="bg-dungeon-gray border border-shadow-slate rounded-xl p-lg relative overflow-hidden group hover:border-mythic-pink/50 transition-colors">
+<div class="absolute inset-0 border border-white/5 rounded-xl pointer-events-none"></div>
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-mythic-pink shadow-[0_0_10px_#FF4D6D]"></div>
+<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-md relative z-10">
+<div class="flex items-center gap-lg w-full md:w-1/4">
+<div class="w-16 h-16 rounded-lg bg-surface-container-highest flex items-center justify-center border border-outline-variant/30 text-mythic-pink">
+<span class="material-symbols-outlined text-3xl">bug_report</span>
+</div>
+<div>
+<h3 class="font-card-title text-card-title text-white">버그 디버깅</h3>
+<span class="font-caption text-caption text-mythic-pink/80 bg-mythic-pink/10 px-xs rounded mt-1 inline-block">Critical</span>
+</div>
+</div>
+<div class="w-full md:w-1/2 flex flex-col gap-sm">
+<div class="flex justify-between font-level-display text-[24px]">
+<span class="text-white">0</span>
+<span class="text-mythic-pink">100 <span class="text-on-surface-variant text-[16px]">목표</span></span>
+</div>
+<div class="h-6 w-full bg-abyss-black rounded-full overflow-hidden border border-outline-variant/20">
+<div class="h-full bg-mythic-pink shimmer-bar transition-all duration-500 ease-out" style="width: 0%;"></div>
+</div>
+</div>
+<div class="w-full md:w-auto flex justify-end">
+<button class="bg-primary-container text-on-primary-container font-bold uppercase py-3 px-xl rounded-lg shadow-[0_0_12px_rgba(124,58,237,0.5)] hover:bg-primary hover:text-on-primary active:scale-95 transition-all w-full md:w-auto flex items-center justify-center gap-2">
+                                +20 디버깅
+                            </button>
+</div>
+</div>
+</div>
+<!-- Progress Row 3: Optimization -->
+<div class="bg-dungeon-gray border border-outline-variant/30 rounded-xl p-lg relative overflow-hidden group shadow-[0_0_20px_rgba(34,197,94,0.1)]">
+<div class="absolute inset-0 border border-white/5 rounded-xl pointer-events-none"></div>
+<div class="absolute inset-0 bg-primary/5 pointer-events-none"></div>
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary shadow-[0_0_10px_#22C55E]"></div>
+<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-md relative z-10">
+<div class="flex items-center gap-lg w-full md:w-1/4">
+<div class="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center border border-success-green/50 text-on-surface-variant relative">
+<span class="material-symbols-outlined text-3xl">speed</span>
+</div>
+<div>
+<h3 class="font-card-title text-card-title text-white">시스템 최적화</h3>
+<span class="font-caption text-caption text-on-surface-variant bg-primary/10 px-xs rounded mt-1 inline-block">Ready</span>
+</div>
+</div>
+<div class="w-full md:w-1/2 flex flex-col gap-sm">
+<div class="flex justify-between font-level-display text-[24px]">
+<span class="text-on-surface-variant">0.0 <span class="text-on-surface-variant text-[16px]">KM</span></span>
+<span class="text-on-surface-variant">0.0 <span class="text-on-surface-variant text-[16px]">KM</span></span>
+</div>
+<div class="h-6 w-full bg-abyss-black rounded-full overflow-hidden border border-outline-variant/30">
+<div class="h-full bg-primary shimmer-bar transition-all duration-500 ease-out" style="width: 0%;"></div>
+</div>
+</div>
+<div class="w-full md:w-auto flex justify-end">
+<button class="bg-primary/20 text-on-surface-variant border border-success-green/50 font-bold uppercase py-3 px-xl rounded-lg hover:bg-primary hover:text-abyss-black hover:shadow-[0_0_15px_rgba(34,197,94,0.6)] active:scale-95 transition-all w-full md:w-auto flex items-center justify-center gap-2">
+                                최적화 완료
+                            </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Predicted Rewards Section -->
+<div class="mt-auto border-t border-outline-variant/20 pt-lg pb-md">
+<h4 class="font-quest-title text-quest-title text-on-surface-variant uppercase mb-md flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">inventory_2</span>
+                    예상 클리어 보상
+                </h4>
+<div class="flex flex-wrap gap-md">
+<!-- EXP Reward -->
+<div class="bg-dungeon-gray/50 border border-shadow-slate p-md rounded-lg flex items-center gap-md min-w-[200px]">
+<div class="w-12 h-12 rounded-full bg-exp-blue/10 flex items-center justify-center border border-exp-blue/30 shadow-[0_0_10px_rgba(59,130,246,0.2)]">
+<span class="material-symbols-outlined text-exp-blue">trending_up</span>
+</div>
+<div>
+<p class="font-caption text-caption text-on-surface-variant uppercase">경험치</p>
+<p id="reward-exp-c" class="font-level-display text-[28px] text-exp-blue drop-shadow-[0_0_5px_rgba(59,130,246,0.5)]">+1,500 EXP</p>
+</div>
+</div>
+<!-- Gold Reward -->
+<div class="bg-dungeon-gray/50 border border-shadow-slate p-md rounded-lg flex items-center gap-md min-w-[200px]">
+<div class="w-12 h-12 rounded-full bg-legendary-gold/10 flex items-center justify-center border border-legendary-gold/30 shadow-[0_0_10px_rgba(255,215,0,0.2)]">
+<span class="material-symbols-outlined text-legendary-gold">monetization_on</span>
+</div>
+<div>
+<p class="font-caption text-caption text-on-surface-variant uppercase">골드</p>
+<p class="font-level-display text-[28px] text-legendary-gold drop-shadow-[0_0_5px_rgba(255,215,0,0.5)]">+1,500G</p>
+</div>
+</div>
+<!-- Item Reward -->
+<div class="bg-dungeon-gray/50 border border-shadow-slate p-md rounded-lg flex items-center gap-md min-w-[200px] opacity-70">
+<div class="w-12 h-12 rounded-full bg-surface-variant flex items-center justify-center border border-outline-variant/30">
+<span class="material-symbols-outlined text-on-surface-variant">deployed_code</span>
+</div>
+<div>
+<p class="font-caption text-caption text-on-surface-variant uppercase">전리품 상자</p>
+<p class="font-body-lg text-body-lg text-primary italic mt-1">E ~ C 랭크</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</main>
+<main id="view-s_rank" class="flex-1 w-full md:pl-64 mt-16 p-margin-mobile md:p-margin-desktop overflow-y-auto hidden">
+
+<!-- Ambient Glow Effects -->
+<div class="fixed top-1/4 left-1/3 w-[600px] h-[600px] bg-epic-purple/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
+<div class="fixed bottom-0 right-0 w-[400px] h-[400px] bg-secondary-container/10 rounded-full blur-[100px] pointer-events-none z-0"></div>
+<div class="max-w-7xl mx-auto relative z-10 flex flex-col h-full min-h-[calc(100vh-80px)] w-full">
+<!-- Cinematic Header Area -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-xl gap-lg">
+<div class="flex flex-col">
+<div class="flex items-center gap-sm mb-2">
+<span class="material-symbols-outlined text-epic-purple text-xl animate-pulse" style="font-variation-settings: 'FILL' 1;">crisis_alert</span>
+<span class="font-quest-title text-quest-title text-epic-purple uppercase tracking-[0.2em] text-glow">퀘스트 진행 중</span>
+</div>
+<h1 class="font-boss-display text-boss-display md:text-[80px] text-white leading-none">총합 테스트</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-sm max-w-2xl border-l-2 border-primary/50 pl-md">그동안 쌓아온 운동과 지식을 총동원하여 돌파해야 하는 테스트입니다.</p>
+</div>
+<!-- Digital Countdown Timer -->
+<div class="bg-surface-container-high/80 backdrop-blur-sm border border-health-red/30 p-lg rounded-xl flex flex-col items-center shadow-[0_0_30px_rgba(239,68,68,0.15)] min-w-[200px]">
+<span class="font-caption text-caption text-health-red/80 uppercase tracking-widest mb-xs">남은 시간</span>
+<div class="font-level-display text-level-display text-health-red flex items-center gap-2 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]">
+<span class="material-symbols-outlined text-4xl">timer</span>
+                        44:59
+                    </div>
+</div>
+</div>
+<!-- Wide Progress Bars Container -->
+<div class="flex flex-col gap-lg flex-1 mb-xl">
+<!-- Progress Row 1 -->
+<div class="bg-dungeon-gray border border-shadow-slate rounded-xl p-lg relative overflow-hidden group hover:border-primary/50 transition-colors">
+<!-- Ghost Inner Border -->
+<div class="absolute inset-0 border border-white/5 rounded-xl pointer-events-none"></div>
+<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-md relative z-10">
+<div class="flex items-center gap-lg w-full md:w-1/4">
+<div class="w-16 h-16 rounded-lg bg-surface-container-highest flex items-center justify-center border border-outline-variant/30 text-primary">
+<span class="material-symbols-outlined text-3xl">fitness_center</span>
+</div>
+<div>
+<h3 class="font-card-title text-card-title text-white">전신 운동</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Rank E / 총합 성장</p>
+</div>
+</div>
+<div class="w-full md:w-1/2 flex flex-col gap-sm">
+<div class="flex justify-between font-level-display text-[24px]">
+<span class="text-white">0 <span class="text-on-surface-variant text-[16px]">회</span></span>
+<span class="text-primary">100 <span class="text-on-surface-variant text-[16px]">목표</span></span>
+</div>
+<div class="h-6 w-full bg-abyss-black rounded-full overflow-hidden border border-outline-variant/20">
+<div class="h-full bg-gradient-to-r from-primary-container to-primary shimmer-bar transition-all duration-500 ease-out" style="width: 0%;"></div>
+</div>
+</div>
+<div class="w-full md:w-auto flex justify-end">
+<button class="bg-epic-purple text-white font-bold uppercase py-3 px-xl rounded-lg hover:shadow-[0_0_15px_rgba(124,58,237,0.6)] active:scale-95 transition-all w-full md:w-auto flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">swords</span>
+                                +10 기록
+                            </button>
+</div>
+</div>
+</div>
+<!-- Progress Row 2 -->
+<div class="bg-dungeon-gray border border-shadow-slate rounded-xl p-lg relative overflow-hidden group hover:border-exp-blue/50 transition-colors">
+<div class="absolute inset-0 border border-white/5 rounded-xl pointer-events-none"></div>
+<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-md relative z-10">
+<div class="flex items-center gap-lg w-full md:w-1/4">
+<div class="w-16 h-16 rounded-lg bg-surface-container-highest flex items-center justify-center border border-outline-variant/30 text-exp-blue">
+<span class="material-symbols-outlined text-3xl">accessibility_new</span>
+</div>
+<div>
+<h3 class="font-card-title text-card-title text-white">실전 코딩</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Rank E / 총합 성장</p>
+</div>
+</div>
+<div class="w-full md:w-1/2 flex flex-col gap-sm">
+<div class="flex justify-between font-level-display text-[24px]">
+<span class="text-white">0 <span class="text-on-surface-variant text-[16px]">줄</span></span>
+<span class="text-exp-blue">100 <span class="text-on-surface-variant text-[16px]">목표</span></span>
+</div>
+<div class="h-6 w-full bg-abyss-black rounded-full overflow-hidden border border-outline-variant/20">
+<div class="h-full bg-gradient-to-r from-secondary-container to-exp-blue shimmer-bar transition-all duration-500 ease-out" style="width: 0%;"></div>
+</div>
+</div>
+<div class="w-full md:w-auto flex justify-end">
+<button class="bg-exp-blue text-white font-bold uppercase py-3 px-xl rounded-lg hover:shadow-[0_0_15px_rgba(59,130,246,0.6)] active:scale-95 transition-all w-full md:w-auto flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">swords</span>
+                                +20 기록
+                            </button>
+</div>
+</div>
+</div>
+<!-- Progress Row 3 -->
+<div class="bg-dungeon-gray border border-outline-variant/30 rounded-xl p-lg relative overflow-hidden group shadow-[0_0_20px_rgba(34,197,94,0.1)]">
+<div class="absolute inset-0 border border-white/5 rounded-xl pointer-events-none"></div>
+<!-- Success Flash Overlay (Hidden by default, shown when complete) -->
+<div class="absolute inset-0 bg-primary/5 pointer-events-none"></div>
+<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-md relative z-10">
+<div class="flex items-center gap-lg w-full md:w-1/4">
+<div class="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center border border-success-green/50 text-on-surface-variant relative">
+<span class="material-symbols-outlined text-3xl">directions_run</span>
+<div class="absolute -top-2 -right-2 bg-primary text-abyss-black text-[10px] font-bold px-2 py-1 rounded-full uppercase">클리어</div>
+</div>
+<div>
+<h3 class="font-card-title text-card-title text-white">멘탈 관리</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Rank E / 총합 성장</p>
+</div>
+</div>
+<div class="w-full md:w-1/2 flex flex-col gap-sm">
+<div class="flex justify-between font-level-display text-[24px]">
+<span class="text-on-surface-variant">0.0 <span class="text-on-surface-variant text-[16px]">시간</span></span>
+<span class="text-on-surface-variant">5.0 <span class="text-on-surface-variant text-[16px]">목표</span></span>
+</div>
+<div class="h-6 w-full bg-abyss-black rounded-full overflow-hidden border border-outline-variant/30">
+<div class="h-full bg-primary shimmer-bar transition-all duration-500 ease-out" style="width: 0%;"></div>
+</div>
+</div>
+<div class="w-full md:w-auto flex justify-end">
+<button class="bg-surface-container-highest text-on-surface-variant font-bold uppercase py-3 px-xl rounded-lg cursor-pointer hover:bg-primary/20 w-full md:w-auto flex items-center justify-center gap-2 border border-outline-variant/20" >
+<span class="material-symbols-outlined">check_circle</span>
+                                +1 기록
+                            </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Predicted Rewards Section -->
+<div class="mt-auto border-t border-outline-variant/20 pt-lg pb-md">
+<h4 class="font-quest-title text-quest-title text-on-surface-variant uppercase mb-md flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">inventory_2</span>
+                    예상 클리어 보상
+                </h4>
+<div class="flex flex-wrap gap-md">
+<!-- EXP Reward -->
+<div class="bg-dungeon-gray/50 border border-shadow-slate p-md rounded-lg flex items-center gap-md min-w-[200px]">
+<div class="w-12 h-12 rounded-full bg-exp-blue/10 flex items-center justify-center border border-exp-blue/30 shadow-[0_0_10px_rgba(59,130,246,0.2)]">
+<span class="material-symbols-outlined text-exp-blue">trending_up</span>
+</div>
+<div>
+<p class="font-caption text-caption text-on-surface-variant uppercase">경험치</p>
+<p id="reward-exp-s" class="font-level-display text-[28px] text-exp-blue drop-shadow-[0_0_5px_rgba(59,130,246,0.5)]">+5,000</p>
+</div>
+</div>
+<!-- Gold Reward -->
+<div class="bg-dungeon-gray/50 border border-shadow-slate p-md rounded-lg flex items-center gap-md min-w-[200px]">
+<div class="w-12 h-12 rounded-full bg-legendary-gold/10 flex items-center justify-center border border-legendary-gold/30 shadow-[0_0_10px_rgba(255,215,0,0.2)]">
+<span class="material-symbols-outlined text-legendary-gold">monetization_on</span>
+</div>
+<div>
+<p class="font-caption text-caption text-on-surface-variant uppercase">골드</p>
+<p class="font-level-display text-[28px] text-legendary-gold drop-shadow-[0_0_5px_rgba(255,215,0,0.5)]">+5,000G</p>
+</div>
+</div>
+<!-- Item Reward (Hidden/Mystery) -->
+<div class="bg-dungeon-gray/50 border border-shadow-slate p-md rounded-lg flex items-center gap-md min-w-[200px] opacity-70">
+<div class="w-12 h-12 rounded-full bg-surface-variant flex items-center justify-center border border-outline-variant/30">
+<span class="material-symbols-outlined text-on-surface-variant">help_center</span>
+</div>
+<div>
+<p class="font-caption text-caption text-on-surface-variant uppercase">전리품 상자</p>
+<p class="font-body-lg text-body-lg text-on-surface italic mt-1">E ~ C 랭크</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</main>
+
+<!-- NEW Dungeon Management Modal -->
+<div id="dungeon-edit-modal-new" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-abyss-black/80 backdrop-blur-sm" onclick="document.getElementById('dungeon-edit-modal-new').classList.add('hidden')"></div>
+    <div class="bg-surface-container-highest border border-outline-variant/30 rounded-xl p-lg w-full max-w-md relative shadow-2xl flex flex-col max-h-[90vh]">
+        <div class="flex justify-between items-center mb-md border-b border-outline-variant/20 pb-4">
+            <h2 class="font-section-title text-section-title text-white">던전 (메인 퀘스트) 전체 설정</h2>
+            <button class="text-on-surface-variant hover:text-white" onclick="document.getElementById('dungeon-edit-modal-new').classList.add('hidden')">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-md">
+            <!-- Dropdown Selector -->
+            <div>
+                <label class="block font-caption text-on-surface-variant mb-2">수정할 던전 선택 (총 18개)</label>
+                <div class="relative">
+                    <select id="dungeon-select-new" class="w-full appearance-none bg-abyss-black border border-outline-variant/30 text-on-surface rounded-lg py-3 px-4 focus:outline-none focus:border-epic-purple focus:ring-1 focus:ring-epic-purple cursor-pointer transition-colors">
+                        <!-- Populated by JS -->
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-on-surface-variant">
+                        <span class="material-symbols-outlined">expand_more</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Edit Form -->
+            <div class="space-y-md border-t border-outline-variant/20 pt-md mt-md">
+                <div>
+                    <label class="block font-caption text-on-surface-variant mb-2">던전 이름</label>
+                    <input type="text" id="dungeon-name-input-new" class="w-full bg-abyss-black border border-outline-variant/30 text-on-surface rounded-lg py-2 px-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors">
+                </div>
+                <div>
+                    <label class="block font-caption text-on-surface-variant mb-2">던전 설명</label>
+                    <textarea id="dungeon-desc-input-new" class="w-full bg-abyss-black border border-outline-variant/30 text-on-surface rounded-lg py-2 px-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors h-24 resize-none"></textarea>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-md pt-4 border-t border-outline-variant/20 flex justify-end">
+            <button id="btn-save-dungeon-new" class="bg-epic-purple hover:bg-primary-fixed-dim text-white font-bold py-2 px-6 rounded-lg transition-colors flex items-center gap-2 shadow-[0_0_10px_rgba(124,58,237,0.4)]">
+                <span class="material-symbols-outlined text-sm">save</span> 저장하기
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function openQuestView(viewId) {
+        // Prevent pushing duplicate state if called from popstate
+        if (!history.state || history.state.view !== viewId) {
+            history.pushState({view: viewId}, "", "");
+        }
+        document.getElementById('view-list').classList.add('hidden');
+        document.getElementById('view-e_rank').classList.add('hidden');
+        document.getElementById('view-c_rank').classList.add('hidden');
+        document.getElementById('view-s_rank').classList.add('hidden');
+        document.getElementById(viewId).classList.remove('hidden');
+        window.scrollTo(0, 0);
+    }
+
+    function closeQuestView() {
+        if (history.state && history.state.view) {
+            history.back();
+        } else {
+            document.getElementById('view-e_rank').classList.add('hidden');
+            document.getElementById('view-c_rank').classList.add('hidden');
+            document.getElementById('view-s_rank').classList.add('hidden');
+            document.getElementById('view-list').classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
+    }
+    
+    window.addEventListener('popstate', (e) => {
+        if (e.state && e.state.view) {
+            openQuestView(e.state.view);
+        } else {
+            document.getElementById('view-e_rank').classList.add('hidden');
+            document.getElementById('view-c_rank').classList.add('hidden');
+            document.getElementById('view-s_rank').classList.add('hidden');
+            document.getElementById('view-list').classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
+    });
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        ['view-e_rank', 'view-c_rank', 'view-s_rank'].forEach(id => {
+            const view = document.getElementById(id);
+            if (!view) return;
+            let headerArea = view.querySelector('.flex.flex-col.md\\:flex-row.justify-between');
+            if (!headerArea) headerArea = view.querySelector('.max-w-\\[1400px\\] > div:first-child');
+            if (!headerArea) headerArea = view.firstElementChild;
+            
+            if (headerArea) {
+                const backBtnContainer = document.createElement('div');
+                backBtnContainer.className = 'w-full flex mb-md z-50 relative pt-4 md:pt-0';
+                const backBtn = document.createElement('button');
+                backBtn.className = 'flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors bg-surface-container-highest/80 backdrop-blur-md px-4 py-2 rounded-lg border border-outline-variant/30 hover:border-primary/50';
+                backBtn.innerHTML = '<span class="material-symbols-outlined">arrow_back</span> 돌아가기';
+                backBtn.onclick = closeQuestView;
+                backBtnContainer.appendChild(backBtn);
+                headerArea.parentNode.insertBefore(backBtnContainer, headerArea);
+            }
+        });
+    });
+</script>
+
+</body></html>

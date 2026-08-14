@@ -1,0 +1,298 @@
+<!DOCTYPE html><html class="dark" lang="ko"><head>
+<script src="init_game.js"></script>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>결제 수단 등록 - Level Up Life</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Oswald:wght@500;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-container": "#836100",
+                        "on-secondary-fixed": "#001a42",
+                        "on-tertiary-fixed": "#261a00",
+                        "on-primary-fixed-variant": "#5a00c6",
+                        "surface-dim": "#131317",
+                        "inverse-on-surface": "#303034",
+                        "on-tertiary-fixed-variant": "#5c4300",
+                        "inverse-surface": "#e4e1e7",
+                        "tertiary": "#f9bd22",
+                        "on-secondary": "#002e6a",
+                        "health-red": "#EF4444",
+                        "primary-fixed-dim": "#d2bbff",
+                        "surface-container": "#1f1f23",
+                        "tertiary-fixed": "#ffdf9f",
+                        "surface-tint": "#d2bbff",
+                        "on-primary-container": "#ede0ff",
+                        "outline": "#958da1",
+                        "error-container": "#93000a",
+                        "error": "#ffb4ab",
+                        "primary": "#d2bbff",
+                        "secondary": "#adc6ff",
+                        "primary-fixed": "#eaddff",
+                        "on-surface-variant": "#ccc3d8",
+                        "legendary-gold": "#FFD700",
+                        "surface-container-highest": "#353439",
+                        "outline-variant": "#4a4455",
+                        "secondary-fixed": "#d8e2ff",
+                        "exp-blue": "#3B82F6",
+                        "surface-container-high": "#2a292e",
+                        "on-background": "#e4e1e7",
+                        "abyss-black": "#0B0B0F",
+                        "surface": "#131317",
+                        "on-primary-fixed": "#25005a",
+                        "on-secondary-container": "#e6ecff",
+                        "surface-container-low": "#1b1b1f",
+                        "shadow-slate": "#23262F",
+                        "on-tertiary": "#402d00",
+                        "surface-bright": "#39393d",
+                        "success-green": "#22C55E",
+                        "primary-container": "#7c3aed",
+                        "surface-container-lowest": "#0e0e12",
+                        "on-tertiary-container": "#ffe2ab",
+                        "on-surface": "#e4e1e7",
+                        "mythic-pink": "#FF4D6D",
+                        "on-error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "epic-purple": "#7C3AED",
+                        "on-secondary-fixed-variant": "#004395",
+                        "on-primary": "#3f008e",
+                        "secondary-container": "#0566d9",
+                        "dungeon-gray": "#181A20",
+                        "hunter-surface": "#2C313D",
+                        "on-error": "#690005",
+                        "surface-variant": "#353439",
+                        "inverse-primary": "#732ee4",
+                        "background": "#131317",
+                        "tertiary-fixed-dim": "#f9bd22"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "32px",
+                        "gutter": "16px",
+                        "sm": "8px",
+                        "xs": "4px",
+                        "margin-desktop": "32px",
+                        "margin-mobile": "16px",
+                        "xxl": "48px",
+                        "lg": "24px",
+                        "base": "4px",
+                        "md": "16px"
+                    },
+                    "fontFamily": {
+                        "boss-display": ["Oswald"],
+                        "body-lg": ["Inter"],
+                        "section-title-mobile": ["Oswald"],
+                        "body-sm": ["Inter"],
+                        "section-title": ["Oswald"],
+                        "level-display-mobile": ["Oswald"],
+                        "card-title": ["Inter"],
+                        "caption": ["Inter"],
+                        "quest-title": ["Inter"],
+                        "level-display": ["Oswald"]
+                    },
+                    "fontSize": {
+                        "boss-display": ["64px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "section-title-mobile": ["28px", {"lineHeight": "1.3", "fontWeight": "500"}],
+                        "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "section-title": ["32px", {"lineHeight": "1.3", "fontWeight": "500"}],
+                        "level-display-mobile": ["36px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "card-title": ["24px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "caption": ["12px", {"lineHeight": "1.4", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "quest-title": ["18px", {"lineHeight": "1.5", "fontWeight": "600"}],
+                        "level-display": ["48px", {"lineHeight": "1.2", "fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(24, 26, 32, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(149, 141, 161, 0.1);
+        }
+        
+        .glow-effect {
+            box-shadow: 0 0 15px rgba(124, 58, 237, 0.3);
+        }
+        
+        .input-glow:focus-within {
+            box-shadow: 0 0 0 2px #7C3AED, 0 0 12px rgba(124, 58, 237, 0.5);
+            border-color: transparent;
+        }
+
+        .credit-card-bg {
+            background: linear-gradient(135deg, #181A20 0%, #23262F 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .credit-card-bg::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(124,58,237,0.15) 0%, rgba(0,0,0,0) 60%);
+            transform: rotate(30deg);
+            pointer-events: none;
+        }
+
+        /* Ambient Nebula Background Animation */
+        @keyframes pulse-nebula {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.05); }
+        }
+        .bg-nebula {
+            position: fixed;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(124, 58, 237, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(59, 130, 246, 0.05) 0%, transparent 40%);
+            z-index: -1;
+            animation: pulse-nebula 10s ease-in-out infinite;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-abyss-black text-on-surface font-body-lg min-h-screen overflow-x-hidden selection:bg-epic-purple selection:text-white">
+<!-- Ambient Background -->
+<div class="bg-nebula"></div>
+<div class="fixed inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMTQ5LCAxNDEsIDE2MSwgMC4wNSkiLz48L3N2Zz4=')] z-[-1] pointer-events-none opacity-50"></div>
+<!-- TopAppBar -->
+<header class="bg-abyss-black dark:bg-abyss-black font-boss-display text-boss-display docked full-width top-0 border-b border-outline-variant/30 shadow-[0_0_15px_rgba(124,58,237,0.3)] flex justify-between items-center w-full px-md h-16 fixed z-50">
+<a href="home.html" class="flex items-center gap-sm cursor-pointer hover:opacity-80 transition-opacity">
+<img alt="Level Up Life Logo" class="h-8 w-8 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvVeFzLtZ-Xq9k4cM7sTatF4Oded9MMO6cULtN-y1SefihPn0HcPEKq_JKgO9qOrWbuueKw9hpajqRSOXFrUQK_U5mfwR3lWudiT03alw5RDECZlkx92EIP1j8xXmhsfaPuw582p3YvKVJGFpPOu2ilUzpbWBu-i9vTxi-7QkUka3OokBead-CEcU2AVLWl72lF2rglnMCjk0kvJD5yp4Gv7bBKjvtAOMW-UKswNxog25f-1kREPCFm8MEYzp1RBOdzvZLvsCdKOU">
+<span class="font-boss-display text-section-title text-primary uppercase tracking-tighter hidden sm:block">LEVEL UP LIFE</span>
+</a>
+<div class="flex items-center gap-md font-body-sm text-body-sm">
+
+<div class="flex items-center gap-xs bg-shadow-slate px-sm py-1 rounded-xl ghost-border">
+<span class="material-symbols-outlined text-legendary-gold text-lg" style="font-variation-settings: 'FILL' 1;">monetization_on</span>
+<span class="text-legendary-gold font-bold">0 G</span>
+</div>
+<button class="text-on-surface-variant hover:text-primary-fixed-dim transition-colors scale-95 active:duration-150 relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-health-red rounded-full"></span>
+</button>
+<button class="text-on-surface-variant hover:text-primary-fixed-dim transition-colors scale-95 active:duration-150">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+</header>
+<!-- SideNavBar (Hidden on Mobile, Visible on Desktop) -->
+<aside class="bg-dungeon-gray dark:bg-dungeon-gray docked left-0 h-full w-64 border-r border-outline-variant/20 hidden md:flex flex-col py-lg px-md fixed top-0 z-40">
+<div class="flex flex-col items-center mb-xl pt-16">
+<div class="w-24 h-24 rounded-full bg-shadow-slate ghost-border overflow-hidden mb-sm relative glow-epic">
+<img alt="Sung Jin-Woo Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHTuIx9e5kpkUZYkQdaODnjCmH54Pmd3zhhB59qgLINBgEEUZbXnD7O4i66gY-rFfK8GdGFbCGAPnV_bksPH1jTV6O5OKRXVrVv47__GYXMDjlVtYDYx8ICRHDtvCeoWpMpzQB1JeBm80PeW_KgAkXPfJW5gA-g_nN_o-XtHR5fGviZhLhZgHCWbV5b4hMjstJHjO5iZ1UIsA3zN0nYqnA8KoKpDkY-Id9i6TDihqB8kF6WS1umaLN-BDVf4WTWzVZASpWL4yY65E">
+<div class="absolute inset-0 bg-epic-purple/20 mix-blend-overlay"></div>
+</div>
+<h2 class="font-section-title text-section-title text-primary">성진우</h2>
+<p class="text-on-surface-variant font-caption text-caption">Lv.1</p>
+</div>
+<nav class="flex-1 space-y-sm">
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-shadow-slate hover:text-on-surface transition-all duration-300 ease-in-out rounded-xl" href="dashboard.html">
+<span class="material-symbols-outlined">person</span>
+<span class="font-body-lg text-body-lg">상태창</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-shadow-slate hover:text-on-surface transition-all duration-300 ease-in-out rounded-xl" href="quests.html">
+<span class="material-symbols-outlined">fort</span>
+<span class="font-body-lg text-body-lg">던전</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-shadow-slate hover:text-on-surface transition-all duration-300 ease-in-out rounded-xl" href="shop.html">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">storefront</span>
+<span class="font-body-lg text-body-lg">상점</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-shadow-slate hover:text-on-surface transition-all duration-300 ease-in-out rounded-xl" href="inventory.html">
+<span class="material-symbols-outlined">backpack</span>
+<span class="font-body-lg text-body-lg">인벤토리</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-shadow-slate hover:text-on-surface transition-all duration-300 ease-in-out rounded-xl" href="achievements.html">
+<span class="material-symbols-outlined">military_tech</span>
+<span class="font-body-lg text-body-lg">업적</span>
+</a>
+</nav>
+<div class="mt-auto pt-lg border-t border-outline-variant/20 flex flex-col gap-2">
+<button class="w-full bg-epic-purple text-white font-bold uppercase py-sm rounded-xl ghost-border hover:shadow-[0_0_12px_rgba(124,58,237,0.8)] transition-all mb-sm">프리미엄 멤버십</button>
+
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-shadow-slate hover:text-on-surface transition-all duration-300 ease-in-out rounded-xl" href="home.html">
+<span class="material-symbols-outlined text-[18px]">logout</span>
+<span class="font-card-title text-body-lg">로그아웃</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="mt-16 pb-24 md:pl-64 min-h-[calc(100vh-4rem)] flex items-start justify-center p-margin-mobile md:p-margin-desktop">
+<div class="w-full max-w-md mx-auto">
+<!-- Page Header -->
+<div class="mb-lg text-center">
+<h1 class="font-boss-display text-section-title text-on-surface mb-xs flex items-center justify-center gap-sm">
+<span class="material-symbols-outlined text-epic-purple">credit_card</span>
+                    결제 수단 등록
+                </h1>
+<p class="font-body-sm text-on-surface-variant">시스템 상점에 사용할 결제 방식을 연동합니다.</p>
+</div>
+<!-- Main Card Container -->
+<div class="glass-panel rounded-xl p-md md:p-lg shadow-2xl relative overflow-hidden"><div class="absolute inset-0 border border-outline-variant/10 rounded-xl pointer-events-none"></div><div class="flex border-b border-outline-variant/20 mb-lg"><button class="flex-1 py-3 text-primary border-b-2 border-epic-purple font-boss-display text-[18px] uppercase tracking-wide" id="tab-card" onclick="document.getElementById('credit-card-section').classList.remove('hidden'); document.getElementById('paypal-section').classList.add('hidden'); this.classList.add('text-primary', 'border-epic-purple'); this.classList.remove('text-on-surface-variant'); document.getElementById('tab-paypal').classList.remove('text-primary', 'border-epic-purple'); document.getElementById('tab-paypal').classList.add('text-on-surface-variant');">신용카드</button><button class="flex-1 py-3 text-on-surface-variant hover:text-on-surface font-boss-display text-[18px] uppercase tracking-wide transition-colors" id="tab-paypal" onclick="document.getElementById('credit-card-section').classList.add('hidden'); document.getElementById('paypal-section').classList.remove('hidden'); this.classList.add('text-primary', 'border-epic-purple'); this.classList.remove('text-on-surface-variant'); document.getElementById('tab-card').classList.remove('text-primary', 'border-epic-purple'); document.getElementById('tab-card').classList.add('text-on-surface-variant');">페이팔</button></div><div id="credit-card-section"><div class="credit-card-bg rounded-lg p-md mb-lg shadow-lg border border-outline-variant/20 relative h-48 flex flex-col justify-between"><div class="flex justify-between items-start w-full"><span class="material-symbols-outlined text-outline text-[32px] opacity-50">contactless</span><div class="flex gap-1"><div class="w-8 h-8 rounded-full bg-health-red/80 mix-blend-screen"></div><div class="w-8 h-8 rounded-full bg-tertiary/80 mix-blend-screen -ml-4"></div></div></div><div class="mt-auto w-full"><div class="font-boss-display text-[24px] tracking-widest text-on-surface mb-sm opacity-80" id="card-display-number">**** **** **** ****</div><div class="flex justify-between items-end w-full"><div><div class="font-caption text-[10px] text-on-surface-variant uppercase mb-1">Cardholder</div><div class="font-body-sm text-on-surface uppercase tracking-wider opacity-90 truncate max-w-[150px]" id="card-display-name">HUNTER NAME</div></div><div class="text-right"><div class="font-caption text-[10px] text-on-surface-variant uppercase mb-1">Valid Thru</div><div class="font-body-sm text-on-surface tracking-wider opacity-90" id="card-display-expiry">MM/YY</div></div></div></div><div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-50 pointer-events-none mix-blend-overlay"></div></div><form class="space-y-md"><div class="space-y-xs"><label class="font-body-sm text-caption text-on-surface-variant" for="cardNumber">카드 번호</label><div class="relative input-glow rounded-lg transition-all duration-300"><input class="w-full bg-abyss-black border border-outline-variant/30 rounded-lg py-3 px-4 pl-10 text-on-surface focus:outline-none font-body-lg tracking-widest placeholder:text-outline-variant" id="cardNumber" maxlength="19" placeholder="0000 0000 0000 0000" type="text"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant">credit_score</span></div></div><div class="flex gap-md"><div class="space-y-xs flex-1"><label class="font-body-sm text-caption text-on-surface-variant" for="expiryDate">유효 기간</label><div class="relative input-glow rounded-lg transition-all duration-300"><input class="w-full bg-abyss-black border border-outline-variant/30 rounded-lg py-3 px-4 text-on-surface focus:outline-none font-body-lg text-center placeholder:text-outline-variant" id="expiryDate" maxlength="5" placeholder="MM/YY" type="text"></div></div><div class="space-y-xs flex-1"><label class="font-body-sm text-caption text-on-surface-variant" for="cvc">CVC</label><div class="relative input-glow rounded-lg transition-all duration-300"><input class="w-full bg-abyss-black border border-outline-variant/30 rounded-lg py-3 px-4 text-on-surface focus:outline-none font-body-lg text-center placeholder:text-outline-variant" id="cvc" maxlength="3" placeholder="***" type="password"><span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline-variant text-[18px] cursor-help" title="카드 뒷면 3자리 숫자">help</span></div></div></div><div class="space-y-xs"><label class="font-body-sm text-caption text-on-surface-variant" for="cardName">카드 소유자 성명</label><div class="relative input-glow rounded-lg transition-all duration-300"><input class="w-full bg-abyss-black border border-outline-variant/30 rounded-lg py-3 px-4 pl-10 text-on-surface focus:outline-none font-body-lg uppercase placeholder:text-outline-variant" id="cardName" placeholder="성진우" type="text"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant">person</span></div></div><div class="pt-sm"><button class="w-full bg-epic-purple hover:bg-inverse-primary text-white font-boss-display text-[20px] py-4 rounded-lg transition-all duration-300 glow-effect uppercase tracking-wide flex items-center justify-center gap-2 relative overflow-hidden group" type="button"><span class="relative z-10">동기화 완료</span><span class="material-symbols-outlined relative z-10 text-[24px]">sync</span><div class="absolute inset-0 h-full w-0 bg-white/20 transition-all duration-300 ease-out group-hover:w-full z-0"></div></button></div></form></div><div class="hidden py-lg text-center space-y-lg" id="paypal-section"><div class="flex justify-center mb-md"><div class="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center border border-outline-variant/30"><span class="material-symbols-outlined text-[48px] text-primary">account_balance_wallet</span></div></div><div class="space-y-sm"><h3 class="font-boss-display text-card-title text-on-surface">페이팔 결제</h3><p class="font-body-sm text-on-surface-variant px-md">페이팔 계정을 연동하여 안전하게 결제하세요.<br>결제 시 페이팔 보안 페이지로 이동합니다.</p></div><div class="pt-md"><button class="w-full bg-[#0070ba] hover:bg-[#005ea6] text-white font-boss-display text-[20px] py-4 rounded-lg transition-all duration-300 shadow-lg uppercase tracking-wide flex items-center justify-center gap-2 relative overflow-hidden group" type="button"><span class="relative z-10">페이팔로 안전하게 결제하기</span><span class="material-symbols-outlined relative z-10 text-[24px]">open_in_new</span><div class="absolute inset-0 h-full w-0 bg-white/10 transition-all duration-300 ease-out group-hover:w-full z-0"></div></button></div><div class="pt-sm"><button class="w-full bg-epic-purple hover:bg-inverse-primary text-white font-boss-display text-[20px] py-4 rounded-lg transition-all duration-300 glow-effect uppercase tracking-wide flex items-center justify-center gap-2 relative overflow-hidden group" type="button"><span class="relative z-10">동기화 완료</span><span class="material-symbols-outlined relative z-10 text-[24px]">sync</span><div class="absolute inset-0 h-full w-0 bg-white/20 transition-all duration-300 ease-out group-hover:w-full z-0"></div></button></div></div><div class="mt-lg pt-sm border-t border-outline-variant/10 flex items-center justify-center gap-xs text-success-green/80"><span class="material-symbols-outlined text-[16px]">lock</span><span class="font-caption text-[11px]">시스템 보안 암호화 적용 중</span></div></div>
+</div>
+</main>
+<!-- BottomNavBar (Visible on Mobile, Hidden on Desktop) - Contextually Suppressed per instructions for Transactional screen -->
+<!-- Suppressed: The user is in a focused journey (registering payment), hide global nav to prioritize canvas -->
+<script>
+        // Simple script to simulate typing effect on the card visual
+        document.addEventListener('DOMContentLoaded', () => {
+            const numInput = document.getElementById('cardNumber');
+            const nameInput = document.getElementById('cardName');
+            const expInput = document.getElementById('expiryDate');
+
+            const numDisplay = document.getElementById('card-display-number');
+            const nameDisplay = document.getElementById('card-display-name');
+            const expDisplay = document.getElementById('card-display-expiry');
+
+            // Format card number with spaces
+            numInput.addEventListener('input', (e) => {
+                let value = e.target.value.replace(/\D/g, '');
+                let formattedValue = '';
+                for (let i = 0; i < value.length; i++) {
+                    if (i > 0 && i % 4 === 0) formattedValue += ' ';
+                    formattedValue += value[i];
+                }
+                e.target.value = formattedValue;
+                numDisplay.textContent = formattedValue || '**** **** **** ****';
+            });
+
+            // Format expiry date with slash
+            expInput.addEventListener('input', (e) => {
+                 let value = e.target.value.replace(/\D/g, '');
+                 if (value.length > 2) {
+                     value = value.substring(0, 2) + '/' + value.substring(2, 4);
+                 }
+                 e.target.value = value;
+                 expDisplay.textContent = value || 'MM/YY';
+            });
+
+            // Update Name
+            nameInput.addEventListener('input', (e) => {
+                nameDisplay.textContent = e.target.value.toUpperCase() || 'HUNTER NAME';
+            });
+        });
+    </script>
+
+
+</body></html>

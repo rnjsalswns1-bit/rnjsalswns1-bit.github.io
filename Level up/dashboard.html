@@ -1,0 +1,520 @@
+<!DOCTYPE html><html class="dark" lang="ko"><head>
+<script src="init_game.js"></script>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Level Up Life - Status Window</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Oswald:wght@500;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline": "#958da1",
+                        "on-primary": "#3f008e",
+                        "legendary-gold": "#FFD700",
+                        "surface-container-high": "#2a292e",
+                        "epic-purple": "#7C3AED",
+                        "surface-tint": "#d2bbff",
+                        "success-green": "#22C55E",
+                        "on-primary-container": "#ede0ff",
+                        "on-tertiary-container": "#ffe2ab",
+                        "primary-container": "#7c3aed",
+                        "on-tertiary": "#402d00",
+                        "surface-bright": "#39393d",
+                        "health-red": "#EF4444",
+                        "secondary": "#adc6ff",
+                        "on-primary-fixed-variant": "#5a00c6",
+                        "shadow-slate": "#23262F",
+                        "surface-container": "#1f1f23",
+                        "on-error-container": "#ffdad6",
+                        "primary-fixed-dim": "#d2bbff",
+                        "secondary-container": "#0566d9",
+                        "on-primary-fixed": "#25005a",
+                        "inverse-surface": "#e4e1e7",
+                        "outline-variant": "#4a4455",
+                        "inverse-on-surface": "#303034",
+                        "tertiary-fixed-dim": "#f9bd22",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "on-background": "#e4e1e7",
+                        "exp-blue": "#3B82F6",
+                        "on-tertiary-fixed": "#261a00",
+                        "tertiary-container": "#836100",
+                        "primary-fixed": "#eaddff",
+                        "on-secondary": "#002e6a",
+                        "on-secondary-container": "#e6ecff",
+                        "dungeon-gray": "#181A20",
+                        "primary": "#d2bbff",
+                        "on-secondary-fixed": "#001a42",
+                        "error": "#ffb4ab",
+                        "surface-container-low": "#1b1b1f",
+                        "secondary-fixed": "#d8e2ff",
+                        "surface-container-highest": "#353439",
+                        "surface-container-lowest": "#0e0e12",
+                        "on-error": "#690005",
+                        "abyss-black": "#0B0B0F",
+                        "on-tertiary-fixed-variant": "#5c4300",
+                        "background": "#131317",
+                        "surface-dim": "#131317",
+                        "mythic-pink": "#FF4D6D",
+                        "on-secondary-fixed-variant": "#004395",
+                        "error-container": "#93000a",
+                        "on-surface": "#e4e1e7",
+                        "tertiary-fixed": "#ffdf9f",
+                        "surface": "#131317",
+                        "inverse-primary": "#732ee4",
+                        "surface-variant": "#353439",
+                        "hunter-surface": "#2C313D",
+                        "on-surface-variant": "#ccc3d8",
+                        "tertiary": "#f9bd22"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "base": "4px",
+                        "xl": "32px",
+                        "lg": "24px",
+                        "sm": "8px",
+                        "md": "16px",
+                        "margin-desktop": "32px",
+                        "xxl": "48px",
+                        "margin-mobile": "16px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "caption": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "card-title": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "quest-title": ["Inter"],
+                        "section-title-mobile": ["Oswald"],
+                        "section-title": ["Oswald"],
+                        "level-display-mobile": ["Oswald"],
+                        "level-display": ["Oswald"],
+                        "boss-display": ["Oswald"]
+                    },
+                    "fontSize": {
+                        "caption": ["12px", { "lineHeight": "1.4", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "body-sm": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "card-title": ["24px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "quest-title": ["18px", { "lineHeight": "1.5", "fontWeight": "600" }],
+                        "section-title-mobile": ["28px", { "lineHeight": "1.3", "fontWeight": "500" }],
+                        "section-title": ["32px", { "lineHeight": "1.3", "fontWeight": "500" }],
+                        "level-display-mobile": ["36px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "level-display": ["48px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "boss-display": ["64px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .ghost-border { box-shadow: inset 0 0 0 1px rgba(204, 195, 216, 0.1); }
+        .glow-epic { box-shadow: 0 0 15px rgba(124, 58, 237, 0.4); }
+        .glow-gold { box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
+        .shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        ::-webkit-scrollbar-thumb { background: #23262F; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #7C3AED; }
+
+        /* Penalty Quest Theme */
+        #penalty-quest-section {
+            --theme-color: #3B82F6;
+            --theme-bg: rgba(59, 130, 246, 0.1);
+            --theme-glow: rgba(59, 130, 246, 0.4);
+        }
+        #penalty-quest-section.warning-theme {
+            --theme-color: #ef4444;
+            --theme-bg: rgba(239, 68, 68, 0.1);
+            --theme-glow: rgba(239, 68, 68, 0.4);
+        }
+        .theme-text { color: var(--theme-color) !important; }
+        .theme-border { border-color: var(--theme-color) !important; }
+        .theme-bg-alpha { background-color: var(--theme-bg) !important; }
+        .theme-shadow { box-shadow: 0 0 20px var(--theme-glow) !important; }
+        .theme-hover:hover { background-color: var(--theme-color) !important; color: white !important; }
+        .theme-hover-bg:hover { background-color: var(--theme-bg) !important; }
+        .warning-only { display: none; }
+        #penalty-quest-section.warning-theme .warning-only { display: block; }
+        #penalty-quest-section.warning-theme .normal-only { display: none; }
+    </style>
+</head>
+<body class="bg-abyss-black text-on-surface font-body-sm min-h-screen flex flex-col md:flex-row overflow-x-hidden selection:bg-epic-purple selection:text-white">
+<!-- TopAppBar (Mobile & Desktop Header Area) -->
+<header class="bg-abyss-black dark:bg-abyss-black font-boss-display text-boss-display docked full-width top-0 border-b border-outline-variant/30 shadow-[0_0_15px_rgba(124,58,237,0.3)] flex justify-between items-center w-full px-md h-16 fixed z-50">
+<a href="home.html" class="flex items-center gap-sm cursor-pointer hover:opacity-80 transition-opacity">
+<img alt="Level Up Life Logo" class="h-8 w-8 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvVeFzLtZ-Xq9k4cM7sTatF4Oded9MMO6cULtN-y1SefihPn0HcPEKq_JKgO9qOrWbuueKw9hpajqRSOXFrUQK_U5mfwR3lWudiT03alw5RDECZlkx92EIP1j8xXmhsfaPuw582p3YvKVJGFpPOu2ilUzpbWBu-i9vTxi-7QkUka3OokBead-CEcU2AVLWl72lF2rglnMCjk0kvJD5yp4Gv7bBKjvtAOMW-UKswNxog25f-1kREPCFm8MEYzp1RBOdzvZLvsCdKOU">
+<span class="font-boss-display text-section-title text-primary uppercase tracking-tighter hidden sm:block">LEVEL UP LIFE</span>
+</a>
+<div class="flex items-center gap-md font-body-sm text-body-sm">
+
+<div class="flex items-center gap-xs bg-shadow-slate px-sm py-1 rounded-xl ghost-border">
+<span class="material-symbols-outlined text-legendary-gold text-lg" style="font-variation-settings: 'FILL' 1;">monetization_on</span>
+<span class="text-legendary-gold font-bold">0 G</span>
+</div>
+<button class="text-on-surface-variant hover:text-primary-fixed-dim transition-colors scale-95 active:duration-150 relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-health-red rounded-full"></span>
+</button>
+<button class="text-on-surface-variant hover:text-primary-fixed-dim transition-colors scale-95 active:duration-150">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+</header>
+<!-- SideNavBar (Desktop) -->
+<aside class="bg-dungeon-gray dark:bg-dungeon-gray docked left-0 h-full w-64 border-r border-outline-variant/20 hidden md:flex flex-col py-lg px-md fixed top-0 z-40">
+<div class="flex flex-col items-center mb-xl pt-16">
+<div class="w-24 h-24 rounded-full bg-shadow-slate ghost-border overflow-hidden mb-sm relative glow-epic">
+<img alt="Sung Jin-Woo Avatar" class="w-full h-full object-cover" data-alt="A striking portrait of an anime-style modern male hunter with dark, messy hair and glowing purple eyes, set against a dark, moody background. He wears a sleek, high-tech black tactical coat. The lighting is cinematic, heavily contrasting deep abyssal blacks with vibrant epic purple rim lights, fitting a high-stakes dungeon crawler RPG aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHTuIx9e5kpkUZYkQdaODnjCmH54Pmd3zhhB59qgLINBgEEUZbXnD7O4i66gY-rFfK8GdGFbCGAPnV_bksPH1jTV6O5OKRXVrVv47__GYXMDjlVtYDYx8ICRHDtvCeoWpMpzQB1JeBm80PeW_KgAkXPfJW5gA-g_nN_o-XtHR5fGviZhLhZgHCWbV5b4hMjstJHjO5iZ1UIsA3zN0nYqnA8KoKpDkY-Id9i6TDihqB8kF6WS1umaLN-BDVf4WTWzVZASpWL4yY65E">
+<div class="absolute inset-0 bg-epic-purple/20 mix-blend-overlay"></div>
+</div>
+<h2 class="font-section-title text-section-title text-primary">성진우</h2>
+<p class="text-on-surface-variant font-caption text-caption">Lv.1</p>
+</div>
+<nav class="flex-1 space-y-sm">
+<a class="flex items-center gap-sm px-md py-sm bg-primary-container/20 text-primary border-r-4 border-primary transition-all duration-300 ease-in-out rounded-xl" href="dashboard.html">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-body-lg text-body-lg">상태창</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-shadow-slate hover:text-on-surface transition-all duration-300 ease-in-out rounded-xl" href="quests.html">
+<span class="material-symbols-outlined">fort</span>
+<span class="font-body-lg text-body-lg">던전</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-shadow-slate hover:text-on-surface transition-all duration-300 ease-in-out rounded-xl" href="shop.html">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">storefront</span>
+<span class="font-body-lg text-body-lg">상점</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-shadow-slate hover:text-on-surface transition-all duration-300 ease-in-out rounded-xl" href="inventory.html">
+<span class="material-symbols-outlined">backpack</span>
+<span class="font-body-lg text-body-lg">인벤토리</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-shadow-slate hover:text-on-surface transition-all duration-300 ease-in-out rounded-xl" href="achievements.html">
+<span class="material-symbols-outlined">military_tech</span>
+<span class="font-body-lg text-body-lg">업적</span>
+</a>
+</nav>
+<div class="mt-auto pt-lg border-t border-outline-variant/20 flex flex-col gap-2">
+<button class="w-full bg-epic-purple text-white font-bold uppercase py-sm rounded-xl ghost-border hover:shadow-[0_0_12px_rgba(124,58,237,0.8)] transition-all mb-sm">프리미엄 멤버십</button>
+
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-shadow-slate hover:text-on-surface transition-all duration-300 ease-in-out rounded-xl" href="home.html">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-card-title text-body-lg">로그아웃</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 mt-16 md:ml-64 p-margin-mobile md:p-margin-desktop overflow-y-auto">
+<header class="mb-4">
+<h1 class="font-section-title-mobile md:font-section-title text-section-title-mobile md:text-section-title text-primary uppercase tracking-wide">상태창</h1>
+</header>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Left Column: Character Stats & Attributes -->
+<div class="lg:col-span-5">
+    <!-- Main Radial Character Card -->
+    <div class="bg-[#0f1015] rounded-xl overflow-hidden relative py-6 px-4 flex flex-col items-center justify-center min-h-[480px]">
+        
+        <!-- Central Character Info -->
+        <div class="relative z-10 flex flex-col items-center -translate-y-6">
+            <div class="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden relative mb-2 border-2 border-epic-purple shadow-[0_0_20px_rgba(124,58,237,0.4)]">
+                <img alt="Sung Jin-Woo Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHTuIx9e5kpkUZYkQdaODnjCmH54Pmd3zhhB59qgLINBgEEUZbXnD7O4i66gY-rFfK8GdGFbCGAPnV_bksPH1jTV6O5OKRXVrVv47__GYXMDjlVtYDYx8ICRHDtvCeoWpMpzQB1JeBm80PeW_KgAkXPfJW5gA-g_nN_o-XtHR5fGviZhLhZgHCWbV5b4hMjstJHjO5iZ1UIsA3zN0nYqnA8KoKpDkY-Id9i6TDihqB8kF6WS1umaLN-BDVf4WTWzVZASpWL4yY65E"/>
+            </div>
+            
+            <h3 class="font-section-title text-2xl text-white mb-1">성진우</h3>
+            <p class="font-caption text-xs text-white bg-[#1a1a24] border border-outline-variant/30 inline-block px-3 py-0.5 rounded-full">Lv. 1</p>
+        </div>
+
+        <!-- Radial Stats Container -->
+        <!-- Clean layout matching Stitch design exactly -->
+        <div class="absolute inset-0 pointer-events-none z-20 hidden sm:block">
+            <!-- Top (Int) -->
+            <div class="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-auto flex flex-col items-center justify-center w-[90px] py-2 bg-[#111118]/80 backdrop-blur-sm rounded-xl border border-exp-blue/50 transition-all hover:border-exp-blue hover:-translate-y-1">
+                <span class="material-symbols-outlined text-exp-blue text-sm mb-1">psychology</span>
+                <span class="text-[#888] text-[10px] font-bold mb-1">지능</span>
+                <span class="font-level-display-mobile text-xl text-white leading-none">10</span>
+            </div>
+            <!-- Mid Left (Will) -->
+            <div class="absolute top-[42%] -translate-y-1/2 left-6 pointer-events-auto flex flex-col items-center justify-center w-[90px] py-2 bg-[#111118]/80 backdrop-blur-sm rounded-xl border border-tertiary/50 transition-all hover:border-tertiary hover:-translate-y-1">
+                <span class="material-symbols-outlined text-tertiary text-sm mb-1">shield</span>
+                <span class="text-[#888] text-[10px] font-bold mb-1">의지</span>
+                <span class="font-level-display-mobile text-xl text-white leading-none">10</span>
+            </div>
+            <!-- Mid Right (Dex) -->
+            <div class="absolute top-[42%] -translate-y-1/2 right-6 pointer-events-auto flex flex-col items-center justify-center w-[90px] py-2 bg-[#111118]/80 backdrop-blur-sm rounded-xl border border-success-green/50 transition-all hover:border-success-green hover:-translate-y-1">
+                <span class="material-symbols-outlined text-success-green text-sm mb-1">speed</span>
+                <span class="text-[#888] text-[10px] font-bold mb-1">민첩</span>
+                <span class="font-level-display-mobile text-xl text-white leading-none">10</span>
+            </div>
+            <!-- Bottom Left (Vit) -->
+            <div class="absolute bottom-20 left-[26%] pointer-events-auto flex flex-col items-center justify-center w-[90px] py-2 bg-[#111118]/80 backdrop-blur-sm rounded-xl border border-mythic-pink/50 transition-all hover:border-mythic-pink hover:-translate-y-1">
+                <span class="material-symbols-outlined text-mythic-pink text-sm mb-1">favorite</span>
+                <span class="text-[#888] text-[10px] font-bold mb-1">체력</span>
+                <span class="font-level-display-mobile text-xl text-white leading-none">10</span>
+            </div>
+            <!-- Bottom Right (Str) -->
+            <div class="absolute bottom-20 right-[26%] pointer-events-auto flex flex-col items-center justify-center w-[90px] py-2 bg-[#111118]/80 backdrop-blur-sm rounded-xl border border-health-red/50 transition-all hover:border-health-red hover:-translate-y-1">
+                <span class="material-symbols-outlined text-health-red text-sm mb-1">fitness_center</span>
+                <span class="text-[#888] text-[10px] font-bold mb-1">힘</span>
+                <span class="font-level-display-mobile text-xl text-white leading-none">10</span>
+            </div>
+        </div>
+        
+        <!-- Mobile Stats Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-2 mt-8 w-full sm:hidden z-20">
+            <div class="flex flex-col items-center bg-abyss-black/50 p-2 rounded border border-health-red/20">
+                <span class="material-symbols-outlined text-health-red text-xs mb-1">fitness_center</span>
+                <span class="font-level-display-mobile text-lg leading-none">10</span>
+                <span class="text-[9px] text-on-surface-variant mt-1">힘</span>
+            </div>
+            <div class="flex flex-col items-center bg-abyss-black/50 p-2 rounded border border-success-green/20">
+                <span class="material-symbols-outlined text-success-green text-xs mb-1">speed</span>
+                <span class="font-level-display-mobile text-lg leading-none">10</span>
+                <span class="text-[9px] text-on-surface-variant mt-1">민첩</span>
+            </div>
+            <div class="flex flex-col items-center bg-abyss-black/50 p-2 rounded border border-exp-blue/20">
+                <span class="material-symbols-outlined text-exp-blue text-xs mb-1">psychology</span>
+                <span class="font-level-display-mobile text-lg leading-none">10</span>
+                <span class="text-[9px] text-on-surface-variant mt-1">지능</span>
+            </div>
+            <div class="flex flex-col items-center bg-abyss-black/50 p-2 rounded border border-tertiary/20">
+                <span class="material-symbols-outlined text-tertiary text-xs mb-1">shield</span>
+                <span class="font-level-display-mobile text-lg leading-none">10</span>
+                <span class="text-[9px] text-on-surface-variant mt-1">의지</span>
+            </div>
+            <div class="flex flex-col items-center bg-abyss-black/50 p-2 rounded border border-mythic-pink/20 md:col-span-1 col-span-2">
+                <span class="material-symbols-outlined text-mythic-pink text-xs mb-1">favorite</span>
+                <span class="font-level-display-mobile text-lg leading-none">10</span>
+                <span class="text-[9px] text-on-surface-variant mt-1">체력</span>
+            </div>
+        </div>
+
+        <!-- Full-Width Bottom EXP Bar -->
+        <div class="absolute bottom-0 left-0 right-0 px-6 py-4 bg-abyss-black/40 backdrop-blur-md border-t border-outline-variant/20 z-30 pointer-events-auto">
+            <div class="flex justify-between items-end mb-2">
+                <span class="text-xs font-bold text-exp-blue tracking-wider">EXP</span>
+                <span class="text-xs font-mono text-on-surface-variant"><span id="main-exp-current" class="text-white font-bold">0</span> / <span id="main-exp-max">100</span></span>
+            </div>
+            <div class="h-2.5 w-full bg-abyss-black rounded-full overflow-hidden border border-outline-variant/50 relative">
+                <div class="absolute inset-0 bg-shadow-slate opacity-30"></div>
+                <div id="main-exp-fill" class="h-full bg-exp-blue shadow-[0_0_12px_rgba(59,130,246,0.8)] relative z-10 transition-all duration-500 rounded-full" style="width: 0%"></div>
+                <div class="absolute top-0 left-0 right-0 h-1/2 bg-white/20 z-20 rounded-t-full"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Right Column: Quests & Achievements -->
+<div class="lg:col-span-7 space-y-4">
+<!-- Daily Quests Section -->
+<!-- Penalty Quest Section -->
+<div id="penalty-quest-section" class="transition-colors duration-500">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between border-b theme-border pb-2 mb-4 gap-2">
+        <h2 class="font-section-title-mobile md:font-section-title text-section-title-mobile md:text-section-title theme-text inline-block flex items-center gap-2">
+            <span class="material-symbols-outlined text-3xl warning-only">warning</span>
+            <span class="material-symbols-outlined text-3xl normal-only">assignment</span>
+            일일 퀘스트
+        </h2>
+        <div class="text-left sm:text-right">
+            <p id="penalty-timer-text" class="font-body-sm text-body-sm text-on-surface font-bold">초기화까지: <span class="reset-timer-display font-mono">14:23:09</span></p>
+        </div>
+    </div>
+
+    <!-- The Penalty Card -->
+    <div id="penalty-card" class="bg-abyss-black border-2 theme-border rounded-lg p-4 relative overflow-hidden flex flex-col theme-shadow transition-all duration-500">
+        <div id="penalty-bg-pulse" class="absolute inset-0 theme-bg-alpha pointer-events-none transition-opacity"></div>
+        <div class="absolute -top-10 -right-10 text-health-red/10 pointer-events-none warning-only">
+            <span class="material-symbols-outlined text-[150px]">skull</span>
+        </div>
+        
+        <div class="relative z-10 mb-2 warning-only">
+            <h3 class="font-quest-title text-xl theme-text mb-1">상태창의 경고</h3>
+            <p class="text-on-surface-variant font-bold text-sm">목표 달성 실패 시 심장 마비로 <span class="theme-text">사망</span>합니다.</p>
+        </div>
+        <div class="relative z-10 mb-2 normal-only">
+            <h3 class="font-quest-title text-xl theme-text mb-1">일일 미션</h3>
+            <p class="text-on-surface-variant font-bold text-sm">건강한 신체에 건강한 정신이 깃든다.</p>
+        </div>
+
+        <div class="relative z-10 space-y-2 mb-4 bg-dungeon-gray/80 p-3 rounded border theme-border opacity-80">
+            <!-- Pushups -->
+            <label class="flex items-center gap-3 cursor-pointer group">
+                <div class="relative flex items-center justify-center w-6 h-6 border-2 theme-border rounded bg-abyss-black theme-hover-bg transition-colors">
+                    <input type="checkbox" class="penalty-checkbox absolute opacity-0 w-full h-full cursor-pointer" data-task="pushup">
+                    <span class="material-symbols-outlined theme-text text-sm opacity-0 pointer-events-none check-icon transition-opacity">check</span>
+                </div>
+                <span class="text-on-surface text-lg flex-1">푸쉬업 <span class="theme-text font-bold">100</span>회</span>
+            </label>
+            <!-- Situps -->
+            <label class="flex items-center gap-3 cursor-pointer group">
+                <div class="relative flex items-center justify-center w-6 h-6 border-2 theme-border rounded bg-abyss-black theme-hover-bg transition-colors">
+                    <input type="checkbox" class="penalty-checkbox absolute opacity-0 w-full h-full cursor-pointer" data-task="situp">
+                    <span class="material-symbols-outlined theme-text text-sm opacity-0 pointer-events-none check-icon transition-opacity">check</span>
+                </div>
+                <span class="text-on-surface text-lg flex-1">윗몸 일으키기 <span class="theme-text font-bold">100</span>회</span>
+            </label>
+            <!-- Run -->
+            <label class="flex items-center gap-3 cursor-pointer group">
+                <div class="relative flex items-center justify-center w-6 h-6 border-2 theme-border rounded bg-abyss-black theme-hover-bg transition-colors">
+                    <input type="checkbox" class="penalty-checkbox absolute opacity-0 w-full h-full cursor-pointer" data-task="run">
+                    <span class="material-symbols-outlined theme-text text-sm opacity-0 pointer-events-none check-icon transition-opacity">check</span>
+                </div>
+                <span class="text-on-surface text-lg flex-1">달리기 <span class="theme-text font-bold">10</span>km</span>
+            </label>
+        </div>
+
+        <div class="relative z-10 flex flex-col sm:flex-row gap-2 mt-auto">
+            <button id="btn-submit-proof" class="flex-1 bg-abyss-black border theme-border theme-text theme-hover font-bold py-2 rounded transition-all flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined">photo_camera</span> 증거 제출 (AI 판독)
+            </button>
+            <button id="btn-complete-penalty" class="flex-1 bg-abyss-black border theme-border theme-text font-bold py-2 rounded transition-all opacity-50 cursor-not-allowed">
+                퀘스트 완료
+            </button>
+        </div>
+    </div>
+</div>
+<!-- Recent Achievements -->
+<div>
+<h2 class="font-section-title-mobile md:font-section-title text-section-title-mobile md:text-section-title text-on-surface mb-2 border-b border-outline-variant/30 pb-1 inline-block">최근 업적</h2>
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+<!-- Badge 1 -->
+<div class="bg-shadow-slate rounded-xl p-2 flex flex-col items-center justify-center text-center ghost-border glow-gold">
+<div class="w-10 h-10 rounded-full bg-abyss-black flex items-center justify-center mb-1 ghost-border text-legendary-gold">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">swords</span>
+</div>
+<span class="font-caption text-caption text-on-surface font-bold">첫 피</span>
+</div>
+<!-- Badge 2 -->
+<div class="bg-shadow-slate rounded-xl p-2 flex flex-col items-center justify-center text-center ghost-border">
+<div class="w-10 h-10 rounded-full bg-abyss-black flex items-center justify-center mb-1 ghost-border text-exp-blue">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+</div>
+<span class="font-caption text-caption text-on-surface font-bold">7일 연속</span>
+</div>
+<!-- Empty slots for future achievements -->
+<div class="bg-abyss-black rounded-xl p-2 flex flex-col items-center justify-center text-center ghost-border opacity-50 border border-dashed border-outline-variant/50">
+<div class="w-10 h-10 rounded-full flex items-center justify-center mb-1 text-outline-variant">
+<span class="material-symbols-outlined text-2xl">lock</span>
+</div>
+<span class="font-caption text-caption text-outline-variant">잠김</span>
+</div>
+<div class="bg-abyss-black rounded-xl p-2 flex flex-col items-center justify-center text-center ghost-border opacity-50 border border-dashed border-outline-variant/50">
+<div class="w-10 h-10 rounded-full flex items-center justify-center mb-1 text-outline-variant">
+<span class="material-symbols-outlined text-2xl">lock</span>
+</div>
+<span class="font-caption text-caption text-outline-variant">잠김</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile) -->
+<nav class="bg-dungeon-gray/90 backdrop-blur-md docked full-width bottom-0 rounded-t-xl border-t border-outline-variant/30 shadow-[0_-4px_20px_rgba(0,0,0,0.5)] fixed bottom-0 w-full z-50 flex justify-around items-center h-16 md:hidden font-caption text-caption tap-highlight-transparent overflow-x-auto no-scrollbar">
+<a href="quests.html" class="flex flex-col items-center justify-center text-on-surface-variant active:bg-shadow-slate p-2 rounded min-w-[4rem] h-full">
+<span class="material-symbols-outlined">assignment</span>
+<span class="mt-1">퀘스트</span>
+</a>
+<a href="dashboard.html" class="flex flex-col items-center justify-center text-primary filter drop-shadow-[0_0_8px_#7C3AED] active:bg-shadow-slate p-2 rounded min-w-[4rem] h-full border-t-2 border-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+<span class="mt-1 font-bold">상태창</span>
+</a>
+<a href="shop.html" class="flex flex-col items-center justify-center text-on-surface-variant active:bg-shadow-slate p-2 rounded min-w-[4rem] h-full">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">storefront</span>
+<span class="mt-1">상점</span>
+</a>
+<a href="inventory.html" class="flex flex-col items-center justify-center text-on-surface-variant active:bg-shadow-slate p-2 rounded min-w-[4rem] h-full">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="mt-1">인벤토리</span>
+</a>
+<a href="achievements.html" class="flex flex-col items-center justify-center text-on-surface-variant active:bg-shadow-slate p-2 rounded min-w-[4rem] h-full">
+<span class="material-symbols-outlined">emoji_events</span>
+<span class="mt-1">업적</span>
+</a>
+</nav>
+<!-- Micro-interaction Script -->
+<script>
+        // Simple click effect for quest completion buttons
+        document.querySelectorAll('.bg-epic-purple, .bg-shadow-slate').forEach(button => {
+            if(button.textContent.trim() === '완료') {
+                button.addEventListener('click', function(e) {
+                    const card = this.closest('.bg-dungeon-gray');
+                    card.classList.add('border-success-green', 'border', 'transition-all', 'duration-300');
+                    this.textContent = '완료됨';
+                    this.classList.remove('bg-shadow-slate', 'text-on-surface-variant', 'hover:bg-epic-purple', 'hover:text-white', 'hover:bg-primary-fixed-dim');
+                    this.classList.add('bg-success-green', 'text-white', 'hover:bg-success-green');
+                    
+                    // Optional: remove card after a delay to simulate claiming
+                    // setTimeout(() => { card.style.display = 'none'; }, 1000);
+                });
+            }
+        });
+    </script>
+
+
+
+
+<!-- Evidence Upload Modal -->
+<div id="evidence-upload-modal" class="fixed inset-0 z-50 hidden bg-abyss-black/90 flex items-center justify-center backdrop-blur-sm">
+    <div class="bg-surface-container-lowest border border-outline-variant/30 p-6 rounded-xl max-w-md w-full mx-4 shadow-[0_0_20px_rgba(124,58,237,0.2)]">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold text-primary flex items-center gap-2">
+                <span class="material-symbols-outlined">photo_camera</span>
+                증거 제출
+            </h3>
+            <button id="btn-close-evidence" class="text-on-surface-variant hover:text-white transition-colors">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        
+        <p class="text-sm text-on-surface-variant mb-4">오늘 수행한 일일 미션의 증거 사진이나 운동 기록 스크린샷을 업로드해주세요. AI가 이미지를 판독하여 달성 여부를 검증합니다.</p>
+        
+        <!-- Upload Area (Visual Only) -->
+        <label class="border-2 border-dashed border-outline-variant/50 rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer bg-abyss-black hover:bg-outline-variant/10 transition-colors mb-4 group relative overflow-hidden">
+            <input type="file" id="evidence-file-input" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+            <span class="material-symbols-outlined text-4xl text-outline-variant group-hover:text-primary transition-colors mb-2">cloud_upload</span>
+            <span id="evidence-file-name" class="font-bold text-on-surface group-hover:text-primary transition-colors">클릭하여 사진 첨부</span>
+            <span class="text-xs text-on-surface-variant mt-1">또는 여기로 파일을 드래그 앤 드롭</span>
+        </label>
+        
+        <div class="flex justify-end gap-3 mt-6">
+            <button id="btn-cancel-evidence" class="px-4 py-2 rounded bg-shadow-slate hover:bg-outline-variant/30 text-white transition-colors font-bold">취소</button>
+            <button id="btn-confirm-evidence" class="px-6 py-2 rounded bg-epic-purple hover:bg-primary-fixed-dim text-white transition-colors font-bold shadow-[0_0_10px_rgba(124,58,237,0.5)]">AI 판독 시작</button>
+        </div>
+    </div>
+</div>
+
+<!-- AI Verification Modal -->
+<div id="ai-verification-modal" class="fixed inset-0 z-50 hidden bg-abyss-black/90 flex items-center justify-center backdrop-blur-sm">
+    <div class="bg-dungeon-gray border border-primary p-8 rounded-xl max-w-sm w-full mx-4 flex flex-col items-center text-center">
+        <div class="relative w-20 h-20 mb-6">
+            <!-- Scanning animation -->
+            <div class="absolute inset-0 border-4 border-primary rounded-full animate-ping opacity-75"></div>
+            <div class="absolute inset-0 border-4 border-primary rounded-full flex items-center justify-center bg-abyss-black">
+                <span class="material-symbols-outlined text-primary text-4xl animate-pulse">document_scanner</span>
+            </div>
+        </div>
+        <h3 class="text-xl font-bold text-primary mb-2">시스템 AI 가동 중</h3>
+        <p id="ai-status-text" class="text-on-surface-variant text-sm mb-6">제출된 운동 기록을 분석하고 있습니다...</p>
+        
+        <div class="w-full bg-abyss-black h-2 rounded-full overflow-hidden">
+            <div id="ai-progress-bar" class="h-full bg-primary w-0 transition-all duration-300"></div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,515 @@
+<!DOCTYPE html><html class="dark" lang="ko"><head>
+<script src="init_game.js"></script>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>업적 - Level Up Life</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Oswald:wght@500;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .ghost-border { box-shadow: inset 0 0 0 1px rgba(204, 195, 216, 0.1); }
+        .glow-legendary {
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+        }
+        .glow-legendary-text {
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+        }
+        .glow-epic {
+            box-shadow: 0 0 15px rgba(124, 58, 237, 0.4);
+        }
+        .glow-gold { box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
+        .shimmer-effect {
+            position: relative;
+            overflow: hidden;
+        }
+        .shimmer-effect::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer-effect 2s infinite;
+        }
+        @keyframes shimmer-effect {
+            100% { left: 200%; }
+        }
+        .shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .progress-bar-fill {
+            transition: width 1s ease-in-out;
+        }
+        /* Custom Scrollbar for inner content */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0B0B0F; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #23262F; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4a4455; 
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "health-red": "#EF4444",
+                    "hunter-surface": "#2C313D",
+                    "surface-variant": "#353439",
+                    "secondary": "#adc6ff",
+                    "exp-blue": "#3B82F6",
+                    "on-tertiary-fixed-variant": "#5c4300",
+                    "success-green": "#22C55E",
+                    "on-surface-variant": "#ccc3d8",
+                    "surface": "#131317",
+                    "on-background": "#e4e1e7",
+                    "primary-container": "#7c3aed",
+                    "surface-container-low": "#1b1b1f",
+                    "primary-fixed-dim": "#d2bbff",
+                    "on-primary": "#3f008e",
+                    "on-primary-container": "#ede0ff",
+                    "surface-container-high": "#2a292e",
+                    "secondary-container": "#0566d9",
+                    "tertiary": "#f9bd22",
+                    "on-surface": "#e4e1e7",
+                    "secondary-fixed-dim": "#adc6ff",
+                    "on-tertiary-fixed": "#261a00",
+                    "secondary-fixed": "#d8e2ff",
+                    "on-secondary-fixed": "#001a42",
+                    "on-error-container": "#ffdad6",
+                    "mythic-pink": "#FF4D6D",
+                    "dungeon-gray": "#181A20",
+                    "inverse-primary": "#732ee4",
+                    "abyss-black": "#0B0B0F",
+                    "epic-purple": "#7C3AED",
+                    "tertiary-fixed": "#ffdf9f",
+                    "on-secondary-container": "#e6ecff",
+                    "tertiary-container": "#836100",
+                    "on-primary-fixed-variant": "#5a00c6",
+                    "inverse-surface": "#e4e1e7",
+                    "surface-bright": "#39393d",
+                    "primary": "#d2bbff",
+                    "on-primary-fixed": "#25005a",
+                    "surface-container-lowest": "#0e0e12",
+                    "on-secondary": "#002e6a",
+                    "on-secondary-fixed-variant": "#004395",
+                    "inverse-on-surface": "#303034",
+                    "surface-container": "#1f1f23",
+                    "surface-dim": "#131317",
+                    "on-tertiary": "#402d00",
+                    "on-error": "#690005",
+                    "surface-container-highest": "#353439",
+                    "error": "#ffb4ab",
+                    "on-tertiary-container": "#ffe2ab",
+                    "error-container": "#93000a",
+                    "outline-variant": "#4a4455",
+                    "tertiary-fixed-dim": "#f9bd22",
+                    "legendary-gold": "#FFD700",
+                    "surface-tint": "#d2bbff",
+                    "outline": "#958da1",
+                    "shadow-slate": "#23262F",
+                    "background": "#131317",
+                    "primary-fixed": "#eaddff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter": "16px",
+                    "margin-mobile": "16px",
+                    "lg": "24px",
+                    "xxl": "48px",
+                    "sm": "8px",
+                    "xl": "32px",
+                    "md": "16px",
+                    "margin-desktop": "32px",
+                    "base": "4px",
+                    "xs": "4px"
+            },
+            "fontFamily": {
+                    "quest-title": [
+                            "Inter"
+                    ],
+                    "level-display": [
+                            "Oswald"
+                    ],
+                    "caption": [
+                            "Inter"
+                    ],
+                    "body-lg": [
+                            "Inter"
+                    ],
+                    "boss-display": [
+                            "Oswald"
+                    ],
+                    "body-sm": [
+                            "Inter"
+                    ],
+                    "level-display-mobile": [
+                            "Oswald"
+                    ],
+                    "card-title": [
+                            "Inter"
+                    ],
+                    "section-title": [
+                            "Oswald"
+                    ],
+                    "section-title-mobile": [
+                            "Oswald"
+                    ]
+            },
+            "fontSize": {
+                    "quest-title": [
+                            "18px",
+                            {
+                                    "lineHeight": "1.5",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "level-display": [
+                            "48px",
+                            {
+                                    "lineHeight": "1.2",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "caption": [
+                            "12px",
+                            {
+                                    "lineHeight": "1.4",
+                                    "letterSpacing": "0.05em",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "body-lg": [
+                            "16px",
+                            {
+                                    "lineHeight": "1.6",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "boss-display": [
+                            "64px",
+                            {
+                                    "lineHeight": "1.1",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "body-sm": [
+                            "14px",
+                            {
+                                    "lineHeight": "1.5",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "level-display-mobile": [
+                            "36px",
+                            {
+                                    "lineHeight": "1.2",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "card-title": [
+                            "24px",
+                            {
+                                    "lineHeight": "1.4",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "section-title": [
+                            "32px",
+                            {
+                                    "lineHeight": "1.3",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "section-title-mobile": [
+                            "28px",
+                            {
+                                    "lineHeight": "1.3",
+                                    "fontWeight": "500"
+                            }
+                    ]
+            }
+    },
+        },
+      }
+    </script>
+</head>
+<body class="bg-abyss-black text-on-surface font-body-sm min-h-screen flex flex-col md:flex-row overflow-x-hidden selection:bg-epic-purple selection:text-white">
+<!-- TopAppBar (Mobile & Desktop Header Area) -->
+<header class="bg-abyss-black dark:bg-abyss-black font-boss-display text-boss-display docked full-width top-0 border-b border-outline-variant/30 shadow-[0_0_15px_rgba(124,58,237,0.3)] flex justify-between items-center w-full px-md h-16 fixed z-50">
+<a href="home.html" class="flex items-center gap-sm cursor-pointer hover:opacity-80 transition-opacity">
+<img alt="Level Up Life Logo" class="h-8 w-8 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvVeFzLtZ-Xq9k4cM7sTatF4Oded9MMO6cULtN-y1SefihPn0HcPEKq_JKgO9qOrWbuueKw9hpajqRSOXFrUQK_U5mfwR3lWudiT03alw5RDECZlkx92EIP1j8xXmhsfaPuw582p3YvKVJGFpPOu2ilUzpbWBu-i9vTxi-7QkUka3OokBead-CEcU2AVLWl72lF2rglnMCjk0kvJD5yp4Gv7bBKjvtAOMW-UKswNxog25f-1kREPCFm8MEYzp1RBOdzvZLvsCdKOU">
+<span class="font-boss-display text-section-title text-primary uppercase tracking-tighter hidden sm:block">LEVEL UP LIFE</span>
+</a>
+<div class="flex items-center gap-md font-body-sm text-body-sm">
+
+<div class="flex items-center gap-xs bg-shadow-slate px-sm py-1 rounded-xl ghost-border">
+<span class="material-symbols-outlined text-legendary-gold text-lg" style="font-variation-settings: 'FILL' 1;">monetization_on</span>
+<span class="text-legendary-gold font-bold">0 G</span>
+</div>
+<button class="text-on-surface-variant hover:text-primary-fixed-dim transition-colors scale-95 active:duration-150 relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-health-red rounded-full"></span>
+</button>
+<button class="text-on-surface-variant hover:text-primary-fixed-dim transition-colors scale-95 active:duration-150">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+</header>
+<!-- SideNavBar (Desktop) -->
+<aside class="bg-dungeon-gray dark:bg-dungeon-gray docked left-0 h-full w-64 border-r border-outline-variant/20 hidden md:flex flex-col py-lg px-md fixed top-0 z-40">
+<div class="flex flex-col items-center mb-xl pt-16">
+<div class="w-24 h-24 rounded-full bg-shadow-slate ghost-border overflow-hidden mb-sm relative glow-epic">
+<img alt="Sung Jin-Woo Avatar" class="w-full h-full object-cover" data-alt="A striking portrait of an anime-style modern male hunter with dark, messy hair and glowing purple eyes, set against a dark, moody background. He wears a sleek, high-tech black tactical coat. The lighting is cinematic, heavily contrasting deep abyssal blacks with vibrant epic purple rim lights, fitting a high-stakes dungeon crawler RPG aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHTuIx9e5kpkUZYkQdaODnjCmH54Pmd3zhhB59qgLINBgEEUZbXnD7O4i66gY-rFfK8GdGFbCGAPnV_bksPH1jTV6O5OKRXVrVv47__GYXMDjlVtYDYx8ICRHDtvCeoWpMpzQB1JeBm80PeW_KgAkXPfJW5gA-g_nN_o-XtHR5fGviZhLhZgHCWbV5b4hMjstJHjO5iZ1UIsA3zN0nYqnA8KoKpDkY-Id9i6TDihqB8kF6WS1umaLN-BDVf4WTWzVZASpWL4yY65E">
+<div class="absolute inset-0 bg-epic-purple/20 mix-blend-overlay"></div>
+</div>
+<h2 class="font-section-title text-section-title text-primary">성진우</h2>
+<p class="text-on-surface-variant font-caption text-caption">Lv.1</p>
+</div>
+<nav class="flex-1 space-y-sm">
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-shadow-slate hover:text-on-surface transition-all duration-300 ease-in-out rounded-xl" href="dashboard.html">
+<span class="material-symbols-outlined">person</span>
+<span class="font-body-lg text-body-lg">상태창</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-shadow-slate hover:text-on-surface transition-all duration-300 ease-in-out rounded-xl" href="quests.html">
+<span class="material-symbols-outlined">fort</span>
+<span class="font-body-lg text-body-lg">던전</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-shadow-slate hover:text-on-surface transition-all duration-300 ease-in-out rounded-xl" href="shop.html">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">storefront</span>
+<span class="font-body-lg text-body-lg">상점</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-shadow-slate hover:text-on-surface transition-all duration-300 ease-in-out rounded-xl" href="inventory.html">
+<span class="material-symbols-outlined">backpack</span>
+<span class="font-body-lg text-body-lg">인벤토리</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm bg-primary-container/20 text-primary border-r-4 border-primary transition-all duration-300 ease-in-out rounded-xl" href="achievements.html">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">military_tech</span>
+<span class="font-body-lg text-body-lg font-bold">업적</span>
+</a>
+</nav>
+<div class="mt-auto pt-lg border-t border-outline-variant/20 flex flex-col gap-2">
+<button class="w-full bg-epic-purple text-white font-bold uppercase py-sm rounded-xl ghost-border hover:shadow-[0_0_12px_rgba(124,58,237,0.8)] transition-all mb-sm">프리미엄 멤버십</button>
+
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-shadow-slate hover:text-on-surface transition-all duration-300 ease-in-out rounded-xl" href="home.html">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-card-title text-body-lg">로그아웃</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 mt-16 md:ml-64 p-margin-mobile md:p-margin-desktop overflow-y-auto">
+<div class="max-w-7xl mx-auto">
+<!-- Page Header -->
+<div class="mb-xl flex items-end justify-between">
+<div>
+<h1 class="font-boss-display text-boss-display text-on-surface uppercase tracking-tighter">트로피 룸</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-2">당신의 유산과 기념비적인 업적을 추적하세요.</p>
+</div>
+<div class="hidden md:flex items-center space-x-2 text-legendary-gold">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+<span class="font-section-title text-section-title font-bold">12 / 50</span>
+</div>
+</div>
+<!-- Dashboard Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter lg:gap-lg">
+<!-- Left Column: Hall of Fame & Recent -->
+<div class="lg:col-span-2 flex flex-col space-y-lg">
+<!-- Hall of Fame (S-Rank) -->
+<section>
+<div class="flex items-center space-x-2 mb-sm">
+<span class="material-symbols-outlined text-legendary-gold">stars</span>
+<h2 class="font-section-title text-section-title-mobile text-legendary-gold glow-legendary-text uppercase">명예의 전당</h2>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-gutter">
+<!-- S-Rank Achievement Card -->
+<div class="bg-dungeon-gray rounded-lg p-md border border-legendary-gold/30 glow-legendary relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-br from-legendary-gold/5 to-transparent z-0"></div>
+<div class="relative z-10 flex items-start space-x-md">
+<div class="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center border-2 border-legendary-gold flex-shrink-0 relative">
+<span class="material-symbols-outlined text-4xl text-legendary-gold" style="font-variation-settings: 'FILL' 1;">military_tech</span>
+<div class="absolute -bottom-2 -right-2 bg-legendary-gold text-abyss-black text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">S급</div>
+</div>
+<div class="flex-1">
+<h3 class="font-card-title text-card-title text-on-surface mb-1">마왕 학살자</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-3">피해를 입지 않고 S급 던전을 솔로로 클리어하세요.</p>
+<div class="flex items-center justify-between text-xs font-bold uppercase text-legendary-gold">
+<span class="">해제됨</span>
+<span class="">2023.10.24</span>
+</div>
+</div>
+</div>
+<!-- Inner glow stroke -->
+<div class="absolute inset-0 border border-white/10 rounded-lg pointer-events-none"></div>
+</div>
+<!-- Another S-Rank -->
+<div class="bg-dungeon-gray rounded-lg p-md border border-legendary-gold/30 glow-legendary relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-br from-legendary-gold/5 to-transparent z-0"></div>
+<div class="relative z-10 flex items-start space-x-md">
+<div class="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center border-2 border-legendary-gold flex-shrink-0 relative">
+<span class="material-symbols-outlined text-4xl text-legendary-gold" style="font-variation-settings: 'FILL' 1;">diamond</span>
+<div class="absolute -bottom-2 -right-2 bg-legendary-gold text-abyss-black text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">S급</div>
+</div>
+<div class="flex-1">
+<h3 class="font-card-title text-card-title text-on-surface mb-1">능력치 맥스</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-3">모든 기본 속성에서 허용된 최대 한계에 도달하세요.</p>
+<div class="flex items-center justify-between text-xs font-bold uppercase text-legendary-gold">
+<span class="">해제됨</span>
+<span class="">2023.11.05</span>
+</div>
+</div>
+</div>
+<div class="absolute inset-0 border border-white/10 rounded-lg pointer-events-none"></div>
+</div>
+</div>
+</section>
+<!-- Earned Badges -->
+<section>
+<h2 class="font-section-title text-section-title-mobile text-on-surface mb-sm">획득한 트로피</h2>
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-gutter">
+<!-- A-Rank -->
+<div class="bg-shadow-slate rounded-lg p-sm border border-outline-variant/30 flex flex-col items-center text-center relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-epic-purple"></div>
+<div class="w-12 h-12 rounded-full bg-dungeon-gray flex items-center justify-center mb-2 mt-2 border border-epic-purple/50">
+<span class="material-symbols-outlined text-2xl text-epic-purple">swords</span>
+</div>
+<h4 class="font-quest-title text-quest-title text-on-surface">100번째 처치</h4>
+<span class="bg-epic-purple/15 text-epic-purple font-caption text-caption px-2 py-1 rounded-full mt-2 uppercase">A급</span>
+</div>
+<!-- B-Rank -->
+<div class="bg-shadow-slate rounded-lg p-sm border border-outline-variant/30 flex flex-col items-center text-center relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-exp-blue"></div>
+<div class="w-12 h-12 rounded-full bg-dungeon-gray flex items-center justify-center mb-2 mt-2 border border-exp-blue/50">
+<span class="material-symbols-outlined text-2xl text-exp-blue">local_fire_department</span>
+</div>
+<h4 class="font-quest-title text-quest-title text-on-surface">7일 연속</h4>
+<span class="bg-exp-blue/15 text-exp-blue font-caption text-caption px-2 py-1 rounded-full mt-2 uppercase">B급</span>
+</div>
+<!-- C-Rank -->
+<div class="bg-shadow-slate rounded-lg p-sm border border-outline-variant/30 flex flex-col items-center text-center relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-success-green"></div>
+<div class="w-12 h-12 rounded-full bg-dungeon-gray flex items-center justify-center mb-2 mt-2 border border-success-green/50">
+<span class="material-symbols-outlined text-2xl text-success-green">flag</span>
+</div>
+<h4 class="font-quest-title text-quest-title text-on-surface">첫 번째 퀘스트</h4>
+<span class="bg-success-green/15 text-success-green font-caption text-caption px-2 py-1 rounded-full mt-2 uppercase">C급</span>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column: In Progress -->
+<div class="lg:col-span-1">
+<div class="bg-dungeon-gray rounded-xl p-md border border-outline-variant/20 sticky top-24">
+<div class="flex items-center justify-between mb-lg border-b border-outline-variant/20 pb-sm">
+<h2 class="font-section-title text-section-title-mobile text-on-surface">진행 중</h2>
+<span class="material-symbols-outlined text-on-surface-variant">hourglass_top</span>
+</div>
+<div class="space-y-md">
+<!-- Progress Item 1 -->
+<div>
+<div class="flex justify-between items-end mb-1">
+<h4 class="font-quest-title text-sm font-semibold text-on-surface">마라톤 러너</h4>
+<span class="font-caption text-caption text-on-surface-variant">42 / 50 km</span>
+</div>
+<div class="h-2 w-full bg-abyss-black rounded-full overflow-hidden border border-outline-variant/10">
+<div class="h-full bg-gradient-to-r from-exp-blue to-primary shimmer-effect progress-bar-fill" style="width: 84%;"></div>
+</div>
+<p class="font-caption text-[10px] text-outline mt-1">보상: +10 민첩</p>
+</div>
+<!-- Progress Item 2 -->
+<div>
+<div class="flex justify-between items-end mb-1">
+<h4 class="font-quest-title text-sm font-semibold text-on-surface">부의 축적</h4>
+<span class="font-caption text-caption text-on-surface-variant">8,500 / 10,000 G</span>
+</div>
+<div class="h-2 w-full bg-abyss-black rounded-full overflow-hidden border border-outline-variant/10">
+<div class="h-full bg-gradient-to-r from-legendary-gold to-tertiary-fixed shimmer-effect progress-bar-fill" style="width: 85%;"></div>
+</div>
+<p class="font-caption text-[10px] text-outline mt-1">보상: "마이다스의 손" 칭호</p>
+</div>
+<!-- Progress Item 3 -->
+<div class="opacity-70">
+<div class="flex justify-between items-end mb-1">
+<h4 class="font-quest-title text-sm font-semibold text-on-surface">강철의 의지</h4>
+<span class="font-caption text-caption text-on-surface-variant">12 / 100 Days</span>
+</div>
+<div class="h-2 w-full bg-abyss-black rounded-full overflow-hidden border border-outline-variant/10">
+<div class="h-full bg-outline-variant progress-bar-fill" style="width: 12%;"></div>
+</div>
+<p class="font-caption text-[10px] text-outline mt-1">보상: +20 체력</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom padding for mobile nav clearance -->
+<div class="h-24 md:h-0 w-full"></div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="bg-dungeon-gray/90 backdrop-blur-md docked full-width bottom-0 rounded-t-xl border-t border-outline-variant/30 shadow-[0_-4px_20px_rgba(0,0,0,0.5)] fixed bottom-0 w-full z-50 flex justify-around items-center h-16 md:hidden font-caption text-caption tap-highlight-transparent overflow-x-auto no-scrollbar">
+<a href="dashboard.html" class="flex flex-col items-center justify-center text-on-surface-variant active:bg-shadow-slate p-2 rounded min-w-[4rem] h-full">
+<span class="material-symbols-outlined">person</span>
+<span class="mt-1">상태창</span>
+</a>
+<a href="quests.html" class="flex flex-col items-center justify-center text-on-surface-variant active:bg-shadow-slate p-2 rounded min-w-[4rem] h-full">
+<span class="material-symbols-outlined">fort</span>
+<span class="mt-1">던전</span>
+</a>
+<a href="shop.html" class="flex flex-col items-center justify-center text-on-surface-variant active:bg-shadow-slate p-2 rounded min-w-[4rem] h-full">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">storefront</span>
+<span class="mt-1">상점</span>
+</a>
+<a href="inventory.html" class="flex flex-col items-center justify-center text-on-surface-variant active:bg-shadow-slate p-2 rounded min-w-[4rem] h-full">
+<span class="material-symbols-outlined">backpack</span>
+<span class="mt-1">인벤토리</span>
+</a>
+<a href="achievements.html" class="flex flex-col items-center justify-center text-primary filter drop-shadow-[0_0_8px_#7C3AED] active:bg-shadow-slate p-2 rounded min-w-[4rem] h-full border-t-2 border-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">military_tech</span>
+<span class="mt-1 font-bold">업적</span>
+</a>
+</nav>
+<script>
+        // Simple animation trigger for progress bars on load
+        document.addEventListener("DOMContentLoaded", () => {
+            setTimeout(() => {
+                const bars = document.querySelectorAll('.progress-bar-fill');
+                bars.forEach(bar => {
+                    const targetWidth = bar.style.width;
+                    bar.style.width = '0%';
+                    setTimeout(() => {
+                        bar.style.width = targetWidth;
+                    }, 100);
+                });
+            }, 300);
+        });
+    </script>
+
+
+</body></html>

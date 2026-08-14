@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>E급 던전 초기화</title>
+</head>
+<body style="background-color: #0d0d12; color: #fff; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh;">
+    <script>
+        const saved = localStorage.getItem('game_save_state');
+        if (saved) {
+            let state = JSON.parse(saved);
+            if (state.dungeons && state.dungeons.e_rank) {
+                // E급 던전만 순수하게 리셋
+                state.dungeons.e_rank = { pushups: 0, situps: 0, run: 0, isCompleted: false };
+                localStorage.setItem('game_save_state', JSON.stringify(state));
+                alert('E급 던전 진행도가 0%로 완벽하게 초기화되었습니다! 퀘스트 창으로 돌아갑니다.');
+            }
+        }
+        // 초기화 완료 후 퀘스트 페이지로 복귀
+        window.location.href = 'quests.html';
+    </script>
+</body>
+</html>

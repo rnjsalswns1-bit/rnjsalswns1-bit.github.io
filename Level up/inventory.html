@@ -1,0 +1,276 @@
+<!DOCTYPE html><html class="dark" lang="ko"><head>
+<script src="init_game.js"></script>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>인벤토리 - Shadow Leveling System</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Oswald:wght@500;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline": "#958da1",
+                        "on-primary": "#3f008e",
+                        "legendary-gold": "#FFD700",
+                        "surface-container-high": "#2a292e",
+                        "epic-purple": "#7C3AED",
+                        "surface-tint": "#d2bbff",
+                        "success-green": "#22C55E",
+                        "on-primary-container": "#ede0ff",
+                        "on-tertiary-container": "#ffe2ab",
+                        "primary-container": "#7c3aed",
+                        "on-tertiary": "#402d00",
+                        "surface-bright": "#39393d",
+                        "health-red": "#EF4444",
+                        "secondary": "#adc6ff",
+                        "on-primary-fixed-variant": "#5a00c6",
+                        "shadow-slate": "#23262F",
+                        "surface-container": "#1f1f23",
+                        "on-error-container": "#ffdad6",
+                        "primary-fixed-dim": "#d2bbff",
+                        "secondary-container": "#0566d9",
+                        "on-primary-fixed": "#25005a",
+                        "inverse-surface": "#e4e1e7",
+                        "outline-variant": "#4a4455",
+                        "inverse-on-surface": "#303034",
+                        "tertiary-fixed-dim": "#f9bd22",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "on-background": "#e4e1e7",
+                        "exp-blue": "#3B82F6",
+                        "on-tertiary-fixed": "#261a00",
+                        "tertiary-container": "#836100",
+                        "primary-fixed": "#eaddff",
+                        "on-secondary": "#002e6a",
+                        "on-secondary-container": "#e6ecff",
+                        "dungeon-gray": "#181A20",
+                        "primary": "#d2bbff",
+                        "on-secondary-fixed": "#001a42",
+                        "error": "#ffb4ab",
+                        "surface-container-low": "#1b1b1f",
+                        "secondary-fixed": "#d8e2ff",
+                        "surface-container-highest": "#353439",
+                        "surface-container-lowest": "#0e0e12",
+                        "on-error": "#690005",
+                        "abyss-black": "#0B0B0F",
+                        "on-tertiary-fixed-variant": "#5c4300",
+                        "background": "#131317",
+                        "surface-dim": "#131317",
+                        "mythic-pink": "#FF4D6D",
+                        "on-secondary-fixed-variant": "#004395",
+                        "error-container": "#93000a",
+                        "on-surface": "#e4e1e7",
+                        "tertiary-fixed": "#ffdf9f",
+                        "surface": "#131317",
+                        "inverse-primary": "#732ee4",
+                        "surface-variant": "#353439",
+                        "hunter-surface": "#2C313D",
+                        "on-surface-variant": "#ccc3d8",
+                        "tertiary": "#f9bd22"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "base": "4px",
+                        "xl": "32px",
+                        "lg": "24px",
+                        "sm": "8px",
+                        "md": "16px",
+                        "margin-desktop": "32px",
+                        "xxl": "48px",
+                        "margin-mobile": "16px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "caption": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "card-title": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "quest-title": ["Inter"],
+                        "section-title-mobile": ["Oswald"],
+                        "section-title": ["Oswald"],
+                        "level-display-mobile": ["Oswald"],
+                        "level-display": ["Oswald"],
+                        "boss-display": ["Oswald"]
+                    },
+                    "fontSize": {
+                        "caption": ["12px", { "lineHeight": "1.4", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "body-sm": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "card-title": ["24px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "quest-title": ["18px", { "lineHeight": "1.5", "fontWeight": "600" }],
+                        "section-title-mobile": ["28px", { "lineHeight": "1.3", "fontWeight": "500" }],
+                        "section-title": ["32px", { "lineHeight": "1.3", "fontWeight": "500" }],
+                        "level-display-mobile": ["36px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "level-display": ["48px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "boss-display": ["64px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .ghost-border { box-shadow: inset 0 0 0 1px rgba(204, 195, 216, 0.1); }
+        .glow-epic { box-shadow: 0 0 15px rgba(124, 58, 237, 0.4); }
+        .glow-gold { box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
+        .glow-rare { box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
+        .shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        /* Hide scrollbar for a cleaner HUD look */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(24, 26, 32, 0.5);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4a4455;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-abyss-black text-on-surface font-body-sm min-h-screen flex flex-col md:flex-row overflow-x-hidden selection:bg-epic-purple selection:text-white">
+<!-- TopAppBar (Mobile & Desktop Header Area) -->
+<header class="bg-abyss-black dark:bg-abyss-black font-boss-display text-boss-display docked full-width top-0 border-b border-outline-variant/30 shadow-[0_0_15px_rgba(124,58,237,0.3)] flex justify-between items-center w-full px-md h-16 fixed z-50">
+<a href="home.html" class="flex items-center gap-sm cursor-pointer hover:opacity-80 transition-opacity">
+<img alt="Level Up Life Logo" class="h-8 w-8 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvVeFzLtZ-Xq9k4cM7sTatF4Oded9MMO6cULtN-y1SefihPn0HcPEKq_JKgO9qOrWbuueKw9hpajqRSOXFrUQK_U5mfwR3lWudiT03alw5RDECZlkx92EIP1j8xXmhsfaPuw582p3YvKVJGFpPOu2ilUzpbWBu-i9vTxi-7QkUka3OokBead-CEcU2AVLWl72lF2rglnMCjk0kvJD5yp4Gv7bBKjvtAOMW-UKswNxog25f-1kREPCFm8MEYzp1RBOdzvZLvsCdKOU">
+<span class="font-boss-display text-section-title text-primary uppercase tracking-tighter hidden sm:block">LEVEL UP LIFE</span>
+</a>
+<div class="flex items-center gap-md font-body-sm text-body-sm">
+
+<div class="flex items-center gap-xs bg-shadow-slate px-sm py-1 rounded-xl ghost-border">
+<span class="material-symbols-outlined text-legendary-gold text-lg" style="font-variation-settings: 'FILL' 1;">monetization_on</span>
+<span class="text-legendary-gold font-bold">0 G</span>
+</div>
+<button class="text-on-surface-variant hover:text-primary-fixed-dim transition-colors scale-95 active:duration-150 relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-health-red rounded-full"></span>
+</button>
+<button class="text-on-surface-variant hover:text-primary-fixed-dim transition-colors scale-95 active:duration-150">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+</header>
+<!-- SideNavBar (Desktop) -->
+<aside class="bg-dungeon-gray dark:bg-dungeon-gray docked left-0 h-full w-64 border-r border-outline-variant/20 hidden md:flex flex-col py-lg px-md fixed top-0 z-40">
+<div class="flex flex-col items-center mb-xl pt-16">
+<div class="w-24 h-24 rounded-full bg-shadow-slate ghost-border overflow-hidden mb-sm relative glow-epic">
+<img alt="Sung Jin-Woo Avatar" class="w-full h-full object-cover" data-alt="A striking portrait of an anime-style modern male hunter with dark, messy hair and glowing purple eyes, set against a dark, moody background. He wears a sleek, high-tech black tactical coat. The lighting is cinematic, heavily contrasting deep abyssal blacks with vibrant epic purple rim lights, fitting a high-stakes dungeon crawler RPG aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHTuIx9e5kpkUZYkQdaODnjCmH54Pmd3zhhB59qgLINBgEEUZbXnD7O4i66gY-rFfK8GdGFbCGAPnV_bksPH1jTV6O5OKRXVrVv47__GYXMDjlVtYDYx8ICRHDtvCeoWpMpzQB1JeBm80PeW_KgAkXPfJW5gA-g_nN_o-XtHR5fGviZhLhZgHCWbV5b4hMjstJHjO5iZ1UIsA3zN0nYqnA8KoKpDkY-Id9i6TDihqB8kF6WS1umaLN-BDVf4WTWzVZASpWL4yY65E">
+<div class="absolute inset-0 bg-epic-purple/20 mix-blend-overlay"></div>
+</div>
+<h2 class="font-section-title text-section-title text-primary">성진우</h2>
+<p class="text-on-surface-variant font-caption text-caption">Lv.1</p>
+</div>
+<nav class="flex-1 space-y-sm">
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-shadow-slate hover:text-on-surface transition-all duration-300 ease-in-out rounded-xl" href="dashboard.html">
+<span class="material-symbols-outlined">person</span>
+<span class="font-body-lg text-body-lg">상태창</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-shadow-slate hover:text-on-surface transition-all duration-300 ease-in-out rounded-xl" href="quests.html">
+<span class="material-symbols-outlined">fort</span>
+<span class="font-body-lg text-body-lg">던전</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-shadow-slate hover:text-on-surface transition-all duration-300 ease-in-out rounded-xl" href="shop.html">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">storefront</span>
+<span class="font-body-lg text-body-lg">상점</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm bg-primary-container/20 text-primary border-r-4 border-primary transition-all duration-300 ease-in-out rounded-xl" href="inventory.html">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">backpack</span>
+<span class="font-body-lg text-body-lg">인벤토리</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-shadow-slate hover:text-on-surface transition-all duration-300 ease-in-out rounded-xl" href="achievements.html">
+<span class="material-symbols-outlined">military_tech</span>
+<span class="font-body-lg text-body-lg">업적</span>
+</a>
+</nav>
+<div class="mt-auto pt-lg border-t border-outline-variant/20 flex flex-col gap-2">
+<button class="w-full bg-epic-purple text-white font-bold uppercase py-sm rounded-xl ghost-border hover:shadow-[0_0_12px_rgba(124,58,237,0.8)] transition-all mb-sm">프리미엄 멤버십</button>
+
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-shadow-slate hover:text-on-surface transition-all duration-300 ease-in-out rounded-xl" href="home.html">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-card-title text-body-lg">로그아웃</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 mt-16 md:ml-64 p-margin-mobile md:p-margin-desktop overflow-y-auto pb-24 md:pb-margin-desktop">
+<!-- Inventory Grid Section (Left/Center) -->
+<section class="flex-1 flex flex-col min-w-0 bg-dungeon-gray/80 backdrop-blur-xl rounded-xl border border-outline-variant/20 shadow-2xl overflow-hidden flex flex-col ghost-border">
+<!-- Header -->
+<div class="p-md border-b border-outline-variant/20 flex justify-between items-center bg-gradient-to-r from-dungeon-gray to-transparent">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-[32px] text-epic-purple" style="font-variation-settings: 'FILL' 1;">backpack</span>
+<h1 class="font-section-title text-section-title text-on-surface">인벤토리</h1>
+</div>
+<div class="text-on-surface-variant font-caption text-caption bg-shadow-slate px-sm py-xs rounded-full">
+                        74 / 100 슬롯
+                    </div>
+</div>
+<!-- Category Tabs -->
+<div class="px-md pt-sm flex gap-sm overflow-x-auto no-scrollbar border-b border-outline-variant/10">
+<button class="px-md py-sm font-quest-title text-quest-title text-primary border-b-2 border-epic-purple whitespace-nowrap">장비</button>
+<button class="px-md py-sm font-quest-title text-quest-title text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap">소모품</button>
+<button class="px-md py-sm font-quest-title text-quest-title text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap">재료</button>
+<button class="px-md py-sm font-quest-title text-quest-title text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap">퀘스트</button>
+</div>
+<!-- Grid -->
+<div id="inventory-grid" class="p-md grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 gap-sm content-start">
+    <!-- Populated by init_game.js initInventory() -->
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile) -->
+<nav class="bg-dungeon-gray/90 backdrop-blur-md docked full-width bottom-0 rounded-t-xl border-t border-outline-variant/30 shadow-[0_-4px_20px_rgba(0,0,0,0.5)] fixed bottom-0 w-full z-50 flex justify-around items-center h-16 md:hidden font-caption text-caption tap-highlight-transparent overflow-x-auto no-scrollbar">
+<a href="dashboard.html" class="flex flex-col items-center justify-center text-on-surface-variant active:bg-shadow-slate p-2 rounded min-w-[4rem] h-full">
+<span class="material-symbols-outlined">person</span>
+<span class="mt-1">상태창</span>
+</a>
+<a href="quests.html" class="flex flex-col items-center justify-center text-on-surface-variant active:bg-shadow-slate p-2 rounded min-w-[4rem] h-full">
+<span class="material-symbols-outlined">fort</span>
+<span class="mt-1">던전</span>
+</a>
+<a href="shop.html" class="flex flex-col items-center justify-center text-on-surface-variant active:bg-shadow-slate p-2 rounded min-w-[4rem] h-full">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">storefront</span>
+<span class="mt-1">상점</span>
+</a>
+<a href="inventory.html" class="flex flex-col items-center justify-center text-primary filter drop-shadow-[0_0_8px_#7C3AED] active:bg-shadow-slate p-2 rounded min-w-[4rem] h-full border-t-2 border-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">backpack</span>
+<span class="mt-1 font-bold">인벤토리</span>
+</a>
+<a href="achievements.html" class="flex flex-col items-center justify-center text-on-surface-variant active:bg-shadow-slate p-2 rounded min-w-[4rem] h-full">
+<span class="material-symbols-outlined">military_tech</span>
+<span class="mt-1">업적</span>
+</a>
+</nav>
+
+<!-- Item Use Modal -->
+<div id="modal-use-item" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
+    <div class="absolute inset-0 bg-abyss-black/80 backdrop-blur-sm"></div>
+    <div class="bg-dungeon-gray w-[90%] max-w-sm p-lg rounded-xl border border-primary/30 relative z-10 shadow-[0_0_30px_rgba(124,58,237,0.2)] text-center">
+        <div class="w-20 h-20 mx-auto rounded-full bg-abyss-black flex items-center justify-center mb-md ghost-border text-epic-purple glow-epic">
+            <span id="use-item-icon" class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">star</span>
+        </div>
+        <h2 id="use-item-title" class="font-section-title text-card-title text-primary mb-xs">아이템 이름</h2>
+        <p id="use-item-desc" class="text-on-surface-variant text-body-sm mb-lg">이 보상을 현실에서 사용하시겠습니까?</p>
+        <div class="flex justify-center gap-sm pt-md border-t border-outline-variant/20">
+            <button id="btn-cancel-use" class="px-6 py-2 rounded-lg text-on-surface-variant hover:bg-surface-variant transition-colors">취소</button>
+            <button id="btn-confirm-use" class="px-6 py-2 rounded-lg bg-epic-purple text-white font-bold hover:bg-primary-fixed-dim transition-colors shadow-[0_0_12px_rgba(124,58,237,0.5)]">사용하기</button>
+        </div>
+    </div>
+</div>
+
+</body></html>
