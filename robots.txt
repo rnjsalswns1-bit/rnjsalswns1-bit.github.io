@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://rnjsalswns1-bit.github.io/levelup-life/sitemap.xml
+Sitemap: https://levelup-life-official.github.io/levelup-life/sitemap.xml
