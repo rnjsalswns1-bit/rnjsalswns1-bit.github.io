@@ -228,15 +228,185 @@
             }
         });
 
-        // Add missing button navigations
-        document.querySelectorAll('button').forEach(btn => {
+        // Authentication System (Login / Register / Session)
+        const DEFAULT_USERS = [
+            { id: 'hunter@levelup.com', pw: '1234', name: '성진우' }
+        ];
+
+        function getUsers() {
+            try {
+                const stored = localStorage.getItem('lvlup_users');
+                if (!stored) {
+                    localStorage.setItem('lvlup_users', JSON.stringify(DEFAULT_USERS));
+                    return DEFAULT_USERS;
+                }
+                return JSON.parse(stored);
+            } catch (e) {
+                return DEFAULT_USERS;
+            }
+        }
+
+        function saveUsers(users) {
+            try {
+                localStorage.setItem('lvlup_users', JSON.stringify(users));
+            } catch (e) {}
+        }
+
+        function getCurrentUser() {
+            try {
+                const session = localStorage.getItem('lvlup_current_user') || sessionStorage.getItem('lvlup_current_user');
+                return session ? JSON.parse(session) : null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function setCurrentUser(user, isPermanent = true) {
+            try {
+                const val = JSON.stringify(user);
+                if (isPermanent) {
+                    localStorage.setItem('lvlup_current_user', val);
+                } else {
+                    sessionStorage.setItem('lvlup_current_user', val);
+                }
+            } catch (e) {}
+        }
+
+        function logoutUser() {
+            localStorage.removeItem('lvlup_current_user');
+            sessionStorage.removeItem('lvlup_current_user');
+            window.location.href = 'login.html';
+        }
+
+        // Protected Pages Auth Guard (Redirect unauthenticated visitors to login.html)
+        const protectedPages = ['dashboard', 'quests', 'shop', 'inventory', 'achievements', 'profile', 'level_up', 'reward'];
+        const currentPath = window.location.pathname.toLowerCase();
+        const isProtected = protectedPages.some(page => currentPath.includes(page));
+
+        if (isProtected && !getCurrentUser()) {
+            window.location.href = 'login.html';
+        }
+
+        // Add missing button & logout navigations
+        document.querySelectorAll('button, a').forEach(btn => {
             const txt = btn.textContent.trim();
             if (txt === '프리미엄 멤버십') {
                 btn.onclick = () => window.location.href = 'payment.html';
-            } else if (txt === '임무 시작') {
-                btn.onclick = () => window.location.href = 'quests.html';
+            } else if (txt.includes('임무 시작')) {
+                btn.onclick = () => window.location.href = 'login.html';
+            } else if (txt.includes('로그아웃')) {
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    logoutUser();
+                };
             }
         });
+
+        // Handle Login Page Logic
+        if (window.location.pathname.includes('login')) {
+            const tabLogin = document.getElementById('tab-login');
+            const tabSignup = document.getElementById('tab-signup');
+            const authTitle = document.getElementById('auth-title');
+            const btnAuthText = document.getElementById('btn-auth-text');
+            const loginAlert = document.getElementById('login-alert');
+            const authForm = document.getElementById('auth-form');
+            const hunterIdInput = document.getElementById('hunter-id');
+            const secretKeyInput = document.getElementById('secret-key');
+            const rememberMe = document.getElementById('remember-me');
+            let currentMode = 'login'; // 'login' or 'signup'
+
+            function showAlert(msg, isError = true) {
+                if (!loginAlert) return;
+                loginAlert.classList.remove('hidden', 'bg-error-container/20', 'border-health-red/50', 'text-health-red', 'bg-success-green/20', 'border-success-green/50', 'text-success-green');
+                if (isError) {
+                    loginAlert.classList.add('bg-error-container/20', 'border-health-red/50', 'text-health-red');
+                } else {
+                    loginAlert.classList.add('bg-success-green/20', 'border-success-green/50', 'text-success-green');
+                }
+                loginAlert.textContent = msg;
+            }
+
+            if (tabLogin && tabSignup) {
+                tabLogin.onclick = () => {
+                    currentMode = 'login';
+                    tabLogin.className = 'flex-1 py-sm font-bold text-epic-purple border-b-2 border-epic-purple transition-all';
+                    tabSignup.className = 'flex-1 py-sm font-medium text-outline-variant hover:text-on-surface transition-all';
+                    if (authTitle) authTitle.textContent = '시스템 로그인';
+                    if (btnAuthText) btnAuthText.innerHTML = '<span class="material-symbols-outlined text-xl">login</span>시스템 접속';
+                    if (loginAlert) loginAlert.classList.add('hidden');
+                };
+
+                tabSignup.onclick = () => {
+                    currentMode = 'signup';
+                    tabSignup.className = 'flex-1 py-sm font-bold text-epic-purple border-b-2 border-epic-purple transition-all';
+                    tabLogin.className = 'flex-1 py-sm font-medium text-outline-variant hover:text-on-surface transition-all';
+                    if (authTitle) authTitle.textContent = '신규 플레이어 등록';
+                    if (btnAuthText) btnAuthText.innerHTML = '<span class="material-symbols-outlined text-xl">person_add</span>계정 생성 및 접속';
+                    if (loginAlert) loginAlert.classList.add('hidden');
+                };
+            }
+
+            if (authForm) {
+                authForm.onsubmit = (e) => {
+                    e.preventDefault();
+                    const id = (hunterIdInput ? hunterIdInput.value : '').trim();
+                    const pw = (secretKeyInput ? secretKeyInput.value : '').trim();
+
+                    if (!id || !pw) {
+                        showAlert('플레이어 ID(이메일)와 시크릿 키(비밀번호)를 입력해주세요.', true);
+                        return;
+                    }
+
+                    if (pw.length < 4) {
+                        showAlert('시크릿 키(비밀번호)는 최소 4자리 이상이어야 합니다.', true);
+                        return;
+                    }
+
+                    const users = getUsers();
+
+                    if (currentMode === 'login') {
+                        const existingUser = users.find(u => u.id.toLowerCase() === id.toLowerCase() && u.pw === pw);
+                        if (existingUser) {
+                            setCurrentUser({ id: existingUser.id, name: existingUser.name }, rememberMe ? rememberMe.checked : true);
+                            showAlert('로그인 성공! 대시보드로 이동합니다...', false);
+                            setTimeout(() => {
+                                window.location.href = 'dashboard.html';
+                            }, 500);
+                        } else {
+                            showAlert('등록되지 않은 플레이어 ID이거나 시크릿 키가 일치하지 않습니다.', true);
+                        }
+                    } else {
+                        // Signup mode
+                        const userExists = users.some(u => u.id.toLowerCase() === id.toLowerCase());
+                        if (userExists) {
+                            showAlert('이미 플레이어로 등록된 이메일 주소입니다. 로그인해주세요.', true);
+                            return;
+                        }
+                        const newUser = { id: id, pw: pw, name: id.split('@')[0] };
+                        users.push(newUser);
+                        saveUsers(users);
+                        setCurrentUser({ id: newUser.id, name: newUser.name }, rememberMe ? rememberMe.checked : true);
+                        showAlert('신규 플레이어 계정이 성공적으로 생성되었습니다! 접속 중...', false);
+                        setTimeout(() => {
+                            window.location.href = 'dashboard.html';
+                        }, 500);
+                    }
+                };
+            }
+
+            // Social Login Buttons Handling
+            const socialBtns = document.querySelectorAll('.grid.grid-cols-2 button');
+            socialBtns.forEach(btn => {
+                btn.onclick = () => {
+                    const provider = btn.textContent.includes('Google') ? 'Google' : 'Discord';
+                    setCurrentUser({ id: `${provider.toLowerCase()}_user@levelup.com`, name: `${provider} 플레이어` }, true);
+                    showAlert(`${provider} 계정으로 인증되었습니다! 이동 중...`, false);
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 500);
+                };
+            });
+        }
 
         // 1. Dashboard Quests Handling
         if (window.location.pathname.includes('dashboard')) {
@@ -1831,9 +2001,13 @@
             document.head.appendChild(themeMeta);
         }
 
-        // Register Service Worker
+        // Unregister serviceWorker for local stability
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').catch(() => {});
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+                for (let registration of registrations) {
+                    registration.unregister();
+                }
+            }).catch(() => {});
         }
 
         const buttons = document.querySelectorAll('button');

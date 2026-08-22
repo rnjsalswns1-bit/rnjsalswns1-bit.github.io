@@ -252,16 +252,26 @@
 <div class="absolute inset-0 bg-epic-purple/20 rounded-full blur-xl animate-pulse"></div>
 <img alt="Level Up Life Logo" class="w-full h-full object-contain relative z-10 drop-shadow-[0_0_10px_rgba(124,58,237,0.5)]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhGaa77Wwtv7hHQSOKV-EiSN_DQVbtbfE-24JyWjiKtzNYCV9IFaVR5Yw9sd-dl8NX1MuN7sQIibmMxPito6Y7vW9KucmHU6zAUPN3O1CIGqtII4QAwkrRzLdNqGQQ3xFif0jwz9e1NwdkY9tdV2E3U51ezJdxpLdvMgtU-2avTAJSuOTiPreSHIA2YJLky1K54n5Ghya2_v7RUk21HGzw9C3itTC7FJAFkUPK3sLnHAh_i0SAJoS5PZB0n774_bFX0T8E09l2yqg"/>
 </div>
-<h1 class="font-section-title text-section-title md:font-section-title md:text-section-title text-primary uppercase tracking-widest glow-epic-text">시스템 로그인</h1>
+<h1 id="auth-title" class="font-section-title text-section-title md:font-section-title md:text-section-title text-primary uppercase tracking-widest glow-epic-text">시스템 로그인</h1>
 </div>
+
+<!-- Auth Mode Tabs -->
+<div class="flex border-b border-outline-variant/30 mb-md text-center">
+<button type="button" id="tab-login" class="flex-1 py-sm font-bold text-epic-purple border-b-2 border-epic-purple transition-all">로그인</button>
+<button type="button" id="tab-signup" class="flex-1 py-sm font-medium text-outline-variant hover:text-on-surface transition-all">신규 플레이어 등록 (회원가입)</button>
+</div>
+
+<!-- Alert Box -->
+<div id="login-alert" class="hidden p-3 rounded-lg text-sm font-medium text-center transition-all mb-md border"></div>
+
 <!-- Login Form -->
-<form class="space-y-md w-full">
+<form id="auth-form" class="space-y-md w-full" onsubmit="return false;">
 <!-- Hunter ID Field -->
 <div class="space-y-xs">
-<label class="font-caption text-caption text-primary-fixed-dim uppercase tracking-wider block" for="hunter-id">플레이어 ID</label>
+<label class="font-caption text-caption text-primary-fixed-dim uppercase tracking-wider block" for="hunter-id">플레이어 ID (이메일)</label>
 <div class="relative group">
 <span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-outline-variant group-focus-within:text-epic-purple transition-colors">person</span>
-<input class="w-full bg-surface-container-high border-outline-variant text-on-surface font-body-lg pl-xl pr-sm py-sm rounded focus:border-epic-purple focus:ring-1 focus:ring-epic-purple transition-all outline-none placeholder:text-outline-variant/50" id="hunter-id" placeholder="이메일 주소 입력" type="email"/>
+<input class="w-full bg-surface-container-high border-outline-variant text-on-surface font-body-lg pl-xl pr-sm py-sm rounded focus:border-epic-purple focus:ring-1 focus:ring-epic-purple transition-all outline-none placeholder:text-outline-variant/50" id="hunter-id" placeholder="hunter@levelup.com" type="email" required/>
 </div>
 </div>
 <!-- Secret Key Field -->
@@ -269,21 +279,21 @@
 <label class="font-caption text-caption text-primary-fixed-dim uppercase tracking-wider block" for="secret-key">시크릿 키 (비밀번호)</label>
 <div class="relative group">
 <span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-outline-variant group-focus-within:text-epic-purple transition-colors">key</span>
-<input class="w-full bg-surface-container-high border-outline-variant text-on-surface font-body-lg pl-xl pr-sm py-sm rounded focus:border-epic-purple focus:ring-1 focus:ring-epic-purple transition-all outline-none placeholder:text-outline-variant/50" id="secret-key" placeholder="비밀번호 입력" type="password"/>
+<input class="w-full bg-surface-container-high border-outline-variant text-on-surface font-body-lg pl-xl pr-sm py-sm rounded focus:border-epic-purple focus:ring-1 focus:ring-epic-purple transition-all outline-none placeholder:text-outline-variant/50" id="secret-key" placeholder="비밀번호 입력 (4자리 이상)" type="password" required/>
 </div>
 </div>
 <!-- Remember Me & Forgot Password -->
-<div class="flex justify-between items-center pt-xs pb-sm">
+<div id="remember-box" class="flex justify-between items-center pt-xs pb-sm">
 <label class="flex items-center space-x-xs cursor-pointer group">
-<input class="form-checkbox bg-surface-container-high border-outline-variant text-epic-purple rounded-sm focus:ring-epic-purple focus:ring-offset-0 focus:ring-offset-transparent w-4 h-4" type="checkbox"/>
+<input id="remember-me" class="form-checkbox bg-surface-container-high border-outline-variant text-epic-purple rounded-sm focus:ring-epic-purple focus:ring-offset-0 focus:ring-offset-transparent w-4 h-4" type="checkbox" checked/>
 <span class="font-caption text-caption text-on-surface-variant group-hover:text-primary transition-colors">자동 로그인</span>
 </label>
-<a class="font-caption text-caption text-epic-purple hover:text-primary-fixed transition-colors" href="#">시크릿 키 찾기</a>
+<a class="font-caption text-caption text-epic-purple hover:text-primary-fixed transition-colors" href="#" onclick="alert('기본 테스트 계정:\nID: hunter@levelup.com\nPW: 1234'); return false;">계정 힌트 보기</a>
 </div>
 <!-- Primary Action Button -->
-<button class="w-full bg-epic-purple text-on-primary font-quest-title text-quest-title uppercase py-sm rounded glow-epic glow-epic-active transition-all duration-300 hover:bg-inverse-primary relative overflow-hidden group" type="button">
+<button id="btn-submit-auth" class="w-full bg-epic-purple text-on-primary font-quest-title text-quest-title uppercase py-sm rounded glow-epic glow-epic-active transition-all duration-300 hover:bg-inverse-primary relative overflow-hidden group" type="submit">
 <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
-<span class="relative z-10 flex items-center justify-center gap-2">
+<span id="btn-auth-text" class="relative z-10 flex items-center justify-center gap-2">
 <span class="material-symbols-outlined text-xl">login</span>
                         시스템 접속
                     </span>
