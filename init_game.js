@@ -2164,14 +2164,24 @@
             };
 
             // Save profile button
-            document.getElementById('sys-btn-save-profile').onclick = (e) => {
-                e.preventDefault();
+            window.handleSaveProfile = (e) => {
+                if (e) { e.preventDefault(); e.stopPropagation(); }
+                if (!state) state = {};
                 if (!state.customProfile) {
                     state.customProfile = { name: '성진우', title: 'Lv.1', avatarUrl: '' };
                 }
-                const nameInput = document.getElementById('sys-setting-name-input').value.trim();
-                if (nameInput) {
-                    state.customProfile.name = nameInput;
+                const nameInput = document.getElementById('sys-setting-name-input');
+                const nameVal = nameInput ? nameInput.value.trim() : '';
+                if (nameVal) {
+                    state.customProfile.name = nameVal;
+                    try {
+                        const session = localStorage.getItem('lvlup_current_user') || sessionStorage.getItem('lvlup_current_user');
+                        if (session) {
+                            const u = JSON.parse(session);
+                            u.name = nameVal;
+                            localStorage.setItem('lvlup_current_user', JSON.stringify(u));
+                        }
+                    } catch(err) {}
                 }
                 const avatarInput = document.getElementById('sys-setting-avatar-input');
                 if (avatarInput && avatarInput.files && avatarInput.files[0]) {
@@ -2179,20 +2189,21 @@
                     reader.onload = (ev) => {
                         state.customProfile.avatarUrl = ev.target.result;
                         saveState();
-                        if (window.applyCustomSettings) window.applyCustomSettings();
                         alert('프로필 닉네임 및 이미지가 성공적으로 저장되었습니다!');
-                        document.getElementById('system-settings-modal').classList.add('hidden');
+                        const modal = document.getElementById('system-settings-modal');
+                        if (modal) modal.classList.add('hidden');
                         location.reload();
                     };
                     reader.readAsDataURL(avatarInput.files[0]);
                 } else {
                     saveState();
-                    if (window.applyCustomSettings) window.applyCustomSettings();
                     alert('프로필 닉네임이 성공적으로 저장되었습니다!');
-                    document.getElementById('system-settings-modal').classList.add('hidden');
+                    const modal = document.getElementById('system-settings-modal');
+                    if (modal) modal.classList.add('hidden');
                     location.reload();
                 }
             };
+            document.getElementById('sys-btn-save-profile').onclick = window.handleSaveProfile;
 
             // Export JSON
             document.getElementById('sys-btn-export-json').onclick = () => {
