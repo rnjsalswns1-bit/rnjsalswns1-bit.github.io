@@ -2135,7 +2135,7 @@
                        <label class="font-caption text-on-surface-variant block mb-1">프로필 이미지 선택</label>
                        <input type="file" id="sys-setting-avatar-input" accept="image/*" class="w-full text-xs text-on-surface-variant file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-epic-purple file:text-white file:font-bold hover:file:bg-inverse-primary cursor-pointer">
                     </div>
-                    <button id="sys-btn-save-profile" class="w-full bg-epic-purple text-white font-bold py-2 rounded-lg hover:shadow-[0_0_10px_rgba(124,58,237,0.5)] transition-all text-sm mt-1">프로필 변경사항 저장</button>
+                    <button type="button" id="sys-btn-save-profile" onclick="window.handleSaveProfile(event)" class="w-full bg-epic-purple text-white font-bold py-2 rounded-lg hover:shadow-[0_0_10px_rgba(124,58,237,0.5)] transition-all text-sm mt-1">프로필 변경사항 저장</button>
                  </div>
 
                  <!-- Section 2: Data Backup & Restore -->
