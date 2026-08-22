@@ -85,25 +85,39 @@
         return `${year}-${month}-${date}`;
     };
 
+    function getGameSaveKey() {
+        try {
+            const session = localStorage.getItem('lvlup_current_user') || sessionStorage.getItem('lvlup_current_user');
+            if (session) {
+                const user = JSON.parse(session);
+                if (user && user.id) {
+                    return 'game_save_state_' + user.id.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                }
+            }
+        } catch(e) {}
+        return 'game_save_state_guest';
+    }
+
     // Initialize or load state
     let state = null;
-    const saved = localStorage.getItem('game_save_state');
+    const saveKey = getGameSaveKey();
+    const saved = localStorage.getItem(saveKey);
     if (saved) {
         try {
             state = JSON.parse(saved);
             // Migration for new dungeons state
             if (!state.dungeons || !state.dungeons.s_rank || state.dungeons.routine) {
                 state.dungeons = JSON.parse(JSON.stringify(defaultState.dungeons));
-                localStorage.setItem('game_save_state', JSON.stringify(state));
+                localStorage.setItem(getGameSaveKey(), JSON.stringify(state));
             }
             if (!state.dungeonMetadata) {
                 state.dungeonMetadata = JSON.parse(JSON.stringify(defaultState.dungeonMetadata));
-                localStorage.setItem('game_save_state', JSON.stringify(state));
+                localStorage.setItem(getGameSaveKey(), JSON.stringify(state));
             }
             // Migration for shopItems
             if (!state.shopItems) {
                 state.shopItems = JSON.parse(JSON.stringify(defaultState.shopItems));
-                localStorage.setItem('game_save_state', JSON.stringify(state));
+                localStorage.setItem(getGameSaveKey(), JSON.stringify(state));
             }
             // Migration for inventory items
             if (state.inventory) {
@@ -126,14 +140,14 @@
             if (state.loginDays === undefined) state.loginDays = 1;
             if (state.dungeonsCleared === undefined) state.dungeonsCleared = 0;
 
-            localStorage.setItem('game_save_state', JSON.stringify(state));
+            localStorage.setItem(getGameSaveKey(), JSON.stringify(state));
         } catch(e) {}
     }
     
     if (!state) {
         state = JSON.parse(JSON.stringify(defaultState));
         state.lastQuestDate = getTodayString();
-        localStorage.setItem('game_save_state', JSON.stringify(state));
+        localStorage.setItem(getGameSaveKey(), JSON.stringify(state));
     }
 
     // Migration: Port old dungeonMetadata to new customDungeons (Targeting e1, e2, e3 as requested by user)
@@ -147,7 +161,7 @@
         delete state.customDungeons['s1'];
         
         state.migratedTo18Dungeons = true;
-        localStorage.setItem('game_save_state', JSON.stringify(state));
+        localStorage.setItem(getGameSaveKey(), JSON.stringify(state));
     }
     
     // User requested to duplicate E-rank content (운동, 지식, 총합테스트) to all other ranks
@@ -164,7 +178,7 @@
             });
         }
         state.syncedAllDungeonsToE = true;
-        localStorage.setItem('game_save_state', JSON.stringify(state));
+        localStorage.setItem(getGameSaveKey(), JSON.stringify(state));
     }
 
     // Daily Reset check
@@ -183,11 +197,11 @@
         } else {
             state.loginDays = 1;
         }
-        localStorage.setItem('game_save_state', JSON.stringify(state));
+        localStorage.setItem(getGameSaveKey(), JSON.stringify(state));
     }
 
     function saveState() {
-        localStorage.setItem('game_save_state', JSON.stringify(state));
+        localStorage.setItem(getGameSaveKey(), JSON.stringify(state));
     }
 
     function applyGlobalState() {
@@ -456,7 +470,7 @@
                     // Always read from localStorage to avoid IIFE split state issues
                     let latestState = state;
                     try {
-                        const ls = localStorage.getItem('game_save_state');
+                        const ls = localStorage.getItem(getGameSaveKey());
                         if (ls) latestState = JSON.parse(ls);
                     } catch(e) {}
                     
@@ -985,7 +999,7 @@
                                 stateObj.isCompleted = false;
                             }
                             
-                            localStorage.setItem('game_save_state', JSON.stringify(state));
+                            localStorage.setItem(getGameSaveKey(), JSON.stringify(state));
                             
                             // 완료됨(disabled) 상태 복원을 위해 location.reload 삭제하고 수동 DOM 갱신 적용
                             const textEl = row.querySelector('.font-level-display span:first-child, .font-boss-display.text-sm');
@@ -1049,7 +1063,7 @@
     // 1. Get or init custom settings in state
     let state = null;
     try {
-        state = JSON.parse(localStorage.getItem('game_save_state')) || {};
+        state = JSON.parse(localStorage.getItem(getGameSaveKey())) || {};
     } catch(e) { state = {}; }
 
     if (!state.customProfile) {
@@ -1086,7 +1100,7 @@
     }
 
     function saveState() {
-        localStorage.setItem('game_save_state', JSON.stringify(state));
+        localStorage.setItem(getGameSaveKey(), JSON.stringify(state));
     }
 
     // 2. Apply Custom Settings on load
@@ -1523,7 +1537,7 @@
         if (btnResetData) {
             btnResetData.onclick = () => {
                 if (confirm("정말 모든 데이터를 초기화하시겠습니까? 레벨, 경험치, 인벤토리 등 모든 진행 상황이 삭제되며 복구할 수 없습니다.")) {
-                    localStorage.removeItem('game_save_state');
+                    localStorage.removeItem(getGameSaveKey());
                     location.reload();
                 }
             };
@@ -1661,7 +1675,7 @@
                                 color: 'epic-purple'
                             });
                         }
-                        localStorage.setItem('game_save_state', JSON.stringify(state));
+                        localStorage.setItem(getGameSaveKey(), JSON.stringify(state));
                         applyGlobalState();
                         renderShop();
                     }
@@ -1696,7 +1710,7 @@
                         cost: cost,
                         icon: 'star'
                     });
-                    localStorage.setItem('game_save_state', JSON.stringify(state));
+                    localStorage.setItem(getGameSaveKey(), JSON.stringify(state));
                     modal.classList.add('hidden');
                     renderShop();
                 }
@@ -1792,7 +1806,7 @@
                         if (item.count <= 0) {
                             state.inventory.splice(selectedItemIdx, 1);
                         }
-                        localStorage.setItem('game_save_state', JSON.stringify(state));
+                        localStorage.setItem(getGameSaveKey(), JSON.stringify(state));
                         renderInventory();
                         const descPart = item.desc ? (item.desc.split(': ')[1] || item.desc) : '';
                         alert(`${item.name}을(를) 사용했습니다!\n${descPart}`);
@@ -2195,7 +2209,7 @@
                     try {
                         const importedState = JSON.parse(event.target.result);
                         if (typeof importedState === 'object' && importedState.level !== undefined) {
-                            localStorage.setItem('game_save_state', JSON.stringify(importedState));
+                            localStorage.setItem(getGameSaveKey(), JSON.stringify(importedState));
                             alert('데이터 복원이 성공적으로 완료되었습니다! 페이지를 다시 읽어옵니다.');
                             location.reload();
                         } else {
@@ -2211,7 +2225,7 @@
             // Reset Data
             document.getElementById('sys-btn-reset-data').onclick = () => {
                 if (confirm('정말로 모든 게임 진행 데이터(레벨, 골드, 던전 기록)를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
-                    localStorage.removeItem('game_save_state');
+                    localStorage.removeItem(getGameSaveKey());
                     alert('게임 데이터가 초기화되었습니다.');
                     location.reload();
                 }
