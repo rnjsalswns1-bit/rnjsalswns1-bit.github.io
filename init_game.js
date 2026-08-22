@@ -1,3 +1,79 @@
+window.handleSaveProfile = function(e) {
+    if (e) {
+        if (e.preventDefault) e.preventDefault();
+        if (e.stopPropagation) e.stopPropagation();
+    }
+    try {
+        const nameInput = document.getElementById('sys-setting-name-input');
+        const nameVal = nameInput ? nameInput.value.trim() : '';
+        
+        const saveKey = (function() {
+            try {
+                const session = localStorage.getItem('lvlup_current_user') || sessionStorage.getItem('lvlup_current_user');
+                if (session) {
+                    const user = JSON.parse(session);
+                    if (user && user.id) {
+                        return 'game_save_state_' + user.id.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                    }
+                }
+            } catch(e) {}
+            return 'game_save_state_guest';
+        })();
+
+        let curState = {};
+        try {
+            const raw = localStorage.getItem(saveKey);
+            if (raw) curState = JSON.parse(raw);
+        } catch(e) {}
+
+        if (!curState.customProfile) {
+            curState.customProfile = { name: '성진우', title: 'Lv.1', avatarUrl: '' };
+        }
+
+        if (nameVal) {
+            curState.customProfile.name = nameVal;
+            try {
+                const session = localStorage.getItem('lvlup_current_user') || sessionStorage.getItem('lvlup_current_user');
+                if (session) {
+                    const u = JSON.parse(session);
+                    u.name = nameVal;
+                    localStorage.setItem('lvlup_current_user', JSON.stringify(u));
+                }
+            } catch(err) {}
+        }
+
+        const avatarInput = document.getElementById('sys-setting-avatar-input');
+        if (avatarInput && avatarInput.files && avatarInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                curState.customProfile.avatarUrl = ev.target.result;
+                localStorage.setItem(saveKey, JSON.stringify(curState));
+                alert('프로필 닉네임 및 이미지가 성공적으로 저장되었습니다!');
+                const modal = document.getElementById('system-settings-modal');
+                if (modal) modal.classList.add('hidden');
+                location.reload();
+            };
+            reader.readAsDataURL(avatarInput.files[0]);
+        } else {
+            localStorage.setItem(saveKey, JSON.stringify(curState));
+            alert('프로필 닉네임이 성공적으로 저장되었습니다!');
+            const modal = document.getElementById('system-settings-modal');
+            if (modal) modal.classList.add('hidden');
+            location.reload();
+        }
+    } catch(err) {
+        alert('저장 중 오류 발생: ' + err.message);
+    }
+};
+
+document.addEventListener('click', function(e) {
+    if (e.target && (e.target.id === 'sys-btn-save-profile' || (e.target.textContent && e.target.textContent.trim() === '프로필 변경사항 저장'))) {
+        e.preventDefault();
+        e.stopPropagation();
+        window.handleSaveProfile(e);
+    }
+}, true);
+
 (function() {
     window.DEFAULT_DUNGEONS = [
         { id: 'e1', rank: 'E', name: '운동', desc: '꾸준한 신체 단련 미션입니다.' },
