@@ -1105,12 +1105,13 @@
 
     // 2. Apply Custom Settings on load
     function applyCustomSettings() {
+        if (!state.customProfile) state.customProfile = { name: '성진우', title: 'LV. ' + (state.level || 1) };
         state.customProfile.title = 'LV. ' + state.level; // Dynamically sync with global level
         
         // Update Profile Name & Title
-        const names = document.querySelectorAll('aside h2, main h2.text-on-surface, main h3.font-section-title'); 
+        const names = document.querySelectorAll('aside h2, main h1, main h2.text-on-surface, main h3.font-section-title'); 
         names.forEach(el => {
-            if (el.textContent.trim() === '성진우' || el.dataset.isCustomName) {
+            if (el.textContent.trim() === '성진우' || el.dataset.isCustomName || (state.customProfile && el.textContent.trim() === state.customProfile.name)) {
                 el.textContent = state.customProfile.name;
                 el.dataset.isCustomName = 'true';
             }
@@ -2163,27 +2164,33 @@
             };
 
             // Save profile button
-            document.getElementById('sys-btn-save-profile').onclick = () => {
+            document.getElementById('sys-btn-save-profile').onclick = (e) => {
+                e.preventDefault();
+                if (!state.customProfile) {
+                    state.customProfile = { name: '성진우', title: 'Lv.1', avatarUrl: '' };
+                }
                 const nameInput = document.getElementById('sys-setting-name-input').value.trim();
                 if (nameInput) {
                     state.customProfile.name = nameInput;
                 }
                 const avatarInput = document.getElementById('sys-setting-avatar-input');
-                if (avatarInput.files && avatarInput.files[0]) {
+                if (avatarInput && avatarInput.files && avatarInput.files[0]) {
                     const reader = new FileReader();
-                    reader.onload = (e) => {
-                        state.customProfile.avatarUrl = e.target.result;
+                    reader.onload = (ev) => {
+                        state.customProfile.avatarUrl = ev.target.result;
                         saveState();
-                        applyCustomSettings();
-                        alert('프로필 닉네임 및 이미지가 저장되었습니다!');
+                        if (window.applyCustomSettings) window.applyCustomSettings();
+                        alert('프로필 닉네임 및 이미지가 성공적으로 저장되었습니다!');
                         document.getElementById('system-settings-modal').classList.add('hidden');
+                        location.reload();
                     };
                     reader.readAsDataURL(avatarInput.files[0]);
                 } else {
                     saveState();
-                    applyCustomSettings();
-                    alert('프로필 닉네임이 저장되었습니다!');
+                    if (window.applyCustomSettings) window.applyCustomSettings();
+                    alert('프로필 닉네임이 성공적으로 저장되었습니다!');
                     document.getElementById('system-settings-modal').classList.add('hidden');
+                    location.reload();
                 }
             };
 
