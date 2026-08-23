@@ -391,6 +391,39 @@
         </div>
     </div>
 </div>
+
+<!-- Streak Heatmap & Gacha Loot Box Section -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md mt-lg mb-lg">
+    <!-- Daily Streak Heatmap Card -->
+    <div class="bg-dungeon-gray border border-outline-variant/30 rounded-xl p-md shadow-xl flex flex-col justify-between">
+        <div class="flex justify-between items-center mb-sm">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-epic-purple text-xl">calendar_month</span>
+                <h3 class="font-bold text-white text-base">연속 달성 스트릭</h3>
+            </div>
+            <span id="streak-counter-badge" class="bg-epic-purple/30 text-primary border border-epic-purple/50 px-2.5 py-0.5 rounded-full text-xs font-bold animate-pulse">🔥 1일 연속 달성 중</span>
+        </div>
+        <p class="text-xs text-on-surface-variant mb-3">최근 28일간의 일일 미션 달성 잔디밭 기록입니다.</p>
+        <div id="streak-heatmap-grid" class="grid grid-cols-7 gap-1.5 p-2 bg-abyss-black/60 rounded-lg border border-outline-variant/20">
+            <!-- 28 Days populated by JS -->
+        </div>
+    </div>
+
+    <!-- Gacha Loot Box Card -->
+    <div class="bg-gradient-to-br from-dungeon-gray via-abyss-black to-epic-purple/20 border border-epic-purple/40 rounded-xl p-md shadow-xl flex flex-col justify-between relative overflow-hidden">
+        <div class="flex justify-between items-center mb-sm z-10 relative">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-legendary-gold text-2xl animate-spin-slow">featured_seasonal_and_gifts</span>
+                <h3 class="font-bold text-white text-base">헌터 보관함 상자</h3>
+            </div>
+            <span class="bg-legendary-gold/20 text-legendary-gold border border-legendary-gold/40 px-2.5 py-0.5 rounded-full text-xs font-bold">1,000G / 1회</span>
+        </div>
+        <p class="text-xs text-on-surface-variant mb-3 z-10 relative">골드로 상자를 열어 희귀 장비 및 능력치 영약 템을 뽑으세요!</p>
+        <button id="btn-open-loot-box" class="w-full bg-gradient-to-r from-epic-purple to-primary text-white font-bold py-2.5 rounded-lg shadow-[0_0_15px_rgba(124,58,237,0.5)] hover:scale-[1.02] transition-all z-10 relative flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-base">card_giftcard</span> 보상 상자 오픈 (1,000G)
+        </button>
+    </div>
+</div>
 <!-- Recent Achievements -->
 <div>
 <h2 class="font-section-title-mobile md:font-section-title text-section-title-mobile md:text-section-title text-on-surface mb-2 border-b border-outline-variant/30 pb-1 inline-block">최근 업적</h2>

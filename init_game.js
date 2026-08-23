@@ -2750,11 +2750,148 @@ document.addEventListener('click', function(e) {
         }
     }
 
+// Floating XP/Gold Reward Effect
+window.triggerRewardFloatingEffect = function(x, y, expText = '+150 XP', goldText = '+500G') {
+    const container = document.createElement('div');
+    container.className = 'fixed pointer-events-none z-[9999] flex flex-col items-center gap-1 font-black text-sm animate-float-reward';
+    container.style.left = (x || (window.innerWidth / 2 - 40)) + 'px';
+    container.style.top = (y || (window.innerHeight / 2 - 30)) + 'px';
+    
+    container.innerHTML = `
+        <div class="flex items-center gap-1 text-exp-blue drop-shadow-[0_0_12px_rgba(59,130,246,0.9)] text-base font-mono">
+            <span class="material-symbols-outlined text-sm">arrow_upward</span> ${expText}
+        </div>
+        <div class="flex items-center gap-1 text-legendary-gold drop-shadow-[0_0_12px_rgba(234,179,8,0.9)] text-base font-mono">
+            <span class="material-symbols-outlined text-sm">monetization_on</span> ${goldText}
+        </div>
+    `;
+
+    document.body.appendChild(container);
+    setTimeout(() => {
+        if (container && container.parentNode) container.parentNode.removeChild(container);
+    }, 1200);
+};
+
+// Inject CSS Keyframes dynamically
+(function() {
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes floatReward {
+            0% { opacity: 0; transform: translateY(0) scale(0.7); }
+            20% { opacity: 1; transform: translateY(-20px) scale(1.1); }
+            80% { opacity: 1; transform: translateY(-50px) scale(1); }
+            100% { opacity: 0; transform: translateY(-75px) scale(0.9); }
+        }
+        .animate-float-reward {
+            animation: floatReward 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .animate-spin-slow {
+            animation: spin 10s linear infinite;
+        }
+    `;
+    document.head.appendChild(style);
+})();
+
+    // ====== STREAK HEATMAP & GACHA LOOT BOX SYSTEM ======
+    function initStreakAndGachaSystem() {
+        // 1. Render Streak Heatmap Grid (28 Days)
+        const streakGrid = document.getElementById('streak-heatmap-grid');
+        const streakBadge = document.getElementById('streak-counter-badge');
+        if (streakGrid) {
+            if (!state.streakHistory) state.streakHistory = {};
+            const todayStr = new Date().toISOString().split('T')[0];
+            
+            // Mark today if dailyProgress is submitted or completed
+            if (state.dailyProgress && state.dailyProgress.submitted) {
+                state.streakHistory[todayStr] = true;
+            }
+
+            // Calculate current streak
+            let streakDays = 0;
+            let checkDate = new Date();
+            for (let i = 0; i < 30; i++) {
+                const dateStr = checkDate.toISOString().split('T')[0];
+                if (state.streakHistory[dateStr]) {
+                    streakDays++;
+                } else if (i > 0) {
+                    break;
+                }
+                checkDate.setDate(checkDate.getDate() - 1);
+            }
+            if (streakBadge) streakBadge.textContent = `🔥 ${Math.max(1, streakDays)}일 연속 달성 중`;
+
+            // Populate 28 tile grid
+            streakGrid.innerHTML = '';
+            const curr = new Date();
+            for (let i = 27; i >= 0; i--) {
+                const d = new Date(curr);
+                d.setDate(d.getDate() - i);
+                const dStr = d.toISOString().split('T')[0];
+                const isDone = state.streakHistory[dStr];
+                
+                const tile = document.createElement('div');
+                tile.title = `${dStr}: ${isDone ? '완수 완료' : '미완수'}`;
+                tile.className = `h-6 rounded flex items-center justify-center text-[9px] font-mono transition-all cursor-pointer ${
+                    isDone 
+                        ? 'bg-epic-purple text-white shadow-[0_0_8px_rgba(124,58,237,0.8)] border border-primary/50 font-bold' 
+                        : 'bg-abyss-black/80 text-outline-variant/40 border border-outline-variant/10'
+                }`;
+                tile.textContent = d.getDate();
+                streakGrid.appendChild(tile);
+            }
+        }
+
+        // 2. Gacha Loot Box Opening Handler
+        const lootBtn = document.getElementById('btn-open-loot-box');
+        if (lootBtn) {
+            lootBtn.onclick = (e) => {
+                if ((state.gold || 0) < 1000) {
+                    alert(`⚠️ 골드가 부족합니다!\n\n필요: 1,000G / 현재 보유: ${(state.gold || 0).toLocaleString()}G`);
+                    return;
+                }
+
+                state.gold -= 1000;
+                
+                // Roll Loot
+                const loots = [
+                    { name: '🗡️ 그림자 군주의 단검', type: '무기', rarity: '전설', desc: 'STR +5 증가 특수 단검', stat: 'str', val: 5 },
+                    { name: '💍 투지의 영원 반지', type: '장신구', rarity: '영웅', desc: 'EXP 획득량 15% 버프', buff: 'exp15' },
+                    { name: '🧪 최상급 HP 회복 포션', type: '소모품', rarity: '희귀', desc: '체력 +50 완전 회복' },
+                    { name: '📜 각성의 마나 주문서', type: '주문서', rarity: '영웅', desc: 'INT +5 증가 인챈트', stat: 'int', val: 5 },
+                    { name: '👑 [카이셀의 후계자] 칭호', type: '칭호', rarity: '신화', desc: '모든 스탯 +3 대폭 상승', stat: 'all', val: 3 }
+                ];
+
+                const rolled = loots[Math.floor(Math.random() * loots.length)];
+
+                // Apply rewards
+                if (rolled.stat === 'all') {
+                    if (!state.stats) state.stats = { str: 10, agi: 10, int: 10, wil: 10, cha: 10 };
+                    Object.keys(state.stats).forEach(k => state.stats[k] += 3);
+                } else if (rolled.stat && state.stats && state.stats[rolled.stat] !== undefined) {
+                    state.stats[rolled.stat] += rolled.val;
+                }
+
+                if (!state.inventory) state.inventory = [];
+                state.inventory.push({ id: 'loot_' + Date.now(), name: rolled.name, type: rolled.type, rarity: rolled.rarity });
+                saveState();
+
+                // Trigger floating reward effect
+                if (window.triggerRewardFloatingEffect) {
+                    window.triggerRewardFloatingEffect(e.clientX, e.clientY, '+500 XP', '🎁 상자 오픈!');
+                }
+
+                alert(`🎁 [보상 상자 오픈 성공!]\n\n🎉 획득 아이템: ${rolled.name}\n등급: [${rolled.rarity}]\n설명: ${rolled.desc}`);
+                location.reload();
+            };
+        }
+    }
+
     window.addEventListener('load', initDungeonRewardsUI);
     window.addEventListener('load', initPenaltyQuest);
     window.addEventListener('load', initDungeonManagementUI);
     window.addEventListener('load', initDailyQuestManagementUI);
     window.addEventListener('load', initRankUpTrialSystem);
+    window.addEventListener('load', initStreakAndGachaSystem);
     window.addEventListener('load', applyCustomDungeons);
     window.addEventListener('load', initShop);
     window.addEventListener('load', initInventory);
