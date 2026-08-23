@@ -112,6 +112,8 @@ document.addEventListener('click', function(e) {
                 window.location.href = 'home.html';
             }
         }
+    }
+
     // Smart CTA Button handling for '임무 시작' / 'login.html' hero links
     const ctaBtn = e.target.closest('a[href*="login.html"]');
     if (ctaBtn && !ctaBtn.closest('#auth-form')) {
