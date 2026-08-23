@@ -2696,7 +2696,7 @@ document.addEventListener('click', function(e) {
                 }
             } else {
                 containerEl.innerHTML = `
-                    <div class="bg-surface-container-high/60 border border-outline-variant/30 rounded-xl p-4 flex items-center justify-between">
+                    <div class="bg-surface-container-high/60 border border-outline-variant/30 rounded-xl p-4 flex items-center justify-between w-full">
                         <div class="flex items-center gap-3">
                             <span class="material-symbols-outlined text-outline text-2xl">lock</span>
                             <div>
@@ -2704,7 +2704,7 @@ document.addEventListener('click', function(e) {
                                 <p class="text-xs text-outline">해금 필요 레벨: Lv.${trial.reqLevel} (현재 플레이어 레벨: Lv.${playerLevel})</p>
                             </div>
                         </div>
-                        <span class="text-xs text-outline font-mono">Lv.${playerLevel} / Lv.${trial.reqLevel}</span>
+                        <span class="text-xs text-outline font-mono whitespace-nowrap shrink-0">Lv.${playerLevel} / Lv.${trial.reqLevel}</span>
                     </div>
                 `;
             }
