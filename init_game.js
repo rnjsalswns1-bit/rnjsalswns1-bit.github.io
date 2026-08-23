@@ -1,3 +1,16 @@
+window.getGameSaveKey = function() {
+    try {
+        const session = localStorage.getItem('lvlup_current_user') || sessionStorage.getItem('lvlup_current_user');
+        if (session) {
+            const user = JSON.parse(session);
+            if (user && user.id) {
+                return 'game_save_state_' + user.id.toLowerCase().replace(/[^a-z0-9]/g, '_');
+            }
+        }
+    } catch(e) {}
+    return 'game_save_state_guest';
+};
+
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.getRegistrations().then(registrations => {
         for (let registration of registrations) {
