@@ -128,10 +128,10 @@ document.addEventListener('click', function(e) {
 
 // Global wheel scroll delegation: Allows scrolling anywhere on screen (even dark background overlay) to scroll open modal content smoothly
 document.addEventListener('wheel', function(e) {
-    const activeModal = document.querySelector('div[id*="modal"]:not(.hidden), div[class*="modal"]:not(.hidden)');
+    const activeModal = document.querySelector('#dungeon-edit-modal-new:not(.hidden), #system-settings-modal:not(.hidden), div[id*="modal"]:not(.hidden)');
     if (activeModal) {
-        const scrollable = activeModal.querySelector('.overflow-y-auto') || activeModal;
-        if (scrollable && scrollable.scrollHeight > scrollable.clientHeight) {
+        const scrollable = activeModal.querySelector('#dungeon-edit-scroll-body') || activeModal.querySelector('.overflow-y-auto');
+        if (scrollable) {
             scrollable.scrollTop += e.deltaY;
         }
     }

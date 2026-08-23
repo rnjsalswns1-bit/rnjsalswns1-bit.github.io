@@ -1584,9 +1584,9 @@
 </main>
 
 <!-- NEW Dungeon Management Modal -->
-<div id="dungeon-edit-modal-new" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+<div id="dungeon-edit-modal-new" class="hidden fixed inset-0 z-[100] overflow-y-auto p-4 flex flex-col items-center justify-center">
     <div class="fixed inset-0 bg-abyss-black/80 backdrop-blur-sm pointer-events-none"></div>
-    <div class="bg-surface-container-highest border border-outline-variant/30 rounded-xl p-lg w-full max-w-md relative shadow-2xl flex flex-col max-h-[90vh] z-10 my-auto">
+    <div class="bg-surface-container-highest border border-outline-variant/30 rounded-xl p-lg w-full max-w-md relative shadow-2xl flex flex-col my-auto z-10">
         <div class="flex justify-between items-center mb-md border-b border-outline-variant/20 pb-4">
             <h2 class="font-section-title text-section-title text-white">던전 (메인 퀘스트) 전체 설정</h2>
             <button class="text-on-surface-variant hover:text-white" onclick="document.getElementById('dungeon-edit-modal-new').classList.add('hidden')">
@@ -1594,7 +1594,7 @@
             </button>
         </div>
         
-        <div class="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-md">
+        <div id="dungeon-edit-scroll-body" class="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-md max-h-[70vh]">
             <!-- Dropdown Selector -->
             <div>
                 <label class="block font-caption text-on-surface-variant mb-2">수정할 던전 선택 (총 18개)</label>
