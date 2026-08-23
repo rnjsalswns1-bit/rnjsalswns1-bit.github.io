@@ -100,25 +100,16 @@ document.addEventListener('click', function(e) {
         return;
     }
     
-    // Header Logo Click Handling: Navigate to dashboard.html for logged-in users, index.html for guests
+    // Header Logo Click Handling: Always navigate to home.html (the initial landing page)
     const logoTarget = e.target.closest('header a, header div');
     if (logoTarget && logoTarget.closest('header')) {
         const textContent = logoTarget.textContent || '';
         const imgAlt = (e.target.getAttribute && e.target.getAttribute('alt')) || '';
         if (textContent.includes('LEVEL UP LIFE') || imgAlt.includes('Level Up Life Logo')) {
-            const session = localStorage.getItem('lvlup_current_user') || sessionStorage.getItem('lvlup_current_user');
-            if (session) {
-                if (!window.location.pathname.endsWith('dashboard.html')) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    window.location.href = 'dashboard.html';
-                }
-            } else {
-                if (!window.location.pathname.endsWith('index.html') && !window.location.pathname.endsWith('home.html')) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    window.location.href = 'index.html';
-                }
+            if (!window.location.pathname.endsWith('home.html') && !window.location.pathname.endsWith('index.html')) {
+                e.preventDefault();
+                e.stopPropagation();
+                window.location.href = 'home.html';
             }
         }
     }
