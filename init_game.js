@@ -126,6 +126,17 @@ document.addEventListener('click', function(e) {
     }
 }, true);
 
+// Global wheel scroll delegation: Allows scrolling anywhere on screen (even dark background overlay) to scroll open modal content smoothly
+document.addEventListener('wheel', function(e) {
+    const activeModal = document.querySelector('div[id*="modal"]:not(.hidden), div[class*="modal"]:not(.hidden)');
+    if (activeModal) {
+        const scrollable = activeModal.querySelector('.overflow-y-auto') || activeModal;
+        if (scrollable && scrollable.scrollHeight > scrollable.clientHeight) {
+            scrollable.scrollTop += e.deltaY;
+        }
+    }
+}, { passive: true });
+
 (function() {
     window.DEFAULT_DUNGEONS = [
         { id: 'e1', rank: 'E', name: '운동', desc: '꾸준한 신체 단련 미션입니다.' },
