@@ -2610,10 +2610,151 @@ document.addEventListener('click', function(e) {
         }
     }
 
+    // ====== RANK-UP TRIAL SYSTEM (승급전 시스템) ======
+    window.RANK_TRIALS = {
+        'D': { reqLevel: 5, rankName: 'D급 헌터', missionTitle: 'D급 헌터 승급 시험', missionDesc: '💪 체력 증진: 푸쉬업 50회 & 스쿼트 50회 완수', rewardText: 'D급 던전 3종 전격 해금' },
+        'C': { reqLevel: 10, rankName: 'C급 헌터', missionTitle: 'C급 헌터 승급 시험', missionDesc: '🧠 지능/체력 확장: 종합 미션 3종 완수', rewardText: 'C급 던전 3종 전격 해금' },
+        'B': { reqLevel: 15, rankName: 'B급 헌터', missionTitle: 'B급 헌터 승급 시험', missionDesc: '🛡️ 상급 마수 정벌: 상급 루틴 및 정신력 미션 완수', rewardText: 'B급 던전 3종 전격 해금' },
+        'A': { reqLevel: 20, rankName: 'A급 헌터', missionTitle: 'A급 헌터 승급 시험', missionDesc: '⚡ 최정예 헌터: 마왕성 관문 돌파 미션 완수', rewardText: 'A급 던전 3종 전격 해금' },
+        'S': { reqLevel: 25, rankName: 'S급 헌터', missionTitle: 'S급 헌터 승급 시험', missionDesc: '👑 국가권력급 헌터: 최강의 헌터 최종 시험 완수', rewardText: 'S급 전설 던전 3종 전격 해금' }
+    };
+
+    function initRankUpTrialSystem() {
+        if (!state.hunterRank) state.hunterRank = 'E';
+        if (!state.unlockedRanks) state.unlockedRanks = ['E'];
+
+        const playerLevel = state.level || 1;
+        const ranks = ['E', 'D', 'C', 'B', 'A', 'S'];
+
+        // Determine current target trial rank
+        let targetRank = null;
+        for (let i = 1; i < ranks.length; i++) {
+            const r = ranks[i];
+            if (!state.unlockedRanks.includes(r)) {
+                targetRank = r;
+                break;
+            }
+        }
+
+        // 1. Render Rank-Up Trial Banner if targetRank exists
+        const renderBanner = (containerEl) => {
+            if (!containerEl) return;
+            if (!targetRank) {
+                containerEl.innerHTML = `
+                    <div class="bg-gradient-to-r from-legendary-gold/20 via-primary/20 to-legendary-gold/20 border border-legendary-gold/50 rounded-xl p-4 flex items-center justify-between shadow-[0_0_20px_rgba(234,179,8,0.3)]">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-legendary-gold text-3xl">workspace_premium</span>
+                            <div>
+                                <h3 class="font-bold text-white text-base">👑 최고 등급(S급 헌터) 달성!</h3>
+                                <p class="text-xs text-on-surface-variant">모든 던전 등급이 전격 해금되었습니다.</p>
+                            </div>
+                        </div>
+                        <span class="bg-legendary-gold text-black text-xs font-bold px-3 py-1 rounded-full">S급 최강 헌터</span>
+                    </div>
+                `;
+                return;
+            }
+
+            const trial = RANK_TRIALS[targetRank];
+            const isEligible = playerLevel >= trial.reqLevel;
+
+            if (isEligible) {
+                containerEl.innerHTML = `
+                    <div class="bg-gradient-to-r from-epic-purple/40 via-primary/30 to-epic-purple/40 border-2 border-primary rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-[0_0_25px_rgba(124,58,237,0.5)] animate-pulse">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-full bg-primary/20 border border-primary flex items-center justify-center text-primary">
+                                <span class="material-symbols-outlined text-2xl">military_tech</span>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="bg-primary text-black text-xs font-black px-2 py-0.5 rounded-full uppercase tracking-wider">🔥 승급전 도전 가능</span>
+                                    <h3 class="font-bold text-white text-base">${trial.missionTitle}</h3>
+                                </div>
+                                <p class="text-xs text-on-surface-variant mt-1">${trial.missionDesc} (${trial.rewardText})</p>
+                            </div>
+                        </div>
+                        <button id="btn-challenge-rank-trial" class="bg-primary hover:bg-primary-fixed text-black font-black px-6 py-2.5 rounded-lg shadow-lg hover:scale-105 transition-all text-sm flex items-center gap-2">
+                            <span class="material-symbols-outlined text-lg">workspace_premium</span> 승급 시험 완료 및 ${trial.rankName} 승급!
+                        </button>
+                    </div>
+                `;
+
+                const btn = containerEl.querySelector('#btn-challenge-rank-trial');
+                if (btn) {
+                    btn.onclick = () => {
+                        state.hunterRank = targetRank;
+                        if (!state.unlockedRanks.includes(targetRank)) {
+                            state.unlockedRanks.push(targetRank);
+                        }
+                        if (!state.customProfile) state.customProfile = {};
+                        state.customProfile.title = targetRank + '급 헌터';
+                        saveState();
+
+                        alert(`🎉 축하합니다!\n\n[${trial.rankName}] 승급 시험을 완수하여 승급하셨습니다!\n${trial.rewardText}`);
+                        location.reload();
+                    };
+                }
+            } else {
+                containerEl.innerHTML = `
+                    <div class="bg-surface-container-high/60 border border-outline-variant/30 rounded-xl p-4 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-outline text-2xl">lock</span>
+                            <div>
+                                <h3 class="font-bold text-on-surface-variant text-sm">[${trial.missionTitle}] 오픈 대기 중</h3>
+                                <p class="text-xs text-outline">해금 필요 레벨: Lv.${trial.reqLevel} (현재 플레이어 레벨: Lv.${playerLevel})</p>
+                            </div>
+                        </div>
+                        <span class="text-xs text-outline font-mono">Lv.${playerLevel} / Lv.${trial.reqLevel}</span>
+                    </div>
+                `;
+            }
+        };
+
+        renderBanner(document.getElementById('rank-up-trial-banner-container'));
+        renderBanner(document.getElementById('rank-up-trial-banner-container-dash'));
+
+        // 2. Lock Dungeon Cards on quests.html
+        if (window.location.pathname.includes('quests')) {
+            const cards = document.querySelectorAll('#view-list .bg-dungeon-gray');
+            const cardRanks = ['E', 'E', 'E', 'D', 'D', 'D', 'C', 'C', 'C', 'B', 'B', 'B', 'A', 'A', 'A', 'S', 'S', 'S'];
+
+            cards.forEach((card, idx) => {
+                const rank = cardRanks[idx] || 'E';
+                const isUnlocked = state.unlockedRanks.includes(rank);
+
+                if (!isUnlocked) {
+                    const reqLv = RANK_TRIALS[rank] ? RANK_TRIALS[rank].reqLevel : 5;
+                    
+                    // Create lock overlay
+                    let overlay = card.querySelector('.dungeon-lock-overlay');
+                    if (!overlay) {
+                        overlay = document.createElement('div');
+                        overlay.className = 'dungeon-lock-overlay absolute inset-0 bg-abyss-black/90 backdrop-blur-md z-30 flex flex-col items-center justify-center p-4 text-center rounded-lg border border-outline-variant/30';
+                        overlay.innerHTML = `
+                            <span class="material-symbols-outlined text-4xl text-outline mb-2">lock</span>
+                            <h4 class="font-bold text-white text-sm mb-1">[${rank}급 던전 잠김]</h4>
+                            <p class="text-xs text-on-surface-variant mb-3">${rank}급 헌터 승급전 완료 필요<br>(Lv.${reqLv} 달성 시 도전 가능)</p>
+                            <button class="bg-outline-variant/20 hover:bg-epic-purple text-outline hover:text-white px-3 py-1.5 rounded text-xs font-bold transition-all border border-outline-variant/30">
+                                승급 시험 보기
+                            </button>
+                        `;
+                        card.appendChild(overlay);
+                        
+                        overlay.onclick = (e) => {
+                            e.stopPropagation();
+                            alert(`🔒 [${rank}급 던전 잠김]\n\n이 던전에 입장하려면 [${rank}급 헌터 승급 시험]을 통과해야 합니다.\n(요구 레벨: Lv.${reqLv} / 현재 레벨: Lv.${state.level || 1})`);
+                        };
+                    }
+                }
+            });
+        }
+    }
+
     window.addEventListener('load', initDungeonRewardsUI);
     window.addEventListener('load', initPenaltyQuest);
     window.addEventListener('load', initDungeonManagementUI);
     window.addEventListener('load', initDailyQuestManagementUI);
+    window.addEventListener('load', initRankUpTrialSystem);
     window.addEventListener('load', applyCustomDungeons);
     window.addEventListener('load', initShop);
     window.addEventListener('load', initInventory);
