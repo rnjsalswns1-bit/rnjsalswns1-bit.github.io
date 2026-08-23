@@ -112,6 +112,20 @@ document.addEventListener('click', function(e) {
                 window.location.href = 'home.html';
             }
         }
+    // Smart CTA Button handling for '임무 시작' / 'login.html' links
+    const ctaBtn = e.target.closest('a[href*="login.html"], button, a');
+    if (ctaBtn) {
+        const textContent = ctaBtn.textContent || '';
+        const href = ctaBtn.getAttribute ? ctaBtn.getAttribute('href') : '';
+        if (textContent.includes('임무 시작') || (href && href.includes('login.html'))) {
+            const session = localStorage.getItem('lvlup_current_user') || sessionStorage.getItem('lvlup_current_user');
+            if (session) {
+                // User is already logged in! Go straight to dashboard.html instead of login.html!
+                e.preventDefault();
+                e.stopPropagation();
+                window.location.href = 'dashboard.html';
+            }
+        }
     }
 }, true);
 
