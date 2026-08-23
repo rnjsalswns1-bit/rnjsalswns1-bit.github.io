@@ -1189,7 +1189,7 @@ document.addEventListener('click', function(e) {
     // 1. Get or init custom settings in state
     let state = null;
     try {
-        state = JSON.parse(localStorage.getItem(getGameSaveKey())) || {};
+        state = JSON.parse(localStorage.getItem(window.getGameSaveKey())) || {};
     } catch(e) { state = {}; }
 
     if (!state.customProfile) {
@@ -1226,7 +1226,7 @@ document.addEventListener('click', function(e) {
     }
 
     function saveState() {
-        localStorage.setItem(getGameSaveKey(), JSON.stringify(state));
+        localStorage.setItem(window.getGameSaveKey(), JSON.stringify(state));
     }
 
     // 2. Apply Custom Settings on load
