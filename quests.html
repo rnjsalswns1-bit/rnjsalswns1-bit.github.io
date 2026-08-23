@@ -1595,16 +1595,22 @@
         </div>
         
         <div id="dungeon-edit-scroll-body" class="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-md max-h-[70vh]">
-            <!-- Dropdown Selector -->
+            <!-- Custom Dropdown Selector -->
             <div>
                 <label class="block font-caption text-on-surface-variant mb-2">수정할 던전 선택 (총 18개)</label>
-                <div class="relative">
-                    <select id="dungeon-select-new" class="w-full appearance-none bg-abyss-black border border-outline-variant/30 text-on-surface rounded-lg py-3 px-4 focus:outline-none focus:border-epic-purple focus:ring-1 focus:ring-epic-purple cursor-pointer transition-colors">
+                <div class="relative" id="custom-dungeon-select-wrapper">
+                    <button type="button" id="custom-dungeon-select-trigger" class="w-full bg-abyss-black border border-outline-variant/30 text-on-surface rounded-lg py-3 px-4 flex justify-between items-center focus:outline-none focus:border-epic-purple focus:ring-1 focus:ring-epic-purple cursor-pointer transition-colors text-left font-bold">
+                        <span id="custom-dungeon-select-label">[E급] 운동</span>
+                        <span class="material-symbols-outlined text-on-surface-variant transition-transform" id="custom-dungeon-select-icon">expand_more</span>
+                    </button>
+                    
+                    <!-- Custom Scrollable Options List -->
+                    <div id="custom-dungeon-select-options" class="hidden absolute left-0 right-0 top-full mt-1 bg-dungeon-gray border border-epic-purple/60 rounded-lg shadow-[0_10px_30px_rgba(0,0,0,0.9)] z-50 max-h-56 overflow-y-auto custom-scrollbar py-1">
                         <!-- Populated by JS -->
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-on-surface-variant">
-                        <span class="material-symbols-outlined">expand_more</span>
                     </div>
+                    
+                    <!-- Hidden Select for compatibility -->
+                    <select id="dungeon-select-new" class="hidden"></select>
                 </div>
             </div>
             

@@ -126,16 +126,7 @@ document.addEventListener('click', function(e) {
     }
 }, true);
 
-// Global wheel scroll delegation: Allows scrolling anywhere on screen (even dark background overlay) to scroll open modal content smoothly
-document.addEventListener('wheel', function(e) {
-    const activeModal = document.querySelector('#dungeon-edit-modal-new:not(.hidden), #system-settings-modal:not(.hidden), div[id*="modal"]:not(.hidden)');
-    if (activeModal) {
-        const scrollable = activeModal.querySelector('#dungeon-edit-scroll-body') || activeModal.querySelector('.overflow-y-auto');
-        if (scrollable) {
-            scrollable.scrollTop += e.deltaY;
-        }
-    }
-}, { passive: true });
+
 
 (function() {
     window.DEFAULT_DUNGEONS = [
@@ -2067,16 +2058,64 @@ document.addEventListener('wheel', function(e) {
             const nameInput = document.getElementById('dungeon-name-input-new');
             const descInput = document.getElementById('dungeon-desc-input-new');
             const saveBtn = document.getElementById('btn-save-dungeon-new');
+            
+            const customTrigger = document.getElementById('custom-dungeon-select-trigger');
+            const customLabel = document.getElementById('custom-dungeon-select-label');
+            const customOptions = document.getElementById('custom-dungeon-select-options');
+            const customIcon = document.getElementById('custom-dungeon-select-icon');
 
             if (selectEl && nameInput && descInput && saveBtn) {
-                // Populate dropdown
+                // Populate both selectEl and customOptions list
                 selectEl.innerHTML = '';
+                if (customOptions) customOptions.innerHTML = '';
+
                 DEFAULT_DUNGEONS.forEach(d => {
+                    // Populate native select
                     const opt = document.createElement('option');
                     opt.value = d.id;
                     opt.textContent = `[${d.rank}급] ${d.name}`;
                     selectEl.appendChild(opt);
+
+                    // Populate custom select option div
+                    if (customOptions) {
+                        const item = document.createElement('div');
+                        item.className = 'px-4 py-2.5 hover:bg-epic-purple/30 text-on-surface hover:text-white font-medium cursor-pointer transition-colors flex items-center justify-between border-b border-outline-variant/10 last:border-0';
+                        item.dataset.value = d.id;
+                        item.innerHTML = `<span class="font-bold text-sm">[${d.rank}급] ${d.name}</span><span class="text-xs text-outline">${d.desc.substring(0, 14)}...</span>`;
+                        
+                        item.onclick = (e) => {
+                            e.stopPropagation();
+                            selectEl.value = d.id;
+                            if (customLabel) customLabel.textContent = `[${d.rank}급] ${d.name}`;
+                            if (customOptions) customOptions.classList.add('hidden');
+                            if (customIcon) customIcon.style.transform = 'rotate(0deg)';
+                            loadSelected();
+                        };
+                        customOptions.appendChild(item);
+                    }
                 });
+
+                if (customTrigger && customOptions) {
+                    customTrigger.onclick = (e) => {
+                        e.stopPropagation();
+                        const isHidden = customOptions.classList.contains('hidden');
+                        if (isHidden) {
+                            customOptions.classList.remove('hidden');
+                            if (customIcon) customIcon.style.transform = 'rotate(180deg)';
+                        } else {
+                            customOptions.classList.add('hidden');
+                            if (customIcon) customIcon.style.transform = 'rotate(0deg)';
+                        }
+                    };
+
+                    // Close custom dropdown on outside click
+                    document.addEventListener('click', (e) => {
+                        if (!customTrigger.contains(e.target) && !customOptions.contains(e.target)) {
+                            customOptions.classList.add('hidden');
+                            if (customIcon) customIcon.style.transform = 'rotate(0deg)';
+                        }
+                    });
+                }
 
                 const loadSelected = () => {
                     const id = selectEl.value;
@@ -2106,6 +2145,8 @@ document.addEventListener('wheel', function(e) {
                 // Load initial
                 if (DEFAULT_DUNGEONS.length > 0) {
                     selectEl.value = DEFAULT_DUNGEONS[0].id;
+                    const def = DEFAULT_DUNGEONS[0];
+                    if (customLabel) customLabel.textContent = `[${def.rank}급] ${def.name}`;
                     loadSelected();
                 }
             }
