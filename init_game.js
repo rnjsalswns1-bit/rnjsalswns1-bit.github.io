@@ -1,3 +1,16 @@
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(registrations => {
+        for (let registration of registrations) {
+            registration.unregister();
+        }
+    });
+    if (window.caches) {
+        caches.keys().then(names => {
+            for (let name of names) caches.delete(name);
+        });
+    }
+}
+
 window.handleSaveProfile = function(e) {
     if (e) {
         if (e.preventDefault) e.preventDefault();
