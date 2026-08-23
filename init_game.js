@@ -2501,9 +2501,119 @@ document.addEventListener('click', function(e) {
         });
     }
 
+    function initDailyQuestManagementUI() {
+        if (window.location.pathname.includes('dashboard')) {
+            const selectEl = document.getElementById('dq-select-new');
+            const titleInput = document.getElementById('dq-title-input-new');
+            const descInput = document.getElementById('dq-desc-input-new');
+            const statSelect = document.getElementById('dq-stat-select-new');
+            const saveBtn = document.getElementById('btn-save-dq-new');
+
+            const customTrigger = document.getElementById('custom-dq-select-trigger');
+            const customLabel = document.getElementById('custom-dq-select-label');
+            const customOptions = document.getElementById('custom-dq-select-options');
+            const customIcon = document.getElementById('custom-dq-select-icon');
+
+            if (selectEl && titleInput && descInput && statSelect && saveBtn) {
+                // Populate options
+                selectEl.innerHTML = '';
+                if (customOptions) customOptions.innerHTML = '';
+
+                const dqs = state.customDailyQuests || [];
+                dqs.forEach((q, idx) => {
+                    const opt = document.createElement('option');
+                    opt.value = idx;
+                    opt.textContent = `[퀘스트 ${idx + 1}] ${q.title}`;
+                    selectEl.appendChild(opt);
+
+                    if (customOptions) {
+                        const item = document.createElement('div');
+                        item.className = 'px-4 py-2.5 hover:bg-epic-purple/30 text-on-surface hover:text-white font-medium cursor-pointer transition-colors flex items-center justify-between border-b border-outline-variant/10 last:border-0';
+                        item.dataset.value = idx;
+                        item.innerHTML = `<span class="font-bold text-sm">[퀘스트 ${idx + 1}] ${q.title}</span><span class="text-xs text-outline">${q.category || ''}</span>`;
+                        
+                        item.onclick = (e) => {
+                            e.stopPropagation();
+                            selectEl.value = idx;
+                            if (customLabel) customLabel.textContent = `[퀘스트 ${idx + 1}] ${q.title}`;
+                            if (customOptions) customOptions.classList.add('hidden');
+                            if (customIcon) customIcon.style.transform = 'rotate(0deg)';
+                            loadSelected();
+                        };
+                        customOptions.appendChild(item);
+                    }
+                });
+
+                if (customTrigger && customOptions) {
+                    customTrigger.onclick = (e) => {
+                        e.stopPropagation();
+                        const isHidden = customOptions.classList.contains('hidden');
+                        if (isHidden) {
+                            customOptions.classList.remove('hidden');
+                            if (customIcon) customIcon.style.transform = 'rotate(180deg)';
+                        } else {
+                            customOptions.classList.add('hidden');
+                            if (customIcon) customIcon.style.transform = 'rotate(0deg)';
+                        }
+                    };
+
+                    document.addEventListener('click', (e) => {
+                        if (!customTrigger.contains(e.target) && !customOptions.contains(e.target)) {
+                            customOptions.classList.add('hidden');
+                            if (customIcon) customIcon.style.transform = 'rotate(0deg)';
+                        }
+                    });
+                }
+
+                const loadSelected = () => {
+                    const idx = parseInt(selectEl.value, 10);
+                    const q = state.customDailyQuests && state.customDailyQuests[idx];
+                    if (q) {
+                        titleInput.value = q.title || '';
+                        descInput.value = q.desc || '';
+                        if (q.rewardStat) statSelect.value = q.rewardStat;
+                    }
+                };
+
+                selectEl.addEventListener('change', loadSelected);
+
+                saveBtn.addEventListener('click', () => {
+                    const idx = parseInt(selectEl.value, 10);
+                    if (!state.customDailyQuests) state.customDailyQuests = [];
+                    if (state.customDailyQuests[idx]) {
+                        const statKey = statSelect.value;
+                        const categoryMap = {
+                            'str': '💪 힘(운동)',
+                            'agi': '⚡ 민첩(순발력)',
+                            'int': '🧠 지능(학습/독서)',
+                            'wil': '🛡️ 의지(습관/멘탈)',
+                            'cha': '✨ 매력(소통/자기관리)'
+                        };
+                        state.customDailyQuests[idx].title = titleInput.value.trim() || state.customDailyQuests[idx].title;
+                        state.customDailyQuests[idx].desc = descInput.value.trim() || state.customDailyQuests[idx].desc;
+                        state.customDailyQuests[idx].rewardStat = statKey;
+                        state.customDailyQuests[idx].category = categoryMap[statKey] || '💪 힘(운동)';
+
+                        saveState();
+                        document.getElementById('daily-quest-edit-modal-new').classList.add('hidden');
+                        alert('일일 퀘스트 정보가 성공적으로 저장되었습니다!');
+                        location.reload();
+                    }
+                });
+
+                if (dqs.length > 0) {
+                    selectEl.value = 0;
+                    if (customLabel) customLabel.textContent = `[퀘스트 1] ${dqs[0].title}`;
+                    loadSelected();
+                }
+            }
+        }
+    }
+
     window.addEventListener('load', initDungeonRewardsUI);
     window.addEventListener('load', initPenaltyQuest);
     window.addEventListener('load', initDungeonManagementUI);
+    window.addEventListener('load', initDailyQuestManagementUI);
     window.addEventListener('load', applyCustomDungeons);
     window.addEventListener('load', initShop);
     window.addEventListener('load', initInventory);
