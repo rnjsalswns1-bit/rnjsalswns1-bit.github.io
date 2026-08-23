@@ -163,7 +163,7 @@
 <span class="material-symbols-outlined">notifications</span>
 <span class="absolute top-0 right-0 w-2 h-2 bg-health-red rounded-full"></span>
 </button>
-<button class="text-on-surface-variant hover:text-primary-fixed-dim transition-colors scale-95 active:duration-150" onclick="document.getElementById('dungeon-edit-modal-new').classList.remove('hidden')">
+<button class="text-on-surface-variant hover:text-primary-fixed-dim transition-colors scale-95 active:duration-150">
 <span class="material-symbols-outlined">settings</span>
 </button>
 </div>
@@ -221,7 +221,10 @@
                         </h1>
 <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">목표를 달성하여 경험치와 보상을 획득하세요.</p>
 </div>
-<div class="text-left sm:text-right">
+<div class="flex items-center gap-md text-left sm:text-right">
+<button class="bg-epic-purple/20 hover:bg-epic-purple text-primary hover:text-white border border-epic-purple/50 px-3 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1 transition-all" onclick="document.getElementById('dungeon-edit-modal-new').classList.remove('hidden')">
+<span class="material-symbols-outlined text-sm">edit_note</span> 던전 관리 / 수정
+</button>
 <p class="font-body-sm text-body-sm text-outline">초기화까지: <span id="reset-timer-display" class="text-primary font-mono">14:23:09</span></p>
 </div>
 </div>
