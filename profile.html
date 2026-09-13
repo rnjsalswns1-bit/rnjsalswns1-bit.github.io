@@ -1,4 +1,5 @@
 <!DOCTYPE html><html class="dark" lang="ko"><head>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="init_game.js"></script>
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
@@ -179,7 +180,7 @@
 <aside class="bg-dungeon-gray dark:bg-dungeon-gray docked left-0 h-full w-64 border-r border-outline-variant/20 hidden md:flex flex-col py-lg px-md fixed top-0 z-40">
 <div class="flex flex-col items-center mb-xl pt-16">
 <div class="w-24 h-24 rounded-full bg-shadow-slate ghost-border overflow-hidden mb-sm relative glow-epic">
-<img alt="Sung Jin-Woo Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHTuIx9e5kpkUZYkQdaODnjCmH54Pmd3zhhB59qgLINBgEEUZbXnD7O4i66gY-rFfK8GdGFbCGAPnV_bksPH1jTV6O5OKRXVrVv47__GYXMDjlVtYDYx8ICRHDtvCeoWpMpzQB1JeBm80PeW_KgAkXPfJW5gA-g_nN_o-XtHR5fGviZhLhZgHCWbV5b4hMjstJHjO5iZ1UIsA3zN0nYqnA8KoKpDkY-Id9i6TDihqB8kF6WS1umaLN-BDVf4WTWzVZASpWL4yY65E">
+<img alt="Sung Jin-Woo Avatar" class="w-full h-full object-cover object-top" src="profile_avatar.jpg">
 <div class="absolute inset-0 bg-epic-purple/20 mix-blend-overlay"></div>
 </div>
 <h2 class="font-section-title text-section-title text-primary">성진우</h2>
@@ -210,6 +211,15 @@
 <div class="mt-auto pt-lg border-t border-outline-variant/20 flex flex-col gap-2">
 <button class="w-full bg-epic-purple text-white font-bold uppercase py-sm rounded-xl ghost-border hover:shadow-[0_0_12px_rgba(124,58,237,0.8)] transition-all mb-sm">프리미엄 멤버십</button>
 
+<button onclick="window.exportUserData()" class="w-full bg-epic-purple/20 text-primary-fixed border border-epic-purple/40 font-bold py-2 rounded-xl flex items-center justify-center gap-2 hover:bg-epic-purple/40 transition-all cursor-pointer">
+<span class="material-symbols-outlined text-sm">download</span>
+<span>계정 데이터 백업</span>
+</button>
+<label class="w-full bg-shadow-slate text-on-surface border border-outline-variant/40 font-bold py-2 rounded-xl flex items-center justify-center gap-2 hover:bg-surface-variant transition-all cursor-pointer mb-2">
+<span class="material-symbols-outlined text-sm">upload</span>
+<span>계정 데이터 복원</span>
+<input type="file" accept=".json" class="hidden" onchange="window.importUserData(this)">
+</label>
 <a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-shadow-slate hover:text-on-surface transition-all duration-300 ease-in-out rounded-xl" href="home.html">
 <span class="material-symbols-outlined">logout</span>
 <span class="font-card-title text-body-lg">로그아웃</span>
@@ -247,22 +257,22 @@
 <!-- Character Hero Section -->
 <section class="flex flex-col md:flex-row gap-lg items-center md:items-stretch">
 <!-- Silhouette/Avatar -->
-<div class="w-48 h-64 md:w-64 md:h-80 bg-dungeon-gray rounded-xl border border-shadow-slate flex-shrink-0 relative overflow-hidden group shadow-[inset_0_0_20px_rgba(0,0,0,0.8)]">
-<div class="absolute inset-0 bg-gradient-to-t from-abyss-black via-transparent to-transparent z-10"></div>
-<!-- Placeholder for Character Image -->
-<div class="w-full h-full bg-shadow-slate/50 flex items-center justify-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD4EWciyiMT1znL_R_rPFARakZa5Rcbr37IRtIQLV9BK97VwORt8aEQ1HfmvwidW1cvjAwFkP4BcZIOjVaWkA1qbBr9hDsd2HX1EDvyx0CSkJSGL9m1p_pePRoXAMYbonqaox4xJyDPq-Twms0p8Sxe_JdWGUWjzcWd8yWc182_tAUYUIdHk-oO7NaUX_cGTZugPm4uGUaAYuHJWdGQ4yGB1_Ggqa-1a1kFni8--3M2hrU-wGZ1SDSv0ZNw67FFkH0AKjNwQtyWpIg'); background-size: cover; background-position: center;">
-<img class="hidden" data-alt="A stylized, high-contrast digital illustration of a male protagonist from an RPG or dungeon crawler game. He stands in a confident, slightly shadowed pose, silhouetted against a dark, moody background. The lighting highlights sharp edges of his modern combat attire, with subtle glowing purple energy accents emanating from his hands or aura. The overall aesthetic is dark, sleek, and high-stakes anime style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdc5rGBv8jzxcu7LRs3D1r14o87KlVQgoxTVEt-2XCHyE2aSq0BHMmDA63lPnFNGfCF4vIHI0C3SvilfnL0_YXqNwwsT6zPas9YX3YQU5VeBLEHenxXZ2JmpO969uYzxEQ7OwIg8Mu9p9r-MkyLMSkVTq8pnwGw0y3VHqOJ8Ow8aBh-T8xJVBqylRQIdKi2wimzE3d0AS1Y26ZwYiR5D7ju9ZgG-3Ni7zoBfml_LDONsFYIRr1_HA-tJI4ookSYn3x5jsikj_Pfvo">
+<div class="w-48 h-64 md:w-64 md:h-80 bg-[#13141c] rounded-xl border border-epic-purple/40 flex-shrink-0 relative overflow-hidden group shadow-[0_0_20px_rgba(124,58,237,0.25)] flex flex-col items-center justify-center p-3">
+    <div class="w-full h-full flex items-center justify-center relative z-0">
+        <img alt="Sung Jin-Woo Fullbody" class="w-full h-full object-contain filter drop-shadow-[0_0_15px_rgba(124,58,237,0.35)] transition-transform duration-300 group-hover:scale-105" src="profile_avatar.jpg">
+    </div>
+    <!-- Level Badge overlay -->
+    <div class="absolute top-sm left-sm z-20 bg-abyss-black/80 backdrop-blur-sm border border-epic-purple/50 px-3 py-1 rounded-full flex items-center gap-2 shadow-[0_0_10px_rgba(124,58,237,0.3)]">
+        <span class="font-boss-display text-epic-purple text-xl">LV.</span>
+        <span class="font-level-display text-on-surface text-2xl font-bold">1</span>
+    </div>
 </div>
-<!-- Level Badge overlay -->
-<div class="absolute top-sm left-sm z-20 bg-abyss-black/80 backdrop-blur-sm border border-epic-purple/50 px-3 py-1 rounded-full flex items-center gap-2 shadow-[0_0_10px_rgba(124,58,237,0.3)]">
-<span class="font-boss-display text-epic-purple text-xl">LV.</span>
-<span class="font-level-display text-on-surface text-2xl">12</span>
-</div>
-</div>
-<!-- Core Info & Combat Power -->
 <div class="flex-1 flex flex-col justify-center space-y-md w-full">
 <div>
-<h1 class="font-boss-display text-boss-display text-on-surface leading-none mb-2">성진우</h1>
+<div class="flex items-baseline gap-2 mb-2">
+<h1 class="font-boss-display text-boss-display text-on-surface leading-none">성진우</h1>
+<span class="text-lg text-on-surface-variant font-mono font-medium" id="profile-display-bodyinfo">(178cm / 70kg)</span>
+</div>
 <p class="font-section-title text-on-surface-variant text-xl uppercase tracking-widest text-shadow-slate">그림자 군주 (미완성)</p>
 </div>
 <!-- HP / MP Bars -->

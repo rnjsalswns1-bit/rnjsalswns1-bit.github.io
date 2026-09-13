@@ -11,6 +11,55 @@ window.getGameSaveKey = function() {
     return 'game_save_state_guest';
 };
 
+window.autoAnalyzeQuest = function(titleStr) {
+    if (!titleStr) return { statKey: 'str', category: '💪 힘(운동)', rewardAmount: 0.5 };
+    const title = titleStr.trim();
+
+    let statKey = 'str';
+    let category = '💪 힘(운동)';
+
+    const intKeywords = ['코딩', '프로그래밍', '독서', '책', '공부', '영어', '영단어', '알고리즘', '파이썬', '자바', '학습', '강의', '자격증', '연구', '수학', '분석', '개발', 'C++', 'JS', '스크립트'];
+    const agiKeywords = ['달리기', '러닝', '조깅', '줄넘기', '마라톤', '자전거', '유산소', '산책', '스프린트', 'km', '킬로'];
+    const wilKeywords = ['명상', '기상', '일찍', '미라클모닝', '금주', '금연', '정리', '청소', '다이어트', '식단', '물', '습관', '윗몸'];
+    const chaKeywords = ['피부', '세안', '팩', '외출', '대화', '소통', '패션', '자기관리', '메이크업', '모임', '약속'];
+
+    if (intKeywords.some(kw => title.includes(kw))) {
+        statKey = 'int'; category = '🧠 지능(학습/독서)';
+    } else if (agiKeywords.some(kw => title.includes(kw))) {
+        statKey = 'agi'; category = '⚡ 민첩(순발력/지구력)';
+    } else if (wilKeywords.some(kw => title.includes(kw))) {
+        statKey = 'wil'; category = '🛡️ 의지(습관/멘탈)';
+    } else if (chaKeywords.some(kw => title.includes(kw))) {
+        statKey = 'cha'; category = '✨ 매력(소통/자기관리)';
+    }
+
+    let rewardAmount = 0.5;
+    const numMatch = title.match(/(\d+)\s*(회|개|km|킬로|시간|분|페이지|p)?/i);
+    if (numMatch) {
+        const val = parseInt(numMatch[1], 10);
+        const unit = (numMatch[2] || '').toLowerCase();
+        
+        if (unit === '시간') {
+            rewardAmount = Math.max(0.5, Math.min(3.0, val * 0.5));
+        } else if (unit === '분') {
+            rewardAmount = Math.max(0.5, Math.min(3.0, (val / 30) * 0.5));
+        } else if (unit === 'km' || unit === '킬로') {
+            rewardAmount = Math.max(0.5, Math.min(3.0, (val / 5) * 0.5));
+        } else if (unit === '페이지' || unit === 'p') {
+            rewardAmount = Math.max(0.5, Math.min(3.0, (val / 20) * 0.5));
+        } else {
+            if (val >= 500) rewardAmount = 2.5;
+            else if (val >= 300) rewardAmount = 1.5;
+            else if (val >= 200) rewardAmount = 1.0;
+            else if (val >= 100) rewardAmount = 0.5;
+            else rewardAmount = 0.5;
+        }
+    }
+
+    rewardAmount = Math.round(rewardAmount * 10) / 10;
+    return { statKey, category, rewardAmount };
+};
+
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.getRegistrations().then(registrations => {
         for (let registration of registrations) {
@@ -53,7 +102,7 @@ window.handleSaveProfile = function(e) {
         } catch(e) {}
 
         if (!curState.customProfile) {
-            curState.customProfile = { name: '성진우', title: 'Lv.1', avatarUrl: '' };
+            curState.customProfile = { name: '성진우', title: 'Lv.1', avatarUrl: 'profile_avatar.jpg', height: 178, weight: 70 };
         }
 
         if (nameVal) {
@@ -68,13 +117,18 @@ window.handleSaveProfile = function(e) {
             } catch(err) {}
         }
 
+        const hInput = document.getElementById('sys-setting-height-input') || document.getElementById('set-profile-height');
+        const wInput = document.getElementById('sys-setting-weight-input') || document.getElementById('set-profile-weight');
+        if (hInput && hInput.value) curState.customProfile.height = parseFloat(hInput.value);
+        if (wInput && wInput.value) curState.customProfile.weight = parseFloat(wInput.value);
+
         const avatarInput = document.getElementById('sys-setting-avatar-input');
         if (avatarInput && avatarInput.files && avatarInput.files[0]) {
             const reader = new FileReader();
             reader.onload = function(ev) {
                 curState.customProfile.avatarUrl = ev.target.result;
                 localStorage.setItem(saveKey, JSON.stringify(curState));
-                alert('프로필 닉네임 및 이미지가 성공적으로 저장되었습니다!');
+                alert('프로필 변경사항이 성공적으로 저장되었습니다!');
                 const modal = document.getElementById('system-settings-modal');
                 if (modal) modal.classList.add('hidden');
                 location.reload();
@@ -82,7 +136,7 @@ window.handleSaveProfile = function(e) {
             reader.readAsDataURL(avatarInput.files[0]);
         } else {
             localStorage.setItem(saveKey, JSON.stringify(curState));
-            alert('프로필 닉네임이 성공적으로 저장되었습니다!');
+            alert('프로필 변경사항이 성공적으로 저장되었습니다!');
             const modal = document.getElementById('system-settings-modal');
             if (modal) modal.classList.add('hidden');
             location.reload();
@@ -156,6 +210,16 @@ document.addEventListener('click', function(e) {
         exp: 0,
         hp: 100,
         mp: 25,
+        statPoints: 0,
+        stats: {
+            str: 10,
+            agi: 10,
+            dex: 10,
+            int: 10,
+            wil: 10,
+            disc: 10,
+            cha: 10
+        },
         lastQuestDate: '',
         loginDays: 1,
         dungeonsCleared: 0,
@@ -231,7 +295,17 @@ document.addEventListener('click', function(e) {
     // Initialize or load state
     let state = null;
     const saveKey = getGameSaveKey();
-    const saved = localStorage.getItem(saveKey);
+    let saved = localStorage.getItem(saveKey);
+
+    // Auto-Migration & Data Protection: If user key is empty/reset, copy from guest save data if available
+    if (!saved || saved === 'null' || saved === '{}') {
+        const guestData = localStorage.getItem('game_save_state_guest');
+        if (guestData && saveKey !== 'game_save_state_guest') {
+            saved = guestData;
+            localStorage.setItem(saveKey, guestData);
+        }
+    }
+
     if (saved) {
         try {
             state = JSON.parse(saved);
@@ -269,6 +343,12 @@ document.addEventListener('click', function(e) {
             // Ensure achievement tracking fields exist
             if (state.loginDays === undefined) state.loginDays = 1;
             if (state.dungeonsCleared === undefined) state.dungeonsCleared = 0;
+
+            // Ensure stats structure exists without resetting user earned stats on reload
+            if (!state.stats) {
+                state.stats = { str: 10, agi: 10, dex: 10, int: 10, wil: 10, disc: 10, cha: 10 };
+                if (state.statPoints === undefined) state.statPoints = 0;
+            }
 
             localStorage.setItem(getGameSaveKey(), JSON.stringify(state));
         } catch(e) {}
@@ -315,6 +395,7 @@ document.addEventListener('click', function(e) {
     const today = getTodayString();
     if (state.lastQuestDate !== today) {
         state.dailyQuests = {};
+        state.dailyProgress = { date: today, completions: [false, false, false], submitted: false };
         // Reset dungeons
         if (state.dungeons) {
             state.dungeons.e_rank = { pushups: 0, situps: 0, run: 0, isCompleted: false };
@@ -417,6 +498,11 @@ document.addEventListener('click', function(e) {
         }
 
         function logoutUser() {
+            try {
+                if (state) {
+                    localStorage.setItem('game_save_state_guest', JSON.stringify(state));
+                }
+            } catch(e) {}
             localStorage.removeItem('lvlup_current_user');
             sessionStorage.removeItem('lvlup_current_user');
             window.location.href = 'login.html';
@@ -427,8 +513,9 @@ document.addEventListener('click', function(e) {
         const currentPath = window.location.pathname.toLowerCase();
         const isProtected = protectedPages.some(page => currentPath.includes(page));
 
-        if (isProtected && !getCurrentUser()) {
-            window.location.href = 'login.html';
+        if (!getCurrentUser()) {
+            // Auto-login default user so any page works seamlessly from anywhere
+            setCurrentUser({ id: 'hunter@levelup.com', name: '성진우' }, true);
         }
 
         // Add missing button & logout navigations
@@ -509,15 +596,21 @@ document.addEventListener('click', function(e) {
                     const users = getUsers();
 
                     if (currentMode === 'login') {
-                        const existingUser = users.find(u => u.id.toLowerCase() === id.toLowerCase() && u.pw === pw);
-                        if (existingUser) {
+                        let existingUser = users.find(u => u.id.toLowerCase() === id.toLowerCase() && u.pw === pw);
+                        if (!existingUser && !users.some(u => u.id.toLowerCase() === id.toLowerCase())) {
+                            // Automatically register previously existing accounts on the fly
+                            existingUser = { id: id, pw: pw, name: id.split('@')[0] };
+                            users.push(existingUser);
+                            saveUsers(users);
+                        }
+                        if (existingUser && existingUser.pw === pw) {
                             setCurrentUser({ id: existingUser.id, name: existingUser.name }, rememberMe ? rememberMe.checked : true);
                             showAlert('로그인 성공! 대시보드로 이동합니다...', false);
                             setTimeout(() => {
                                 window.location.href = 'dashboard.html';
                             }, 500);
                         } else {
-                            showAlert('등록되지 않은 플레이어 ID이거나 시크릿 키가 일치하지 않습니다.', true);
+                            showAlert('시크릿 키(비밀번호)가 일치하지 않습니다.', true);
                         }
                     } else {
                         // Signup mode
@@ -1196,13 +1289,17 @@ document.addEventListener('click', function(e) {
         state = JSON.parse(localStorage.getItem(window.getGameSaveKey())) || {};
     } catch(e) { state = {}; }
 
-    if (!state.customProfile) {
-        state.customProfile = { name: '성진우', title: 'Lv.1', avatarUrl: '' };
-    } else if (state.customProfile.title === 'E급 헌터') {
-        state.customProfile.title = 'Lv.1';
-    }
-    
-    // Add default stats if not exists
+        if (!state.customProfile) {
+            state.customProfile = { name: '성진우', title: 'Lv.1', avatarUrl: 'profile_avatar.jpg' };
+        } else if (!state.customProfile.avatarUrl || state.customProfile.avatarUrl.includes('googleusercontent')) {
+            state.customProfile.avatarUrl = 'profile_avatar.jpg';
+        }
+
+        const targetAvatar = (state.customProfile && state.customProfile.avatarUrl && !state.customProfile.avatarUrl.includes('googleusercontent')) ? state.customProfile.avatarUrl : 'profile_avatar.jpg';
+        const sidebarAvatars = document.querySelectorAll('aside img, img[alt*="Avatar"]');
+        sidebarAvatars.forEach(img => {
+            if (img) img.src = targetAvatar;
+        });
     if (!state.stats) {
         state.stats = { str: 10, agi: 10, int: 10, wil: 10, cha: 10 };
     }
@@ -1210,23 +1307,29 @@ document.addEventListener('click', function(e) {
     if (!state.customDailyQuests || state.customDailyQuests.length !== 3 || state.customDailyQuests[0].title === '아침 달리기') {
         state.customDailyQuests = [
             { id: 'dq_1', title: '푸쉬업 100회', desc: '상태창의 퀘스트를 완수하세요.', rarity: '일반', category: '💪 힘(운동)', rewardStat: 'str' },
-            { id: 'dq_2', title: '윗몸 일으키기 100회', desc: '상태창의 퀘스트를 완수하세요.', rarity: '일반', category: '💪 힘(운동)', rewardStat: 'str' },
-            { id: 'dq_3', title: '달리기 10km', desc: '상태창의 퀘스트를 완수하세요.', rarity: '일반', category: '💪 힘(운동)', rewardStat: 'agi' }
+            { id: 'dq_2', title: '윗몸 일으키기 100회', desc: '상태창의 퀘스트를 완수하세요.', rarity: '일반', category: '🛡️ 의지(습관/멘탈)', rewardStat: 'wil' },
+            { id: 'dq_3', title: '달리기 10km', desc: '상태창의 퀘스트를 완수하세요.', rarity: '일반', category: '⚡ 민첩(순발력/지구력)', rewardStat: 'agi' }
         ];
     } else {
-        // Enforce categories and add rewardStat if missing
-        if(state.customDailyQuests[0]) { state.customDailyQuests[0].category = '💪 힘(운동)'; if(!state.customDailyQuests[0].rewardStat) state.customDailyQuests[0].rewardStat = 'str'; }
-        if(state.customDailyQuests[1]) { state.customDailyQuests[1].category = '💪 힘(운동)'; if(!state.customDailyQuests[1].rewardStat) state.customDailyQuests[1].rewardStat = 'str'; }
-        if(state.customDailyQuests[2]) { state.customDailyQuests[2].category = '💪 힘(운동)'; if(!state.customDailyQuests[2].rewardStat) state.customDailyQuests[2].rewardStat = 'agi'; }
+        if (state.customDailyQuests[0] && state.customDailyQuests[1] && state.customDailyQuests[0].title === state.customDailyQuests[1].title && state.customDailyQuests[0].title === '윗몸 일으키기 100회') {
+            state.customDailyQuests[0].title = '푸쉬업 100회';
+            state.customDailyQuests[0].rewardStat = 'str';
+            state.customDailyQuests[0].category = '💪 힘(운동)';
+        }
+        if(state.customDailyQuests[0] && !state.customDailyQuests[0].rewardStat) state.customDailyQuests[0].rewardStat = 'str';
+        if(state.customDailyQuests[1] && !state.customDailyQuests[1].rewardStat) state.customDailyQuests[1].rewardStat = 'wil';
+        if(state.customDailyQuests[2] && !state.customDailyQuests[2].rewardStat) state.customDailyQuests[2].rewardStat = 'agi';
     }
     
     if (!state.level) state.level = 1;
     if (typeof state.exp === 'undefined') state.exp = 0;
     if (!state.maxExp) state.maxExp = 100;
     
-    const todayStr = new Date().toISOString().split('T')[0];
+    const dNow = new Date();
+    const todayStr = `${dNow.getFullYear()}-${String(dNow.getMonth() + 1).padStart(2, '0')}-${String(dNow.getDate()).padStart(2, '0')}`;
     if (!state.dailyProgress || state.dailyProgress.date !== todayStr) {
         state.dailyProgress = { date: todayStr, completions: [false, false, false], submitted: false };
+        localStorage.setItem(window.getGameSaveKey(), JSON.stringify(state));
     }
 
     function saveState() {
@@ -1235,7 +1338,9 @@ document.addEventListener('click', function(e) {
 
     // 2. Apply Custom Settings on load
     function applyCustomSettings() {
-        if (!state.customProfile) state.customProfile = { name: '성진우', title: 'LV. ' + (state.level || 1) };
+        if (!state.customProfile) state.customProfile = { name: '성진우', title: 'LV. ' + (state.level || 1), height: 178, weight: 70 };
+        if (!state.customProfile.height) state.customProfile.height = 178;
+        if (!state.customProfile.weight) state.customProfile.weight = 70;
         state.customProfile.title = 'LV. ' + state.level; // Dynamically sync with global level
         
         // Update Profile Name & Title
@@ -1247,6 +1352,13 @@ document.addEventListener('click', function(e) {
             }
         });
 
+        // Update Body Info (Height & Weight)
+        const bodyInfoTxt = `(${state.customProfile.height}cm / ${state.customProfile.weight}kg)`;
+        const bodyInfoEls = document.querySelectorAll('#card-display-bodyinfo, #profile-display-bodyinfo, .card-body-info');
+        bodyInfoEls.forEach(el => {
+            el.textContent = bodyInfoTxt;
+        });
+
         const titles = document.querySelectorAll('aside p, main p.text-on-surface-variant');
         titles.forEach(el => {
             if (el.textContent.trim().includes('E급 헌터') || el.textContent.trim().includes('Lv.') || el.textContent.trim().includes('LV.') || el.dataset.isCustomTitle) {
@@ -1255,10 +1367,9 @@ document.addEventListener('click', function(e) {
             }
         });
 
-        if (state.customProfile.avatarUrl) {
-            const avatars = document.querySelectorAll('img[alt*="Profile"], aside img[src*="aida-public"]');
-            avatars.forEach(img => img.src = state.customProfile.avatarUrl);
-        }
+        const finalAvatar = (state.customProfile && state.customProfile.avatarUrl && !state.customProfile.avatarUrl.includes('googleusercontent')) ? state.customProfile.avatarUrl : 'profile_avatar.jpg';
+        const avatarsToUpdate = document.querySelectorAll('aside img, img[alt*="Profile"], img[alt*="Avatar"]');
+        avatarsToUpdate.forEach(img => { if (img) img.src = finalAvatar; });
 
         // Update Dashboard Main EXP Bar
         function updateExpUI() {
@@ -1393,6 +1504,11 @@ document.addEventListener('click', function(e) {
                             if (state.dailyProgress.submitted) {
                                 // Cancel submission
                                 state.dailyProgress.submitted = false;
+                                 const dCancel = new Date();
+                                const todayStr = `${dCancel.getFullYear()}-${String(dCancel.getMonth() + 1).padStart(2, '0')}-${String(dCancel.getDate()).padStart(2, '0')}`;
+                                if (state.streakHistory) {
+                                    delete state.streakHistory[todayStr];
+                                }
                                 
                                 // Revoke EXP
                                 const expReward = (10 * state.level) * completedCount;
@@ -1401,9 +1517,12 @@ document.addEventListener('click', function(e) {
                                 // Revoke Stat Bonuses for Quests
                                 state.dailyProgress.completions.forEach((isCompleted, idx) => {
                                     if (isCompleted && state.customDailyQuests[idx]) {
-                                        const statKey = state.customDailyQuests[idx].rewardStat;
+                                        const q = state.customDailyQuests[idx];
+                                        const analysis = typeof window.autoAnalyzeQuest === 'function' ? window.autoAnalyzeQuest(q.title) : { statKey: q.rewardStat, rewardAmount: 0.5 };
+                                        const statKey = q.rewardStat || analysis.statKey;
                                         if (statKey && state.stats[statKey] !== undefined) {
-                                            state.stats[statKey] -= 0.5;
+                                            const statIncrease = q.rewardAmount || analysis.rewardAmount || 0.5;
+                                            state.stats[statKey] -= statIncrease;
                                             if (state.level === 1 && state.stats[statKey] < 10) {
                                                 state.stats[statKey] = 10;
                                             }
@@ -1441,14 +1560,16 @@ document.addEventListener('click', function(e) {
                                 // Grant Stat Bonuses for Quests
                                 state.dailyProgress.completions.forEach((isCompleted, idx) => {
                                     if (isCompleted && state.customDailyQuests[idx]) {
-                                        const statKey = state.customDailyQuests[idx].rewardStat;
+                                        const q = state.customDailyQuests[idx];
+                                        const analysis = typeof window.autoAnalyzeQuest === 'function' ? window.autoAnalyzeQuest(q.title) : { statKey: q.rewardStat, rewardAmount: 0.5 };
+                                        const statKey = q.rewardStat || analysis.statKey;
                                         if (statKey && state.stats[statKey] !== undefined) {
-                                            let statIncrease = 0.5;
+                                            let statIncrease = q.rewardAmount || analysis.rewardAmount || 0.5;
                                             
                                             // Equipment Buff: 그림자 군주의 단검 (dagger) for strength stats
                                             const hasDagger = state.inventory && state.inventory.find(i => i.id === 'dagger');
                                             if (hasDagger && statKey === 'str') {
-                                                statIncrease = 1.0;
+                                                statIncrease = Math.round((statIncrease * 1.5) * 10) / 10;
                                             }
                                             
                                             state.stats[statKey] += statIncrease;
@@ -1474,6 +1595,9 @@ document.addEventListener('click', function(e) {
                             if (typeof window.updateDashboardStatsUI === 'function') {
                                 window.updateDashboardStatsUI();
                             }
+                            if (typeof initStreakAndGachaSystem === 'function') {
+                                initStreakAndGachaSystem();
+                            }
                         };
                     }
                 }
@@ -1491,7 +1615,7 @@ document.addEventListener('click', function(e) {
         modal.id = 'custom-settings-modal';
         modal.className = 'fixed inset-0 bg-abyss-black/80 flex items-center justify-center z-[100] hidden';
         
-        const defaultAvatar = 'https://lh3.googleusercontent.com/aida-public/AB6AXuCQsPOWFcfYf7WAkzip9pYWBWl0L4qORIoh4EMa_FoPtwNnNNLQavbKltrGbpW2aUFYBEhXdZL-_O8bqRVKXgrbh7JgXInecWz8xYp9xxRIuoPC3zxI9XCv3rzjMXoOF8o8fn4_t1SWA8AAcsChxyfGyFA631ihqv9IBfZtD5PWf3VUGABfVrnySkJbXWVozoTsk8HLrATVghEGmHSevm2pWdxKb5RVH6jszadDhcfY6DJHHWtx3r-ovv9wMH0Gm9D1FUjllQ6niFo';
+        const defaultAvatar = 'profile_avatar.jpg';
         const currentAvatar = state.customProfile.avatarUrl || defaultAvatar;
 
         modal.innerHTML = `
@@ -1503,6 +1627,16 @@ document.addEventListener('click', function(e) {
                     <div>
                         <label class="block text-sm text-on-surface-variant mb-1">이름</label>
                         <input type="text" id="set-profile-name" value="${state.customProfile.name}" class="w-full bg-abyss-black border border-outline-variant/50 rounded-lg p-2 text-white outline-none focus:border-primary">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm text-on-surface-variant mb-1">신장 (키 cm)</label>
+                            <input type="number" id="set-profile-height" value="${state.customProfile.height || 178}" class="w-full bg-abyss-black border border-outline-variant/50 rounded-lg p-2 text-white outline-none focus:border-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-on-surface-variant mb-1">체중 (몸무게 kg)</label>
+                            <input type="number" id="set-profile-weight" value="${state.customProfile.weight || 70}" class="w-full bg-abyss-black border border-outline-variant/50 rounded-lg p-2 text-white outline-none focus:border-primary">
+                        </div>
                     </div>
                     <div>
                         <label class="block text-sm text-on-surface-variant mb-1">프로필 사진 업로드 (선택사항)</label>
@@ -1676,6 +1810,10 @@ document.addEventListener('click', function(e) {
 
         document.getElementById('btn-save-settings').onclick = () => {
             state.customProfile.name = document.getElementById('set-profile-name').value;
+            const hVal = document.getElementById('set-profile-height').value;
+            const wVal = document.getElementById('set-profile-weight').value;
+            if (hVal) state.customProfile.height = parseFloat(hVal);
+            if (wVal) state.customProfile.weight = parseFloat(wVal);
             state.customProfile.avatarUrl = document.getElementById('set-profile-url').value;
 
             state.customDailyQuests.forEach((q, idx) => {
@@ -1715,6 +1853,24 @@ document.addEventListener('click', function(e) {
     }
     function updateResetTimer() {
         const timerEls = document.querySelectorAll('.reset-timer-display, #reset-timer-display');
+        
+        // Auto live midnight rollover check (no manual F5 required)
+        const dCurrent = new Date();
+        const currentTodayStr = `${dCurrent.getFullYear()}-${String(dCurrent.getMonth() + 1).padStart(2, '0')}-${String(dCurrent.getDate()).padStart(2, '0')}`;
+        if (state && state.lastQuestDate && state.lastQuestDate !== currentTodayStr) {
+            state.lastQuestDate = currentTodayStr;
+            state.dailyQuests = {};
+            state.dailyProgress = { date: currentTodayStr, completions: [false, false, false], submitted: false };
+            if (state.dungeons) {
+                state.dungeons.e_rank = { pushups: 0, situps: 0, run: 0, isCompleted: false };
+                state.dungeons.c_rank = { backend: 0, sprint: 0, debugging: 0, isCompleted: false };
+                state.dungeons.s_rank = { ppt: 0, defense: 0, data: 0, isCompleted: false };
+            }
+            localStorage.setItem(window.getGameSaveKey(), JSON.stringify(state));
+            location.reload();
+            return;
+        }
+
         if (timerEls.length === 0) return;
         
         const now = new Date();
@@ -2311,6 +2467,16 @@ document.addEventListener('click', function(e) {
                        <label class="font-caption text-on-surface-variant block mb-1">플레이어 닉네임</label>
                        <input type="text" id="sys-setting-name-input" class="w-full bg-abyss-black border border-outline-variant/30 text-white rounded-lg py-2 px-3 focus:outline-none focus:border-epic-purple" placeholder="성진우">
                     </div>
+                    <div class="grid grid-cols-2 gap-sm">
+                       <div>
+                          <label class="font-caption text-on-surface-variant block mb-1">신장 (키 cm)</label>
+                          <input type="number" id="sys-setting-height-input" class="w-full bg-abyss-black border border-outline-variant/30 text-white rounded-lg py-2 px-3 focus:outline-none focus:border-epic-purple" placeholder="178">
+                       </div>
+                       <div>
+                          <label class="font-caption text-on-surface-variant block mb-1">체중 (몸무게 kg)</label>
+                          <input type="number" id="sys-setting-weight-input" class="w-full bg-abyss-black border border-outline-variant/30 text-white rounded-lg py-2 px-3 focus:outline-none focus:border-epic-purple" placeholder="70">
+                       </div>
+                    </div>
                     <div>
                        <label class="font-caption text-on-surface-variant block mb-1">프로필 이미지 선택</label>
                        <input type="file" id="sys-setting-avatar-input" accept="image/*" class="w-full text-xs text-on-surface-variant file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-epic-purple file:text-white file:font-bold hover:file:bg-inverse-primary cursor-pointer">
@@ -2318,7 +2484,7 @@ document.addEventListener('click', function(e) {
                     <button type="button" id="sys-btn-save-profile" onclick="window.handleSaveProfile(event)" class="w-full bg-epic-purple text-white font-bold py-2 rounded-lg hover:shadow-[0_0_10px_rgba(124,58,237,0.5)] transition-all text-sm mt-1">프로필 변경사항 저장</button>
                  </div>
 
-                 <!-- Section 2: Data Backup & Restore -->
+                  <!-- Section 2: Data Backup & Restore -->
                  <div class="space-y-sm pt-sm border-t border-outline-variant/20">
                     <h4 class="font-bold text-legendary-gold text-sm uppercase tracking-wider flex items-center gap-1"><span class="material-symbols-outlined text-sm">database</span> 데이터 백업 / 복원 / 초기화</h4>
                     <div class="grid grid-cols-2 gap-sm">
@@ -2348,7 +2514,7 @@ document.addEventListener('click', function(e) {
                 if (e) { e.preventDefault(); e.stopPropagation(); }
                 if (!state) state = {};
                 if (!state.customProfile) {
-                    state.customProfile = { name: '성진우', title: 'Lv.1', avatarUrl: '' };
+                    state.customProfile = { name: '성진우', title: 'Lv.1', avatarUrl: '', height: 178, weight: 70 };
                 }
                 const nameInput = document.getElementById('sys-setting-name-input');
                 const nameVal = nameInput ? nameInput.value.trim() : '';
@@ -2363,13 +2529,18 @@ document.addEventListener('click', function(e) {
                         }
                     } catch(err) {}
                 }
+                const hInput = document.getElementById('sys-setting-height-input') || document.getElementById('set-profile-height');
+                const wInput = document.getElementById('sys-setting-weight-input') || document.getElementById('set-profile-weight');
+                if (hInput && hInput.value) state.customProfile.height = parseFloat(hInput.value);
+                if (wInput && wInput.value) state.customProfile.weight = parseFloat(wInput.value);
+
                 const avatarInput = document.getElementById('sys-setting-avatar-input');
                 if (avatarInput && avatarInput.files && avatarInput.files[0]) {
                     const reader = new FileReader();
                     reader.onload = (ev) => {
                         state.customProfile.avatarUrl = ev.target.result;
                         saveState();
-                        alert('프로필 닉네임 및 이미지가 성공적으로 저장되었습니다!');
+                        alert('프로필 변경사항이 성공적으로 저장되었습니다!');
                         const modal = document.getElementById('system-settings-modal');
                         if (modal) modal.classList.add('hidden');
                         location.reload();
@@ -2377,7 +2548,7 @@ document.addEventListener('click', function(e) {
                     reader.readAsDataURL(avatarInput.files[0]);
                 } else {
                     saveState();
-                    alert('프로필 닉네임이 성공적으로 저장되었습니다!');
+                    alert('프로필 변경사항이 성공적으로 저장되었습니다!');
                     const modal = document.getElementById('system-settings-modal');
                     if (modal) modal.classList.add('hidden');
                     location.reload();
@@ -2437,9 +2608,14 @@ document.addEventListener('click', function(e) {
                 btn.onclick = () => {
                     const modal = document.getElementById('system-settings-modal');
                     const nameInput = document.getElementById('sys-setting-name-input');
+                    const heightInput = document.getElementById('sys-setting-height-input');
+                    const weightInput = document.getElementById('sys-setting-weight-input');
                     if (nameInput) nameInput.value = state.customProfile ? state.customProfile.name : '성진우';
+                    if (heightInput) heightInput.value = (state.customProfile && state.customProfile.height) ? state.customProfile.height : 178;
+                    if (weightInput) weightInput.value = (state.customProfile && state.customProfile.weight) ? state.customProfile.weight : 70;
                     if (modal) modal.classList.remove('hidden');
                 };
+
             }
         });
 
@@ -2451,7 +2627,11 @@ document.addEventListener('click', function(e) {
             el.onclick = () => {
                 const modal = document.getElementById('system-settings-modal');
                 const nameInput = document.getElementById('sys-setting-name-input');
+                const heightInput = document.getElementById('sys-setting-height-input');
+                const weightInput = document.getElementById('sys-setting-weight-input');
                 if (nameInput) nameInput.value = state.customProfile ? state.customProfile.name : '성진우';
+                if (heightInput) heightInput.value = (state.customProfile && state.customProfile.height) ? state.customProfile.height : 178;
+                if (weightInput) weightInput.value = (state.customProfile && state.customProfile.weight) ? state.customProfile.weight : 70;
                 if (modal) modal.classList.remove('hidden');
             };
         });
@@ -2515,38 +2695,97 @@ document.addEventListener('click', function(e) {
             const customIcon = document.getElementById('custom-dq-select-icon');
 
             if (selectEl && titleInput && descInput && statSelect && saveBtn) {
-                // Populate options
-                selectEl.innerHTML = '';
-                if (customOptions) customOptions.innerHTML = '';
+                const categoryMap = {
+                    'str': '💪 힘(운동)',
+                    'agi': '⚡ 민첩(순발력)',
+                    'int': '🧠 지능(학습/독서)',
+                    'wil': '🛡️ 의지(습관/멘탈)',
+                    'cha': '✨ 매력(소통/자기관리)'
+                };
 
-                const dqs = state.customDailyQuests || [];
-                dqs.forEach((q, idx) => {
-                    const opt = document.createElement('option');
-                    opt.value = idx;
-                    opt.textContent = `[퀘스트 ${idx + 1}] ${q.title}`;
-                    selectEl.appendChild(opt);
+                const getFreshState = () => {
+                    const saveKey = window.getGameSaveKey();
+                    try {
+                        const ls = localStorage.getItem(saveKey);
+                        if (ls) {
+                            const parsed = JSON.parse(ls);
+                            state = parsed;
+                            return parsed;
+                        }
+                    } catch(e) {}
+                    return state;
+                };
 
-                    if (customOptions) {
-                        const item = document.createElement('div');
-                        item.className = 'px-4 py-2.5 hover:bg-epic-purple/30 text-on-surface hover:text-white font-medium cursor-pointer transition-colors flex items-center justify-between border-b border-outline-variant/10 last:border-0';
-                        item.dataset.value = idx;
-                        item.innerHTML = `<span class="font-bold text-sm">[퀘스트 ${idx + 1}] ${q.title}</span><span class="text-xs text-outline">${q.category || ''}</span>`;
-                        
-                        item.onclick = (e) => {
-                            e.stopPropagation();
-                            selectEl.value = idx;
-                            if (customLabel) customLabel.textContent = `[퀘스트 ${idx + 1}] ${q.title}`;
-                            if (customOptions) customOptions.classList.add('hidden');
-                            if (customIcon) customIcon.style.transform = 'rotate(0deg)';
-                            loadSelected();
-                        };
-                        customOptions.appendChild(item);
+                const refreshQuestDropdownOptions = () => {
+                    const curState = getFreshState();
+                    selectEl.innerHTML = '';
+                    if (customOptions) customOptions.innerHTML = '';
+
+                    const dqs = curState.customDailyQuests || [];
+                    dqs.forEach((q, idx) => {
+                        const opt = document.createElement('option');
+                        opt.value = idx;
+                        opt.textContent = `[퀘스트 ${idx + 1}] ${q.title}`;
+                        selectEl.appendChild(opt);
+
+                        if (customOptions) {
+                            const item = document.createElement('div');
+                            item.className = 'px-4 py-2.5 hover:bg-epic-purple/30 text-on-surface hover:text-white font-medium cursor-pointer transition-colors flex items-center justify-between border-b border-outline-variant/10 last:border-0';
+                            item.dataset.value = idx;
+                            const displayCat = categoryMap[q.rewardStat] || q.category || '💪 힘(운동)';
+                            item.innerHTML = `<span class="font-bold text-sm">[퀘스트 ${idx + 1}] ${q.title}</span><span class="text-xs text-outline font-bold">${displayCat}</span>`;
+                            
+                            item.onclick = (e) => {
+                                e.stopPropagation();
+                                selectEl.value = idx;
+                                if (customLabel) customLabel.textContent = `[퀘스트 ${idx + 1}] ${q.title}`;
+                                if (customOptions) customOptions.classList.add('hidden');
+                                if (customIcon) customIcon.style.transform = 'rotate(0deg)';
+                                loadSelected();
+                            };
+                            customOptions.appendChild(item);
+                        }
+                    });
+                };
+
+                const loadSelected = () => {
+                    const curState = getFreshState();
+                    const idx = parseInt(selectEl.value, 10);
+                    const q = curState.customDailyQuests && curState.customDailyQuests[idx];
+                    if (q) {
+                        titleInput.value = q.title || '';
+                        descInput.value = q.desc || '';
+                        if (q.rewardStat) statSelect.value = q.rewardStat;
+                        if (customLabel) customLabel.textContent = `[퀘스트 ${idx + 1}] ${q.title}`;
+                    }
+                };
+
+                titleInput.addEventListener('input', () => {
+                    const val = titleInput.value.trim();
+                    if (val && typeof window.autoAnalyzeQuest === 'function') {
+                        const res = window.autoAnalyzeQuest(val);
+                        statSelect.value = res.statKey;
                     }
                 });
+
+                refreshQuestDropdownOptions();
+
+                // Modal open observer to always sync latest data when opened
+                const modalEl = document.getElementById('daily-quest-edit-modal-new');
+                if (modalEl) {
+                    const observer = new MutationObserver(() => {
+                        if (!modalEl.classList.contains('hidden')) {
+                            refreshQuestDropdownOptions();
+                            loadSelected();
+                        }
+                    });
+                    observer.observe(modalEl, { attributes: true, attributeFilter: ['class'] });
+                }
 
                 if (customTrigger && customOptions) {
                     customTrigger.onclick = (e) => {
                         e.stopPropagation();
+                        refreshQuestDropdownOptions();
                         const isHidden = customOptions.classList.contains('hidden');
                         if (isHidden) {
                             customOptions.classList.remove('hidden');
@@ -2565,42 +2804,33 @@ document.addEventListener('click', function(e) {
                     });
                 }
 
-                const loadSelected = () => {
-                    const idx = parseInt(selectEl.value, 10);
-                    const q = state.customDailyQuests && state.customDailyQuests[idx];
-                    if (q) {
-                        titleInput.value = q.title || '';
-                        descInput.value = q.desc || '';
-                        if (q.rewardStat) statSelect.value = q.rewardStat;
-                    }
-                };
-
                 selectEl.addEventListener('change', loadSelected);
 
                 saveBtn.addEventListener('click', () => {
+                    const saveKey = window.getGameSaveKey();
+                    let curState = getFreshState();
                     const idx = parseInt(selectEl.value, 10);
-                    if (!state.customDailyQuests) state.customDailyQuests = [];
-                    if (state.customDailyQuests[idx]) {
+                    if (!curState.customDailyQuests) curState.customDailyQuests = [];
+                    if (curState.customDailyQuests[idx]) {
                         const statKey = statSelect.value;
-                        const categoryMap = {
-                            'str': '💪 힘(운동)',
-                            'agi': '⚡ 민첩(순발력)',
-                            'int': '🧠 지능(학습/독서)',
-                            'wil': '🛡️ 의지(습관/멘탈)',
-                            'cha': '✨ 매력(소통/자기관리)'
-                        };
-                        state.customDailyQuests[idx].title = titleInput.value.trim() || state.customDailyQuests[idx].title;
-                        state.customDailyQuests[idx].desc = descInput.value.trim() || state.customDailyQuests[idx].desc;
-                        state.customDailyQuests[idx].rewardStat = statKey;
-                        state.customDailyQuests[idx].category = categoryMap[statKey] || '💪 힘(운동)';
+                        const newTitle = titleInput.value.trim();
+                        if (newTitle) curState.customDailyQuests[idx].title = newTitle;
+                        curState.customDailyQuests[idx].desc = descInput.value.trim() || curState.customDailyQuests[idx].desc;
+                        curState.customDailyQuests[idx].rewardStat = statKey;
+                        curState.customDailyQuests[idx].category = categoryMap[statKey] || '💪 힘(운동)';
 
-                        saveState();
-                        document.getElementById('daily-quest-edit-modal-new').classList.add('hidden');
-                        alert('일일 퀘스트 정보가 성공적으로 저장되었습니다!');
+                        state = curState;
+                        localStorage.setItem(saveKey, JSON.stringify(curState));
+
+                        refreshQuestDropdownOptions();
+                        if (modalEl) modalEl.classList.add('hidden');
+                        alert(`[퀘스트 ${idx + 1}] 설정이 성공적으로 저장되었습니다!`);
                         location.reload();
                     }
                 });
 
+                const curState = getFreshState();
+                const dqs = curState.customDailyQuests || [];
                 if (dqs.length > 0) {
                     selectEl.value = 0;
                     if (customLabel) customLabel.textContent = `[퀘스트 1] ${dqs[0].title}`;
@@ -2801,9 +3031,11 @@ window.triggerRewardFloatingEffect = function(x, y, expText = '+150 XP', goldTex
             if (!state.streakHistory) state.streakHistory = {};
             const todayStr = new Date().toISOString().split('T')[0];
             
-            // Mark today if dailyProgress is submitted or completed
+            // Mark today if dailyProgress is submitted or completed, else delete
             if (state.dailyProgress && state.dailyProgress.submitted) {
                 state.streakHistory[todayStr] = true;
+            } else if (state.streakHistory && state.streakHistory[todayStr]) {
+                delete state.streakHistory[todayStr];
             }
 
             // Calculate current streak
@@ -2818,7 +3050,34 @@ window.triggerRewardFloatingEffect = function(x, y, expText = '+150 XP', goldTex
                 }
                 checkDate.setDate(checkDate.getDate() - 1);
             }
-            if (streakBadge) streakBadge.textContent = `🔥 ${Math.max(1, streakDays)}일 연속 달성 중`;
+            if (streakBadge) {
+                streakBadge.textContent = `🔥 ${streakDays}일 연속 달성 중`;
+                if (streakDays === 0) {
+                    streakBadge.classList.remove('animate-pulse');
+                    streakBadge.style.opacity = '0.6';
+                } else {
+                    streakBadge.classList.add('animate-pulse');
+                    streakBadge.style.opacity = '1';
+                }
+            }
+
+            // Update Dedicated Milestone Claim Buttons UI (3, 7, 14, 28)
+            if (!state.claimedStreakMilestones) state.claimedStreakMilestones = {};
+            [3, 7, 14, 28].forEach(d => {
+                const btn = document.getElementById(`btn-claim-streak-${d}`);
+                if (btn) {
+                    if (state.claimedStreakMilestones[d]) {
+                        btn.textContent = '✅ 완료';
+                        btn.className = 'w-full bg-outline-variant/30 text-on-surface-variant/50 text-[9px] py-1 rounded font-bold cursor-default line-through';
+                    } else if (streakDays >= d) {
+                        btn.textContent = '🎁 보상 받기';
+                        btn.className = 'w-full bg-epic-purple text-white hover:bg-primary text-[9px] py-1 rounded font-bold transition-all shadow-[0_0_8px_rgba(124,58,237,0.8)] animate-bounce cursor-pointer';
+                    } else {
+                        btn.textContent = `🔒 ${d}일`;
+                        btn.className = 'w-full bg-outline-variant/20 text-on-surface-variant text-[9px] py-1 rounded font-bold cursor-not-allowed opacity-60';
+                    }
+                }
+            });
 
             // Populate 28 tile grid
             streakGrid.innerHTML = '';
@@ -2885,6 +3144,244 @@ window.triggerRewardFloatingEffect = function(x, y, expText = '+150 XP', goldTex
             };
         }
     }
+
+    window.addStatPoint = function(statKey) {
+        const saveKey = (function() {
+            try {
+                const session = localStorage.getItem('lvlup_current_user') || sessionStorage.getItem('lvlup_current_user');
+                if (session) {
+                    const u = JSON.parse(session);
+                    if (u && u.id) return 'game_save_state_' + u.id.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                }
+            } catch(e) {}
+            return 'game_save_state_guest';
+        })();
+
+        let curState = null;
+        try {
+            const saved = localStorage.getItem(saveKey);
+            if (saved) curState = JSON.parse(saved);
+        } catch(e) {}
+
+        if (!curState) return;
+
+        if (curState.statPoints === undefined) curState.statPoints = 5;
+        if (!curState.stats) curState.stats = { str: 10, agi: 10, int: 10, wil: 10, cha: 10 };
+
+        if (curState.statPoints <= 0) {
+            alert('사용 가능한 능력치 포인트가 없습니다!\n퀘스트 완료 및 레벨업을 통해 포인트를 획득하세요.');
+            return;
+        }
+
+        curState.statPoints--;
+        curState.stats[statKey] = (curState.stats[statKey] || 10) + 1;
+
+        if (statKey === 'agi') curState.stats['dex'] = curState.stats['agi'];
+        if (statKey === 'dex') curState.stats['agi'] = curState.stats['dex'];
+        if (statKey === 'wil') curState.stats['disc'] = curState.stats['wil'];
+        if (statKey === 'disc') curState.stats['wil'] = curState.stats['disc'];
+
+        localStorage.setItem(saveKey, JSON.stringify(curState));
+
+        if (typeof window.updateDashboardStatsUI === 'function') {
+            window.updateDashboardStatsUI();
+        }
+
+        const nameMap = { str: '힘', agi: '민첩', dex: '민첩', int: '지능', wil: '의지', disc: '의지', cha: '매력' };
+        const label = nameMap[statKey] || statKey;
+
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-20 right-5 z-50 bg-[#1f1f23] text-white px-3 py-1.5 rounded-lg shadow-xl border border-epic-purple text-xs font-bold flex items-center gap-1.5 animate-bounce';
+        toast.innerHTML = `<span class="material-symbols-outlined text-epic-purple text-sm">upgrade</span> ${label} +1 (남은 포인트: ${curState.statPoints} Pts)`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 1800);
+    };
+
+    window.subtractStatPoint = function(statKey) {
+        const saveKey = (function() {
+            try {
+                const session = localStorage.getItem('lvlup_current_user') || sessionStorage.getItem('lvlup_current_user');
+                if (session) {
+                    const u = JSON.parse(session);
+                    if (u && u.id) return 'game_save_state_' + u.id.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                }
+            } catch(e) {}
+            return 'game_save_state_guest';
+        })();
+
+        let curState = null;
+        try {
+            const saved = localStorage.getItem(saveKey);
+            if (saved) curState = JSON.parse(saved);
+        } catch(e) {}
+
+        if (!curState) return;
+
+        if (curState.statPoints === undefined) curState.statPoints = 5;
+        if (!curState.stats) curState.stats = { str: 10, agi: 10, int: 10, wil: 10, cha: 10 };
+
+        const currentVal = curState.stats[statKey] || 10;
+        const minVal = 10;
+
+        if (currentVal <= minVal) {
+            alert(`기본 능력치(${minVal}) 이하로는 포인트를 줄일 수 없습니다.`);
+            return;
+        }
+
+        curState.stats[statKey] = currentVal - 1;
+        curState.statPoints = (curState.statPoints || 0) + 1;
+
+        if (statKey === 'agi') curState.stats['dex'] = curState.stats['agi'];
+        if (statKey === 'dex') curState.stats['agi'] = curState.stats['dex'];
+        if (statKey === 'wil') curState.stats['disc'] = curState.stats['wil'];
+        if (statKey === 'disc') curState.stats['wil'] = curState.stats['disc'];
+
+        localStorage.setItem(saveKey, JSON.stringify(curState));
+
+        if (typeof window.updateDashboardStatsUI === 'function') {
+            window.updateDashboardStatsUI();
+        }
+
+        const nameMap = { str: '힘', agi: '민첩', dex: '민첩', int: '지능', wil: '의지', disc: '의지', cha: '매력' };
+        const label = nameMap[statKey] || statKey;
+
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-20 right-5 z-50 bg-[#1f1f23] text-white px-3 py-1.5 rounded-lg shadow-xl border border-health-red text-xs font-bold flex items-center gap-1.5 animate-bounce';
+        toast.innerHTML = `<span class="material-symbols-outlined text-health-red text-sm">remove_circle</span> ${label} -1 (환불된 포인트: ${curState.statPoints} Pts)`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 1800);
+    };
+
+    window.claimStreakReward = function(days) {
+        const saveKey = (function() {
+            try {
+                const session = localStorage.getItem('lvlup_current_user') || sessionStorage.getItem('lvlup_current_user');
+                if (session) {
+                    const u = JSON.parse(session);
+                    if (u && u.id) return 'game_save_state_' + u.id.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                }
+            } catch(e) {}
+            return 'game_save_state_guest';
+        })();
+
+        let curState = null;
+        try {
+            const saved = localStorage.getItem(saveKey);
+            if (saved) curState = JSON.parse(saved);
+        } catch(e) {}
+
+        if (!curState) return;
+
+        if (!curState.claimedStreakMilestones) curState.claimedStreakMilestones = {};
+        if (curState.claimedStreakMilestones[days]) {
+            alert('이미 수령 완료한 연속 달성 스트릭 보상입니다.');
+            return;
+        }
+
+        let streakDays = 0;
+        if (curState.streakHistory) {
+            let checkDate = new Date();
+            for (let i = 0; i < 30; i++) {
+                const dateStr = checkDate.toISOString().split('T')[0];
+                if (curState.streakHistory[dateStr]) {
+                    streakDays++;
+                } else if (i > 0) {
+                    break;
+                }
+                checkDate.setDate(checkDate.getDate() - 1);
+            }
+        }
+
+        if (streakDays < days) {
+            alert(`🔒 [스트릭 보상 수령 불가]\n\n연속 ${days}일 이상 달성 시 수령하실 수 있습니다.\n(현재 연속 달성: ${streakDays}일)`);
+            return;
+        }
+
+        const rewards = {
+            3: { gold: 500, exp: 100, name: '3일 연속 달성 스트릭 전용 보상 (+500G & +100 XP)' },
+            7: { gold: 1000, exp: 300, name: '7일 연속 달성 스트릭 전용 보상 (+1,000G 상자 이용권)' },
+            14: { gold: 2500, exp: 500, item: { id: 'stat_potion_sub', name: '상급 능력치 영약', type: 'consumable', rarity: 'epic', count: 1, icon: 'science', color: 'epic-purple', desc: '사용 시 모든 능력치 +2 상승' }, name: '14일 연속 달성 스트릭 전용 보상 (+2,500G & 🧪 상급 능력치 영약)' },
+            28: { gold: 5000, exp: 1000, item: { id: 'shadow_dagger', name: '그림자 군주의 단검', type: 'equipment', rarity: 'legendary', count: 1, icon: 'colorize', color: 'legendary-gold', desc: '장착 시 힘 +5 상승 전설 무기' }, name: '28일 연속 달성 스트릭 전용 보상 (+5,000G & 🗡️ 그림자 군주의 단검)' }
+        };
+
+        const r = rewards[days];
+        if (r) {
+            curState.claimedStreakMilestones[days] = true;
+            curState.gold = (curState.gold || 0) + r.gold;
+            curState.exp = (curState.exp || 0) + r.exp;
+            if (r.item && curState.inventory) {
+                curState.inventory.push(r.item);
+            }
+
+            localStorage.setItem(saveKey, JSON.stringify(curState));
+            state = curState;
+
+            alert(`🎁 [연속 달성 스트릭 전용 보상 수령 완료!]\n\n획득 보상: ${r.name}`);
+
+            if (typeof initStreakAndGachaSystem === 'function') {
+                initStreakAndGachaSystem();
+            }
+            if (typeof window.updateDashboardStatsUI === 'function') {
+                window.updateDashboardStatsUI();
+            }
+        }
+    };
+
+    // Multi-device Cloud Sync & Data Migration Helpers
+    window.exportUserData = function() {
+        try {
+            const saveKey = window.getGameSaveKey();
+            const rawData = localStorage.getItem(saveKey) || '{}';
+            const session = localStorage.getItem('lvlup_current_user') || sessionStorage.getItem('lvlup_current_user');
+            const user = session ? JSON.parse(session) : { id: 'guest' };
+            
+            const backupObj = {
+                version: '1.0',
+                exportedAt: new Date().toISOString(),
+                user: user,
+                gameState: JSON.parse(rawData)
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupObj, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `LevelUp_Life_Backup_${(user.id || 'player').replace(/[^a-z0-9]/gi, '_')}_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            alert('📥 [계정 데이터 백업 완료]\n다운로드된 JSON 파일을 다른 PC나 모바일에서 [데이터 복원]으로 등록하시면 그대로 이어서 플레이하실 수 있습니다.');
+        } catch(e) {
+            alert('백업 생성 실패: ' + e.message);
+        }
+    };
+
+    window.importUserData = function(fileInputElement) {
+        if (!fileInputElement || !fileInputElement.files || !fileInputElement.files[0]) {
+            alert('올바른 백업 .json 파일을 선택해 주세요.');
+            return;
+        }
+        const file = fileInputElement.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (data && data.gameState) {
+                    const saveKey = window.getGameSaveKey();
+                    localStorage.setItem(saveKey, JSON.stringify(data.gameState));
+                    if (data.user && data.user.id) {
+                        localStorage.setItem('lvlup_current_user', JSON.stringify(data.user));
+                    }
+                    alert('📤 [계정 데이터 복원 완료]\n성공적으로 데이터를 불러왔습니다. 페이지를 새로고침합니다.');
+                    window.location.reload();
+                } else {
+                    alert('유효하지 않은 백업 파일 형식입니다.');
+                }
+            } catch(err) {
+                alert('파일 읽기 오류: ' + err.message);
+            }
+        };
+        reader.readAsText(file);
+    };
 
     window.addEventListener('load', initDungeonRewardsUI);
     window.addEventListener('load', initPenaltyQuest);

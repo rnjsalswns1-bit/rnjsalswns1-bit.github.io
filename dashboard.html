@@ -1,4 +1,5 @@
 <!DOCTYPE html><html class="dark" lang="ko"><head>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="init_game.js"></script>
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
@@ -172,6 +173,15 @@
 <span class="material-symbols-outlined">notifications</span>
 <span class="absolute top-0 right-0 w-2 h-2 bg-health-red rounded-full"></span>
 </button>
+<button onclick="window.exportUserData()" title="계정 데이터 백업 (내보내기)" class="flex items-center gap-1 text-xs bg-epic-purple/20 hover:bg-epic-purple/40 text-primary-fixed border border-epic-purple/40 px-2 py-1 rounded-lg transition-all cursor-pointer">
+<span class="material-symbols-outlined text-sm">download</span>
+<span class="hidden md:inline font-semibold">백업</span>
+</button>
+<label title="계정 데이터 복원 (불러오기)" class="flex items-center gap-1 text-xs bg-shadow-slate hover:bg-surface-variant text-on-surface border border-outline-variant/40 px-2 py-1 rounded-lg transition-all cursor-pointer">
+<span class="material-symbols-outlined text-sm">upload</span>
+<span class="hidden md:inline font-semibold">복원</span>
+<input type="file" accept=".json" class="hidden" onchange="window.importUserData(this)">
+</label>
 <button class="text-on-surface-variant hover:text-primary-fixed-dim transition-colors scale-95 active:duration-150">
 <span class="material-symbols-outlined">settings</span>
 </button>
@@ -181,7 +191,7 @@
 <aside class="bg-dungeon-gray dark:bg-dungeon-gray docked left-0 h-full w-64 border-r border-outline-variant/20 hidden md:flex flex-col py-lg px-md fixed top-0 z-40">
 <div class="flex flex-col items-center mb-xl pt-16">
 <div class="w-24 h-24 rounded-full bg-shadow-slate ghost-border overflow-hidden mb-sm relative glow-epic">
-<img alt="Sung Jin-Woo Avatar" class="w-full h-full object-cover" data-alt="A striking portrait of an anime-style modern male hunter with dark, messy hair and glowing purple eyes, set against a dark, moody background. He wears a sleek, high-tech black tactical coat. The lighting is cinematic, heavily contrasting deep abyssal blacks with vibrant epic purple rim lights, fitting a high-stakes dungeon crawler RPG aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHTuIx9e5kpkUZYkQdaODnjCmH54Pmd3zhhB59qgLINBgEEUZbXnD7O4i66gY-rFfK8GdGFbCGAPnV_bksPH1jTV6O5OKRXVrVv47__GYXMDjlVtYDYx8ICRHDtvCeoWpMpzQB1JeBm80PeW_KgAkXPfJW5gA-g_nN_o-XtHR5fGviZhLhZgHCWbV5b4hMjstJHjO5iZ1UIsA3zN0nYqnA8KoKpDkY-Id9i6TDihqB8kF6WS1umaLN-BDVf4WTWzVZASpWL4yY65E">
+<img alt="Sung Jin-Woo Avatar" class="w-full h-full object-cover object-top" data-alt="Sung Jin-Woo Avatar" src="profile_avatar.jpg">
 <div class="absolute inset-0 bg-epic-purple/20 mix-blend-overlay"></div>
 </div>
 <h2 class="font-section-title text-section-title text-primary">성진우</h2>
@@ -224,95 +234,107 @@
 <h1 class="font-section-title-mobile md:font-section-title text-section-title-mobile md:text-section-title text-primary uppercase tracking-wide">상태창</h1>
 </header>
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-<!-- Left Column: Character Stats & Attributes -->
 <div class="lg:col-span-5">
-    <!-- Main Radial Character Card -->
-    <div class="bg-[#0f1015] rounded-xl overflow-hidden relative py-6 px-4 flex flex-col items-center justify-center min-h-[480px]">
+    <!-- Main Split Character Card (Left: Standing Photo, Right: 5 Stat List) -->
+    <div class="bg-[#0f1015] rounded-xl overflow-hidden relative p-4 pb-12 flex flex-col sm:flex-row items-center gap-4 min-h-[480px] border border-outline-variant/20 shadow-[0_0_25px_rgba(0,0,0,0.5)]">
         
-        <!-- Central Character Info -->
-        <div class="relative z-10 flex flex-col items-center -translate-y-6">
-            <div class="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden relative mb-2 border-2 border-epic-purple shadow-[0_0_20px_rgba(124,58,237,0.4)]">
-                <img alt="Sung Jin-Woo Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHTuIx9e5kpkUZYkQdaODnjCmH54Pmd3zhhB59qgLINBgEEUZbXnD7O4i66gY-rFfK8GdGFbCGAPnV_bksPH1jTV6O5OKRXVrVv47__GYXMDjlVtYDYx8ICRHDtvCeoWpMpzQB1JeBm80PeW_KgAkXPfJW5gA-g_nN_o-XtHR5fGviZhLhZgHCWbV5b4hMjstJHjO5iZ1UIsA3zN0nYqnA8KoKpDkY-Id9i6TDihqB8kF6WS1umaLN-BDVf4WTWzVZASpWL4yY65E"/>
+        <!-- Left Half: Full-Body Character Standing Card (Purple Glow Aesthetic) -->
+        <div class="w-full sm:w-[60%] flex flex-col items-center justify-between bg-gradient-to-b from-[#180e29] to-[#0d0718] rounded-xl p-4 border border-epic-purple/50 h-full min-h-[400px] relative overflow-hidden group shadow-[0_0_20px_rgba(124,58,237,0.25)]">
+            <div class="w-full h-[350px] flex items-center justify-center relative z-0">
+                <img alt="Sung Jin-Woo Fullbody" class="w-full h-full object-contain filter drop-shadow-[0_0_18px_rgba(124,58,237,0.4)] transition-transform duration-300 group-hover:scale-[1.02]" src="profile_avatar.jpg"/>
             </div>
             
-            <h3 class="font-section-title text-2xl text-white mb-1">성진우</h3>
-            <p class="font-caption text-xs text-white bg-[#1a1a24] border border-outline-variant/30 inline-block px-3 py-0.5 rounded-full">Lv. 1</p>
+            <div class="relative z-20 flex flex-col items-center mt-auto w-full pt-1.5">
+                <div class="flex items-center gap-1.5 mb-1">
+                    <h3 class="font-section-title text-2xl text-white tracking-wide font-bold">성진우</h3>
+                    <span class="text-xs text-on-surface-variant font-mono font-medium" id="card-display-bodyinfo">(178cm / 70kg)</span>
+                </div>
+                <p class="font-caption text-xs text-[#c49bff] bg-[#2a1745] border border-[#6b38af] px-4 py-0.5 rounded-full font-bold">Lv. 1</p>
+            </div>
         </div>
 
-        <!-- Radial Stats Container -->
-        <!-- Clean layout matching Stitch design exactly -->
-        <div class="absolute inset-0 pointer-events-none z-20 hidden sm:block">
-            <!-- Top (Int) -->
-            <div class="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-auto flex flex-col items-center justify-center w-[90px] py-2 bg-[#111118]/80 backdrop-blur-sm rounded-xl border border-exp-blue/50 transition-all hover:border-exp-blue hover:-translate-y-1">
-                <span class="material-symbols-outlined text-exp-blue text-sm mb-1">psychology</span>
-                <span class="text-[#888] text-[10px] font-bold mb-1">지능</span>
-                <span class="font-level-display-mobile text-xl text-white leading-none">10</span>
+        <!-- Right Half: 5 Core Stats List (Exact Match to User Image Mock) -->
+        <div class="w-full sm:w-[40%] flex flex-col justify-between space-y-2.5 h-full py-0.5">
+            <h4 class="font-section-title text-xs text-epic-purple uppercase tracking-wider mb-0.5 flex items-center gap-1 border-b border-outline-variant/20 pb-1.5 font-bold">
+                <span class="material-symbols-outlined text-epic-purple text-sm">monitoring</span>
+                스탯 목록
+            </h4>
+            
+            <!-- 힘 (STR) -->
+            <div class="flex items-center justify-between px-3.5 py-2.5 bg-[#140b12] rounded-xl border border-health-red/60 hover:border-health-red transition-all">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-health-red text-base">fitness_center</span>
+                    <span class="text-xs font-bold text-white">힘</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <button onclick="window.subtractStatPoint('str')" title="힘 -1" class="w-5 h-5 rounded-full bg-health-red/20 hover:bg-health-red text-health-red hover:text-white border border-health-red/60 flex items-center justify-center text-xs font-bold transition-all active:scale-90 opacity-90 hover:opacity-100">-</button>
+                    <span class="font-level-display-mobile text-base text-white font-bold min-w-[24px] text-center">10</span>
+                    <button onclick="window.addStatPoint('str')" title="힘 +1" class="w-5 h-5 rounded-full bg-health-red/20 hover:bg-health-red text-health-red hover:text-white border border-health-red/60 flex items-center justify-center text-xs font-bold transition-all active:scale-90 opacity-90 hover:opacity-100">+</button>
+                </div>
             </div>
-            <!-- Mid Left (Will) -->
-            <div class="absolute top-[42%] -translate-y-1/2 left-6 pointer-events-auto flex flex-col items-center justify-center w-[90px] py-2 bg-[#111118]/80 backdrop-blur-sm rounded-xl border border-tertiary/50 transition-all hover:border-tertiary hover:-translate-y-1">
-                <span class="material-symbols-outlined text-tertiary text-sm mb-1">shield</span>
-                <span class="text-[#888] text-[10px] font-bold mb-1">의지</span>
-                <span class="font-level-display-mobile text-xl text-white leading-none">10</span>
+
+            <!-- 민첩 (DEX) -->
+            <div class="flex items-center justify-between px-3.5 py-2.5 bg-[#0b1410] rounded-xl border border-success-green/60 hover:border-success-green transition-all">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-success-green text-base">speed</span>
+                    <span class="text-xs font-bold text-white">민첩</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <button onclick="window.subtractStatPoint('agi')" title="민첩 -1" class="w-5 h-5 rounded-full bg-success-green/20 hover:bg-success-green text-success-green hover:text-black border border-success-green/60 flex items-center justify-center text-xs font-bold transition-all active:scale-90 opacity-90 hover:opacity-100">-</button>
+                    <span class="font-level-display-mobile text-base text-white font-bold min-w-[24px] text-center">10</span>
+                    <button onclick="window.addStatPoint('agi')" title="민첩 +1" class="w-5 h-5 rounded-full bg-success-green/20 hover:bg-success-green text-success-green hover:text-black border border-success-green/60 flex items-center justify-center text-xs font-bold transition-all active:scale-90 opacity-90 hover:opacity-100">+</button>
+                </div>
             </div>
-            <!-- Mid Right (Dex) -->
-            <div class="absolute top-[42%] -translate-y-1/2 right-6 pointer-events-auto flex flex-col items-center justify-center w-[90px] py-2 bg-[#111118]/80 backdrop-blur-sm rounded-xl border border-success-green/50 transition-all hover:border-success-green hover:-translate-y-1">
-                <span class="material-symbols-outlined text-success-green text-sm mb-1">speed</span>
-                <span class="text-[#888] text-[10px] font-bold mb-1">민첩</span>
-                <span class="font-level-display-mobile text-xl text-white leading-none">10</span>
+
+            <!-- 지능 (INT) -->
+            <div class="flex items-center justify-between px-3.5 py-2.5 bg-[#0b1018] rounded-xl border border-exp-blue/60 hover:border-exp-blue transition-all">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-exp-blue text-base">psychology</span>
+                    <span class="text-xs font-bold text-white">지능</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <button onclick="window.subtractStatPoint('int')" title="지능 -1" class="w-5 h-5 rounded-full bg-exp-blue/20 hover:bg-exp-blue text-exp-blue hover:text-white border border-exp-blue/60 flex items-center justify-center text-xs font-bold transition-all active:scale-90 opacity-90 hover:opacity-100">-</button>
+                    <span class="font-level-display-mobile text-base text-white font-bold min-w-[24px] text-center">10</span>
+                    <button onclick="window.addStatPoint('int')" title="지능 +1" class="w-5 h-5 rounded-full bg-exp-blue/20 hover:bg-exp-blue text-exp-blue hover:text-white border border-exp-blue/60 flex items-center justify-center text-xs font-bold transition-all active:scale-90 opacity-90 hover:opacity-100">+</button>
+                </div>
             </div>
-            <!-- Bottom Left (Vit) -->
-            <div class="absolute bottom-20 left-[26%] pointer-events-auto flex flex-col items-center justify-center w-[90px] py-2 bg-[#111118]/80 backdrop-blur-sm rounded-xl border border-mythic-pink/50 transition-all hover:border-mythic-pink hover:-translate-y-1">
-                <span class="material-symbols-outlined text-mythic-pink text-sm mb-1">favorite</span>
-                <span class="text-[#888] text-[10px] font-bold mb-1">체력</span>
-                <span class="font-level-display-mobile text-xl text-white leading-none">10</span>
+
+            <!-- 매력 (CHA) -->
+            <div class="flex items-center justify-between px-3.5 py-2.5 bg-[#160b14] rounded-xl border border-mythic-pink/60 hover:border-mythic-pink transition-all">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-mythic-pink text-base">auto_awesome</span>
+                    <span class="text-xs font-bold text-white">매력</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <button onclick="window.subtractStatPoint('cha')" title="매력 -1" class="w-5 h-5 rounded-full bg-mythic-pink/20 hover:bg-mythic-pink text-mythic-pink hover:text-white border border-mythic-pink/60 flex items-center justify-center text-xs font-bold transition-all active:scale-90 opacity-90 hover:opacity-100">-</button>
+                    <span class="font-level-display-mobile text-base text-white font-bold min-w-[24px] text-center">10</span>
+                    <button onclick="window.addStatPoint('cha')" title="매력 +1" class="w-5 h-5 rounded-full bg-mythic-pink/20 hover:bg-mythic-pink text-mythic-pink hover:text-white border border-mythic-pink/60 flex items-center justify-center text-xs font-bold transition-all active:scale-90 opacity-90 hover:opacity-100">+</button>
+                </div>
             </div>
-            <!-- Bottom Right (Str) -->
-            <div class="absolute bottom-20 right-[26%] pointer-events-auto flex flex-col items-center justify-center w-[90px] py-2 bg-[#111118]/80 backdrop-blur-sm rounded-xl border border-health-red/50 transition-all hover:border-health-red hover:-translate-y-1">
-                <span class="material-symbols-outlined text-health-red text-sm mb-1">fitness_center</span>
-                <span class="text-[#888] text-[10px] font-bold mb-1">힘</span>
-                <span class="font-level-display-mobile text-xl text-white leading-none">10</span>
-            </div>
-        </div>
-        
-        <!-- Mobile Stats Grid -->
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-2 mt-8 w-full sm:hidden z-20">
-            <div class="flex flex-col items-center bg-abyss-black/50 p-2 rounded border border-health-red/20">
-                <span class="material-symbols-outlined text-health-red text-xs mb-1">fitness_center</span>
-                <span class="font-level-display-mobile text-lg leading-none">10</span>
-                <span class="text-[9px] text-on-surface-variant mt-1">힘</span>
-            </div>
-            <div class="flex flex-col items-center bg-abyss-black/50 p-2 rounded border border-success-green/20">
-                <span class="material-symbols-outlined text-success-green text-xs mb-1">speed</span>
-                <span class="font-level-display-mobile text-lg leading-none">10</span>
-                <span class="text-[9px] text-on-surface-variant mt-1">민첩</span>
-            </div>
-            <div class="flex flex-col items-center bg-abyss-black/50 p-2 rounded border border-exp-blue/20">
-                <span class="material-symbols-outlined text-exp-blue text-xs mb-1">psychology</span>
-                <span class="font-level-display-mobile text-lg leading-none">10</span>
-                <span class="text-[9px] text-on-surface-variant mt-1">지능</span>
-            </div>
-            <div class="flex flex-col items-center bg-abyss-black/50 p-2 rounded border border-tertiary/20">
-                <span class="material-symbols-outlined text-tertiary text-xs mb-1">shield</span>
-                <span class="font-level-display-mobile text-lg leading-none">10</span>
-                <span class="text-[9px] text-on-surface-variant mt-1">의지</span>
-            </div>
-            <div class="flex flex-col items-center bg-abyss-black/50 p-2 rounded border border-mythic-pink/20 md:col-span-1 col-span-2">
-                <span class="material-symbols-outlined text-mythic-pink text-xs mb-1">favorite</span>
-                <span class="font-level-display-mobile text-lg leading-none">10</span>
-                <span class="text-[9px] text-on-surface-variant mt-1">체력</span>
+
+            <!-- 의지 (WIL) -->
+            <div class="flex items-center justify-between px-3.5 py-2.5 bg-[#16140b] rounded-xl border border-tertiary/60 hover:border-tertiary transition-all">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-tertiary text-base">shield</span>
+                    <span class="text-xs font-bold text-white">의지</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <button onclick="window.subtractStatPoint('wil')" title="의지 -1" class="w-5 h-5 rounded-full bg-tertiary/20 hover:bg-tertiary text-tertiary hover:text-black border border-tertiary/60 flex items-center justify-center text-xs font-bold transition-all active:scale-90 opacity-90 hover:opacity-100">-</button>
+                    <span class="font-level-display-mobile text-base text-white font-bold min-w-[24px] text-center">10</span>
+                    <button onclick="window.addStatPoint('wil')" title="의지 +1" class="w-5 h-5 rounded-full bg-tertiary/20 hover:bg-tertiary text-tertiary hover:text-black border border-tertiary/60 flex items-center justify-center text-xs font-bold transition-all active:scale-90 opacity-90 hover:opacity-100">+</button>
+                </div>
             </div>
         </div>
 
         <!-- Full-Width Bottom EXP Bar -->
-        <div class="absolute bottom-0 left-0 right-0 px-6 py-4 bg-abyss-black/40 backdrop-blur-md border-t border-outline-variant/20 z-30 pointer-events-auto">
-            <div class="flex justify-between items-end mb-2">
-                <span class="text-xs font-bold text-exp-blue tracking-wider">EXP</span>
-                <span class="text-xs font-mono text-on-surface-variant"><span id="main-exp-current" class="text-white font-bold">0</span> / <span id="main-exp-max">100</span></span>
+        <div class="absolute bottom-0 left-0 right-0 px-4 py-2 bg-abyss-black/80 backdrop-blur-md border-t border-outline-variant/20 z-30 pointer-events-auto">
+            <div class="flex justify-between items-end mb-1">
+                <span class="text-[10px] font-bold text-exp-blue tracking-wider">EXP</span>
+                <span class="text-[10px] font-mono text-on-surface-variant"><span id="main-exp-current" class="text-white font-bold">0</span> / <span id="main-exp-max">100</span></span>
             </div>
-            <div class="h-2.5 w-full bg-abyss-black rounded-full overflow-hidden border border-outline-variant/50 relative">
+            <div class="h-2 w-full bg-abyss-black rounded-full overflow-hidden border border-outline-variant/50 relative">
                 <div class="absolute inset-0 bg-shadow-slate opacity-30"></div>
                 <div id="main-exp-fill" class="h-full bg-exp-blue shadow-[0_0_12px_rgba(59,130,246,0.8)] relative z-10 transition-all duration-500 rounded-full" style="width: 0%"></div>
-                <div class="absolute top-0 left-0 right-0 h-1/2 bg-white/20 z-20 rounded-t-full"></div>
             </div>
         </div>
     </div>
@@ -396,16 +418,55 @@
 <div class="grid grid-cols-1 md:grid-cols-2 gap-md mt-lg mb-lg">
     <!-- Daily Streak Heatmap Card -->
     <div class="bg-dungeon-gray border border-outline-variant/30 rounded-xl p-md shadow-xl flex flex-col justify-between">
-        <div class="flex justify-between items-center mb-sm">
-            <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-epic-purple text-xl">calendar_month</span>
-                <h3 class="font-bold text-white text-base">연속 달성 스트릭</h3>
+        <div>
+            <div class="flex justify-between items-center mb-sm">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-epic-purple text-xl">calendar_month</span>
+                    <h3 class="font-bold text-white text-base">연속 달성 스트릭</h3>
+                </div>
+                <span id="streak-counter-badge" class="bg-epic-purple/30 text-primary border border-epic-purple/50 px-2.5 py-0.5 rounded-full text-xs font-bold animate-pulse">🔥 0일 연속 달성 중</span>
             </div>
-            <span id="streak-counter-badge" class="bg-epic-purple/30 text-primary border border-epic-purple/50 px-2.5 py-0.5 rounded-full text-xs font-bold animate-pulse">🔥 1일 연속 달성 중</span>
+            <p class="text-xs text-on-surface-variant mb-2">최근 28일간의 일일 미션 달성 잔디밭 기록입니다.</p>
+            
+            <div id="streak-heatmap-grid" class="grid grid-cols-7 gap-1.5 p-2 bg-abyss-black/60 rounded-lg border border-outline-variant/20 mb-3">
+                <!-- 28 Days populated by JS -->
+            </div>
         </div>
-        <p class="text-xs text-on-surface-variant mb-3">최근 28일간의 일일 미션 달성 잔디밭 기록입니다.</p>
-        <div id="streak-heatmap-grid" class="grid grid-cols-7 gap-1.5 p-2 bg-abyss-black/60 rounded-lg border border-outline-variant/20">
-            <!-- 28 Days populated by JS -->
+
+        <!-- Dedicated Streak Rewards Section (Fully Separated from Daily Quests) -->
+        <div class="border-t border-outline-variant/20 pt-2.5 mt-1">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold text-primary flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm text-legendary-gold">workspace_premium</span> 연속 달성 전용 보상
+                </span>
+                <span class="text-[10px] text-on-surface-variant">스트릭 달성 시 별도 수령</span>
+            </div>
+            <div class="grid grid-cols-4 gap-1.5 text-center text-[10px]">
+                <!-- 3 Days -->
+                <div class="bg-abyss-black/60 border border-outline-variant/30 rounded p-1.5 flex flex-col items-center justify-between">
+                    <span class="font-bold text-white">3일</span>
+                    <span class="text-legendary-gold text-[9px] font-mono mb-1">500G</span>
+                    <button id="btn-claim-streak-3" onclick="window.claimStreakReward(3)" class="w-full bg-outline-variant/20 text-on-surface-variant text-[9px] py-1 rounded font-bold transition-all">🔒 3일</button>
+                </div>
+                <!-- 7 Days -->
+                <div class="bg-abyss-black/60 border border-outline-variant/30 rounded p-1.5 flex flex-col items-center justify-between">
+                    <span class="font-bold text-white">7일</span>
+                    <span class="text-legendary-gold text-[9px] font-mono mb-1">1,000G</span>
+                    <button id="btn-claim-streak-7" onclick="window.claimStreakReward(7)" class="w-full bg-outline-variant/20 text-on-surface-variant text-[9px] py-1 rounded font-bold transition-all">🔒 7일</button>
+                </div>
+                <!-- 14 Days -->
+                <div class="bg-abyss-black/60 border border-outline-variant/30 rounded p-1.5 flex flex-col items-center justify-between">
+                    <span class="font-bold text-white">14일</span>
+                    <span class="text-epic-purple text-[9px] font-mono mb-1">상급영약</span>
+                    <button id="btn-claim-streak-14" onclick="window.claimStreakReward(14)" class="w-full bg-outline-variant/20 text-on-surface-variant text-[9px] py-1 rounded font-bold transition-all">🔒 14일</button>
+                </div>
+                <!-- 28 Days -->
+                <div class="bg-abyss-black/60 border border-outline-variant/30 rounded p-1.5 flex flex-col items-center justify-between">
+                    <span class="font-bold text-white">28일</span>
+                    <span class="text-legendary-gold text-[9px] font-mono mb-1">전설단검</span>
+                    <button id="btn-claim-streak-28" onclick="window.claimStreakReward(28)" class="w-full bg-outline-variant/20 text-on-surface-variant text-[9px] py-1 rounded font-bold transition-all">🔒 28일</button>
+                </div>
+            </div>
         </div>
     </div>
 

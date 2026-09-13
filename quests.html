@@ -1,4 +1,5 @@
 <!DOCTYPE html><html class="dark" lang="ko"><head>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="init_game.js"></script>
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
@@ -163,6 +164,15 @@
 <span class="material-symbols-outlined">notifications</span>
 <span class="absolute top-0 right-0 w-2 h-2 bg-health-red rounded-full"></span>
 </button>
+<button onclick="window.exportUserData()" title="계정 데이터 백업 (내보내기)" class="flex items-center gap-1 text-xs bg-epic-purple/20 hover:bg-epic-purple/40 text-primary-fixed border border-epic-purple/40 px-2 py-1 rounded-lg transition-all cursor-pointer">
+<span class="material-symbols-outlined text-sm">download</span>
+<span class="hidden md:inline font-semibold">백업</span>
+</button>
+<label title="계정 데이터 복원 (불러오기)" class="flex items-center gap-1 text-xs bg-shadow-slate hover:bg-surface-variant text-on-surface border border-outline-variant/40 px-2 py-1 rounded-lg transition-all cursor-pointer">
+<span class="material-symbols-outlined text-sm">upload</span>
+<span class="hidden md:inline font-semibold">복원</span>
+<input type="file" accept=".json" class="hidden" onchange="window.importUserData(this)">
+</label>
 <button class="text-on-surface-variant hover:text-primary-fixed-dim transition-colors scale-95 active:duration-150">
 <span class="material-symbols-outlined">settings</span>
 </button>
@@ -172,7 +182,7 @@
 <aside class="bg-dungeon-gray dark:bg-dungeon-gray docked left-0 h-full w-64 border-r border-outline-variant/20 hidden md:flex flex-col py-lg px-md fixed top-0 z-40">
 <div class="flex flex-col items-center mb-xl pt-16">
 <div class="w-24 h-24 rounded-full bg-shadow-slate ghost-border overflow-hidden mb-sm relative glow-epic">
-<img alt="Sung Jin-Woo Avatar" class="w-full h-full object-cover" data-alt="A striking portrait of an anime-style modern male hunter with dark, messy hair and glowing purple eyes, set against a dark, moody background. He wears a sleek, high-tech black tactical coat. The lighting is cinematic, heavily contrasting deep abyssal blacks with vibrant epic purple rim lights, fitting a high-stakes dungeon crawler RPG aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHTuIx9e5kpkUZYkQdaODnjCmH54Pmd3zhhB59qgLINBgEEUZbXnD7O4i66gY-rFfK8GdGFbCGAPnV_bksPH1jTV6O5OKRXVrVv47__GYXMDjlVtYDYx8ICRHDtvCeoWpMpzQB1JeBm80PeW_KgAkXPfJW5gA-g_nN_o-XtHR5fGviZhLhZgHCWbV5b4hMjstJHjO5iZ1UIsA3zN0nYqnA8KoKpDkY-Id9i6TDihqB8kF6WS1umaLN-BDVf4WTWzVZASpWL4yY65E">
+<img alt="Sung Jin-Woo Avatar" src="profile_avatar.jpg" class="w-full h-full object-cover object-top">
 <div class="absolute inset-0 bg-epic-purple/20 mix-blend-overlay"></div>
 </div>
 <h2 class="font-section-title text-section-title text-primary">성진우</h2>
