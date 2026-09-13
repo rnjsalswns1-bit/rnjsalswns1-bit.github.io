@@ -3,47 +3,41 @@
     let memoryStoreLocal = {};
     let memoryStoreSession = {};
 
-    window.safeLocalStorage = {
-        getItem: function(key) {
-            try {
-                if (window.localStorage) return window.localStorage.getItem(key);
-            } catch(e) {}
-            return memoryStoreLocal[key] || null;
-        },
-        setItem: function(key, value) {
-            try {
-                if (window.localStorage) window.localStorage.setItem(key, value);
-            } catch(e) {}
-            memoryStoreLocal[key] = String(value);
-        },
-        removeItem: function(key) {
-            try {
-                if (window.localStorage) window.localStorage.removeItem(key);
-            } catch(e) {}
-            delete memoryStoreLocal[key];
-        }
-    };
+    function createSafeStore(isSession) {
+        const mem = isSession ? memoryStoreSession : memoryStoreLocal;
+        const target = isSession ? 'sessionStorage' : 'localStorage';
+        return {
+            getItem: function(key) {
+                try {
+                    const val = window[target].getItem(key);
+                    return val !== null ? val : (mem[key] !== undefined ? mem[key] : null);
+                } catch(e) {
+                    return mem[key] !== undefined ? mem[key] : null;
+                }
+            },
+            setItem: function(key, value) {
+                try {
+                    window[target].setItem(key, value);
+                } catch(e) {}
+                mem[key] = String(value);
+            },
+            removeItem: function(key) {
+                try {
+                    window[target].removeItem(key);
+                } catch(e) {}
+                delete mem[key];
+            },
+            clear: function() {
+                try {
+                    window[target].clear();
+                } catch(e) {}
+                for (let k in mem) delete mem[k];
+            }
+        };
+    }
 
-    window.safeSessionStorage = {
-        getItem: function(key) {
-            try {
-                if (window.sessionStorage) return window.sessionStorage.getItem(key);
-            } catch(e) {}
-            return memoryStoreSession[key] || null;
-        },
-        setItem: function(key, value) {
-            try {
-                if (window.sessionStorage) window.sessionStorage.setItem(key, value);
-            } catch(e) {}
-            memoryStoreSession[key] = String(value);
-        },
-        removeItem: function(key) {
-            try {
-                if (window.sessionStorage) window.sessionStorage.removeItem(key);
-            } catch(e) {}
-            delete memoryStoreSession[key];
-        }
-    };
+    window.safeLocalStorage = createSafeStore(false);
+    window.safeSessionStorage = createSafeStore(true);
 })();
 
 window.getGameSaveKey = function() {
