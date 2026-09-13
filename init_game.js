@@ -463,7 +463,7 @@ document.addEventListener('click', function(e) {
     }
 
     function saveState() {
-        localStorage.setItem(getGameSaveKey(), JSON.stringify(state));
+        window.safeLocalStorage.setItem(getGameSaveKey(), JSON.stringify(state));
     }
 
     function applyGlobalState() {
@@ -702,6 +702,9 @@ document.addEventListener('click', function(e) {
                     setTimeout(() => {
                         window.location.href = 'dashboard.html';
                     }, 500);
+                };
+            });
+
             if (submitBtn) {
                 submitBtn.onclick = (e) => {
                     if (authForm && typeof authForm.requestSubmit === 'function') {
