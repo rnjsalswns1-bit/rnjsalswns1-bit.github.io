@@ -456,8 +456,96 @@ document.addEventListener('click', function(e) {
         localStorage.setItem(getGameSaveKey(), JSON.stringify(state));
     }
 
+    // Global Cloud Account & Save State Sync Protocol (Multi-PC Support)
+    const CLOUD_SYNC_URL = 'https://api.restful-api.dev/objects/ff808181a067127101a098a821760554';
+    let isSyncingCloud = false;
+
+    async function syncFromCloud() {
+        if (isSyncingCloud) return;
+        isSyncingCloud = true;
+        try {
+            const res = await fetch(CLOUD_SYNC_URL);
+            if (res.ok) {
+                const data = await res.json();
+                if (data && data.data) {
+                    if (Array.isArray(data.data.users)) {
+                        const localUsers = getUsers();
+                        const userMap = new Map();
+                        DEFAULT_USERS.forEach(u => userMap.set(u.id.toLowerCase(), u));
+                        localUsers.forEach(u => userMap.set(u.id.toLowerCase(), u));
+                        data.data.users.forEach(u => userMap.set(u.id.toLowerCase(), u));
+                        saveUsers(Array.from(userMap.values()), false);
+                    }
+                    if (data.data.saves && typeof data.data.saves === 'object') {
+                        for (const [sKey, sVal] of Object.entries(data.data.saves)) {
+                            if (sVal && typeof sVal === 'object') {
+                                const currentLocal = safeLocalStorage.getItem(sKey);
+                                if (!currentLocal || JSON.stringify(sVal).length >= currentLocal.length) {
+                                    safeLocalStorage.setItem(sKey, JSON.stringify(sVal));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch(e) {}
+        isSyncingCloud = false;
+    }
+
+    let cloudSaveTimer = null;
+    function triggerCloudSave() {
+        if (cloudSaveTimer) clearTimeout(cloudSaveTimer);
+        cloudSaveTimer = setTimeout(async () => {
+            try {
+                const users = getUsers();
+                const curUserKey = getGameSaveKey();
+                const curSaveVal = safeLocalStorage.getItem(curUserKey);
+                
+                let cloudData = { users: users, saves: {} };
+                try {
+                    const res = await fetch(CLOUD_SYNC_URL);
+                    if (res.ok) {
+                        const existing = await res.json();
+                        if (existing && existing.data) {
+                            cloudData = existing.data;
+                        }
+                    }
+                } catch(e) {}
+
+                if (!cloudData.saves) cloudData.saves = {};
+                if (!cloudData.users) cloudData.users = users;
+
+                const userMap = new Map();
+                users.forEach(u => userMap.set(u.id.toLowerCase(), u));
+                if (Array.isArray(cloudData.users)) {
+                    cloudData.users.forEach(u => userMap.set(u.id.toLowerCase(), u));
+                }
+                cloudData.users = Array.from(userMap.values());
+
+                if (curSaveVal && curUserKey !== 'game_save_state_guest') {
+                    try {
+                        cloudData.saves[curUserKey] = JSON.parse(curSaveVal);
+                    } catch(e) {}
+                }
+
+                await fetch(CLOUD_SYNC_URL, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: 'lvlup_users',
+                        data: cloudData
+                    })
+                });
+            } catch(e) {}
+        }, 1000);
+    }
+
+    // Trigger initial cloud sync silently
+    syncFromCloud();
+
     function saveState() {
         window.safeLocalStorage.setItem(getGameSaveKey(), JSON.stringify(state));
+        triggerCloudSave();
     }
 
     function applyGlobalState() {
@@ -516,9 +604,10 @@ document.addEventListener('click', function(e) {
             }
         }
 
-        function saveUsers(users) {
+        function saveUsers(users, triggerSync = true) {
             try {
                 localStorage.setItem('lvlup_users', JSON.stringify(users));
+                if (triggerSync) triggerCloudSave();
             } catch (e) {}
         }
 
@@ -625,7 +714,7 @@ document.addEventListener('click', function(e) {
                 };
             }
 
-            window.handleAuthSubmit = function(e) {
+            window.handleAuthSubmit = async function(e) {
                 if (e) e.preventDefault();
                 const hunterIdInput = document.getElementById('hunter-id');
                 const secretKeyInput = document.getElementById('secret-key');
@@ -644,7 +733,9 @@ document.addEventListener('click', function(e) {
                     return false;
                 }
 
-                const users = getUsers();
+                // Sync from cloud before checking credentials
+                await syncFromCloud();
+                let users = getUsers();
 
                 if (currentMode === 'login') {
                     let existingUser = users.find(u => u.id.toLowerCase() === id.toLowerCase() && u.pw === pw);
