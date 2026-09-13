@@ -525,6 +525,10 @@ document.addEventListener('click', function(e) {
                             }
                             if (updatedCurrent) {
                                 reloadStateFromStorage();
+                                if (!sessionStorage.getItem('__cloud_synced_reload')) {
+                                    sessionStorage.setItem('__cloud_synced_reload', 'true');
+                                    window.location.reload();
+                                }
                             }
                         }
                     }
