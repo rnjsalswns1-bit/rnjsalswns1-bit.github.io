@@ -534,7 +534,9 @@ document.addEventListener('click', function(e) {
         });
 
         // Handle Login Page Logic
-        if (window.location.pathname.includes('login')) {
+        function initLoginPageLogic() {
+            if (!window.location.pathname.includes('login') && !document.getElementById('auth-form')) return;
+
             const tabLogin = document.getElementById('tab-login');
             const tabSignup = document.getElementById('tab-signup');
             const authTitle = document.getElementById('auth-title');
@@ -544,6 +546,7 @@ document.addEventListener('click', function(e) {
             const hunterIdInput = document.getElementById('hunter-id');
             const secretKeyInput = document.getElementById('secret-key');
             const rememberMe = document.getElementById('remember-me');
+            const submitBtn = document.getElementById('btn-submit-auth');
             let currentMode = 'login'; // 'login' or 'signup'
 
             function showAlert(msg, isError = true) {
@@ -641,9 +644,23 @@ document.addEventListener('click', function(e) {
                     setTimeout(() => {
                         window.location.href = 'dashboard.html';
                     }, 500);
+            if (submitBtn) {
+                submitBtn.onclick = (e) => {
+                    if (authForm && typeof authForm.requestSubmit === 'function') {
+                        authForm.requestSubmit();
+                    } else if (authForm && typeof authForm.onsubmit === 'function') {
+                        authForm.onsubmit(e);
+                    }
                 };
-            });
+            }
         }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initLoginPageLogic);
+        } else {
+            initLoginPageLogic();
+        }
+        window.addEventListener('load', initLoginPageLogic);
 
         // 1. Dashboard Quests Handling
         if (window.location.pathname.includes('dashboard')) {
