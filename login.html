@@ -265,7 +265,7 @@
 <div id="login-alert" class="hidden p-3 rounded-lg text-sm font-medium text-center transition-all mb-md border"></div>
 
 <!-- Login Form -->
-<form id="auth-form" class="space-y-md w-full" onsubmit="return false;">
+<form id="auth-form" class="space-y-md w-full" onsubmit="if(window.handleAuthSubmit) window.handleAuthSubmit(event); return false;">
 <!-- Hunter ID Field -->
 <div class="space-y-xs">
 <label class="font-caption text-caption text-primary-fixed-dim uppercase tracking-wider block" for="hunter-id">플레이어 ID (이메일)</label>
@@ -291,7 +291,7 @@
 <a class="font-caption text-caption text-epic-purple hover:text-primary-fixed transition-colors" href="#" onclick="alert('기본 테스트 계정:\nID: hunter@levelup.com\nPW: 1234'); return false;">계정 힌트 보기</a>
 </div>
 <!-- Primary Action Button -->
-<button id="btn-submit-auth" class="w-full bg-epic-purple text-on-primary font-quest-title text-quest-title uppercase py-sm rounded glow-epic glow-epic-active transition-all duration-300 hover:bg-inverse-primary relative overflow-hidden group" type="submit">
+<button id="btn-submit-auth" onclick="if(window.handleAuthSubmit) window.handleAuthSubmit(event);" class="w-full bg-epic-purple text-on-primary font-quest-title text-quest-title uppercase py-sm rounded glow-epic glow-epic-active transition-all duration-300 hover:bg-inverse-primary relative overflow-hidden group cursor-pointer" type="submit">
 <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
 <span id="btn-auth-text" class="relative z-10 flex items-center justify-center gap-2">
 <span class="material-symbols-outlined text-xl">login</span>

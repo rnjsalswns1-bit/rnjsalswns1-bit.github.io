@@ -1,3 +1,54 @@
+// Global Safe Storage Wrapper to prevent Microsoft Edge / Safari Tracking Prevention SecurityError crashes
+(function() {
+    let memoryStoreLocal = {};
+    let memoryStoreSession = {};
+
+    window.safeLocalStorage = {
+        getItem: function(key) {
+            try {
+                if (window.localStorage) return window.localStorage.getItem(key);
+            } catch(e) {}
+            return memoryStoreLocal[key] || null;
+        },
+        setItem: function(key, value) {
+            try {
+                if (window.localStorage) window.localStorage.setItem(key, value);
+            } catch(e) {}
+            memoryStoreLocal[key] = String(value);
+        },
+        removeItem: function(key) {
+            try {
+                if (window.localStorage) window.localStorage.removeItem(key);
+            } catch(e) {}
+            delete memoryStoreLocal[key];
+        }
+    };
+
+    window.safeSessionStorage = {
+        getItem: function(key) {
+            try {
+                if (window.sessionStorage) return window.sessionStorage.getItem(key);
+            } catch(e) {}
+            return memoryStoreSession[key] || null;
+        },
+        setItem: function(key, value) {
+            try {
+                if (window.sessionStorage) window.sessionStorage.setItem(key, value);
+            } catch(e) {}
+            memoryStoreSession[key] = String(value);
+        },
+        removeItem: function(key) {
+            try {
+                if (window.sessionStorage) window.sessionStorage.removeItem(key);
+            } catch(e) {}
+            delete memoryStoreSession[key];
+        }
+    };
+})();
+
+const localStorage = window.safeLocalStorage;
+const sessionStorage = window.safeSessionStorage;
+
 window.getGameSaveKey = function() {
     try {
         const session = localStorage.getItem('lvlup_current_user') || sessionStorage.getItem('lvlup_current_user');
@@ -580,58 +631,65 @@ document.addEventListener('click', function(e) {
                 };
             }
 
-            if (authForm) {
-                authForm.onsubmit = (e) => {
-                    e.preventDefault();
-                    const id = (hunterIdInput ? hunterIdInput.value : '').trim();
-                    const pw = (secretKeyInput ? secretKeyInput.value : '').trim();
+            window.handleAuthSubmit = function(e) {
+                if (e) e.preventDefault();
+                const hunterIdInput = document.getElementById('hunter-id');
+                const secretKeyInput = document.getElementById('secret-key');
+                const rememberMe = document.getElementById('remember-me');
+                
+                const id = (hunterIdInput ? hunterIdInput.value : '').trim();
+                const pw = (secretKeyInput ? secretKeyInput.value : '').trim();
 
-                    if (!id || !pw) {
-                        showAlert('플레이어 ID(이메일)와 시크릿 키(비밀번호)를 입력해주세요.', true);
-                        return;
-                    }
+                if (!id || !pw) {
+                    showAlert('플레이어 ID(이메일)와 시크릿 키(비밀번호)를 입력해주세요.', true);
+                    return false;
+                }
 
-                    if (pw.length < 4) {
-                        showAlert('시크릿 키(비밀번호)는 최소 4자리 이상이어야 합니다.', true);
-                        return;
-                    }
+                if (pw.length < 4) {
+                    showAlert('시크릿 키(비밀번호)는 최소 4자리 이상이어야 합니다.', true);
+                    return false;
+                }
 
-                    const users = getUsers();
+                const users = getUsers();
 
-                    if (currentMode === 'login') {
-                        let existingUser = users.find(u => u.id.toLowerCase() === id.toLowerCase() && u.pw === pw);
-                        if (!existingUser && !users.some(u => u.id.toLowerCase() === id.toLowerCase())) {
-                            // Automatically register previously existing accounts on the fly
-                            existingUser = { id: id, pw: pw, name: id.split('@')[0] };
-                            users.push(existingUser);
-                            saveUsers(users);
-                        }
-                        if (existingUser && existingUser.pw === pw) {
-                            setCurrentUser({ id: existingUser.id, name: existingUser.name }, rememberMe ? rememberMe.checked : true);
-                            showAlert('로그인 성공! 대시보드로 이동합니다...', false);
-                            setTimeout(() => {
-                                window.location.href = 'dashboard.html';
-                            }, 500);
-                        } else {
-                            showAlert('시크릿 키(비밀번호)가 일치하지 않습니다.', true);
-                        }
-                    } else {
-                        // Signup mode
-                        const userExists = users.some(u => u.id.toLowerCase() === id.toLowerCase());
-                        if (userExists) {
-                            showAlert('이미 플레이어로 등록된 이메일 주소입니다. 로그인해주세요.', true);
-                            return;
-                        }
-                        const newUser = { id: id, pw: pw, name: id.split('@')[0] };
-                        users.push(newUser);
+                if (currentMode === 'login') {
+                    let existingUser = users.find(u => u.id.toLowerCase() === id.toLowerCase() && u.pw === pw);
+                    if (!existingUser && !users.some(u => u.id.toLowerCase() === id.toLowerCase())) {
+                        // Automatically register previously existing accounts on the fly
+                        existingUser = { id: id, pw: pw, name: id.split('@')[0] };
+                        users.push(existingUser);
                         saveUsers(users);
-                        setCurrentUser({ id: newUser.id, name: newUser.name }, rememberMe ? rememberMe.checked : true);
-                        showAlert('신규 플레이어 계정이 성공적으로 생성되었습니다! 접속 중...', false);
+                    }
+                    if (existingUser && existingUser.pw === pw) {
+                        setCurrentUser({ id: existingUser.id, name: existingUser.name }, rememberMe ? rememberMe.checked : true);
+                        showAlert('로그인 성공! 대시보드로 이동합니다...', false);
                         setTimeout(() => {
                             window.location.href = 'dashboard.html';
                         }, 500);
+                    } else {
+                        showAlert('시크릿 키(비밀번호)가 일치하지 않습니다.', true);
                     }
-                };
+                } else {
+                    // Signup mode
+                    const userExists = users.some(u => u.id.toLowerCase() === id.toLowerCase());
+                    if (userExists) {
+                        showAlert('이미 플레이어로 등록된 이메일 주소입니다. 로그인해주세요.', true);
+                        return false;
+                    }
+                    const newUser = { id: id, pw: pw, name: id.split('@')[0] };
+                    users.push(newUser);
+                    saveUsers(users);
+                    setCurrentUser({ id: newUser.id, name: newUser.name }, rememberMe ? rememberMe.checked : true);
+                    showAlert('신규 플레이어 계정이 성공적으로 생성되었습니다! 접속 중...', false);
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 500);
+                }
+                return false;
+            };
+
+            if (authForm) {
+                authForm.onsubmit = window.handleAuthSubmit;
             }
 
             // Social Login Buttons Handling
