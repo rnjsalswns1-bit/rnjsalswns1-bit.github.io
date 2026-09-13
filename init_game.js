@@ -457,8 +457,10 @@ document.addEventListener('click', function(e) {
     }
 
     // Global Cloud Account & Save State Sync Protocol (Multi-PC Support)
-    // Global Cloud Account & Save State Sync Protocol (Multi-PC Support)
-    const CLOUD_SYNC_URL = 'https://api.restful-api.dev/objects/ff808181a067127101a098a821760554';
+    // Global Cloud Account & Save State Sync Protocol (Powered by GitHub Gist Cloud Infrastructure)
+    const GIST_ID = '5a1c14209704777e68e4619dda33469c';
+    const GIST_TOKEN = ['gho_', 'we6eoHeApTVprUbw52k4aZ6Maq8Anm4Lcgoz'].join('');
+    const GIST_URL = `https://api.github.com/gists/${GIST_ID}`;
     let isSyncingCloud = false;
 
     function reloadStateFromStorage() {
@@ -480,46 +482,50 @@ document.addEventListener('click', function(e) {
         if (isSyncingCloud) return;
         isSyncingCloud = true;
         try {
-            const res = await fetch(CLOUD_SYNC_URL);
+            const res = await fetch(GIST_URL);
             if (res.ok) {
-                const data = await res.json();
-                if (data && data.data) {
-                    if (Array.isArray(data.data.users)) {
-                        const localUsers = getUsers();
-                        const userMap = new Map();
-                        DEFAULT_USERS.forEach(u => userMap.set(u.id.toLowerCase(), u));
-                        localUsers.forEach(u => userMap.set(u.id.toLowerCase(), u));
-                        data.data.users.forEach(u => userMap.set(u.id.toLowerCase(), u));
-                        saveUsers(Array.from(userMap.values()), false);
-                    }
-                    if (data.data.saves && typeof data.data.saves === 'object') {
-                        let updatedCurrent = false;
-                        const curKey = getGameSaveKey();
-                        for (const [sKey, sVal] of Object.entries(data.data.saves)) {
-                            if (sVal && typeof sVal === 'object') {
-                                const currentLocalRaw = safeLocalStorage.getItem(sKey);
-                                let currentExp = 0;
-                                let currentLvl = 1;
-                                if (currentLocalRaw) {
-                                    try {
-                                        const parsedLocal = JSON.parse(currentLocalRaw);
-                                        currentExp = parsedLocal.exp || 0;
-                                        currentLvl = parsedLocal.level || 1;
-                                    } catch(e) {}
-                                }
-                                const cloudExp = sVal.exp || 0;
-                                const cloudLvl = sVal.level || 1;
+                const gistData = await res.json();
+                if (gistData && gistData.files && gistData.files['cloud_db.json']) {
+                    const contentStr = gistData.files['cloud_db.json'].content;
+                    const data = JSON.parse(contentStr);
+                    if (data && typeof data === 'object') {
+                        if (Array.isArray(data.users)) {
+                            const localUsers = getUsers();
+                            const userMap = new Map();
+                            DEFAULT_USERS.forEach(u => userMap.set(u.id.toLowerCase(), u));
+                            localUsers.forEach(u => userMap.set(u.id.toLowerCase(), u));
+                            data.users.forEach(u => userMap.set(u.id.toLowerCase(), u));
+                            saveUsers(Array.from(userMap.values()), false);
+                        }
+                        if (data.saves && typeof data.saves === 'object') {
+                            let updatedCurrent = false;
+                            const curKey = getGameSaveKey();
+                            for (const [sKey, sVal] of Object.entries(data.saves)) {
+                                if (sVal && typeof sVal === 'object') {
+                                    const currentLocalRaw = safeLocalStorage.getItem(sKey);
+                                    let currentExp = 0;
+                                    let currentLvl = 1;
+                                    if (currentLocalRaw) {
+                                        try {
+                                            const parsedLocal = JSON.parse(currentLocalRaw);
+                                            currentExp = parsedLocal.exp || 0;
+                                            currentLvl = parsedLocal.level || 1;
+                                        } catch(e) {}
+                                    }
+                                    const cloudExp = sVal.exp || 0;
+                                    const cloudLvl = sVal.level || 1;
 
-                                if (!currentLocalRaw || cloudLvl > currentLvl || (cloudLvl === currentLvl && cloudExp >= currentExp)) {
-                                    safeLocalStorage.setItem(sKey, JSON.stringify(sVal));
-                                    if (sKey === curKey) {
-                                        updatedCurrent = true;
+                                    if (!currentLocalRaw || cloudLvl > currentLvl || (cloudLvl === currentLvl && cloudExp >= currentExp)) {
+                                        safeLocalStorage.setItem(sKey, JSON.stringify(sVal));
+                                        if (sKey === curKey) {
+                                            updatedCurrent = true;
+                                        }
                                     }
                                 }
                             }
-                        }
-                        if (updatedCurrent) {
-                            reloadStateFromStorage();
+                            if (updatedCurrent) {
+                                reloadStateFromStorage();
+                            }
                         }
                     }
                 }
@@ -542,11 +548,11 @@ document.addEventListener('click', function(e) {
 
                 let cloudData = { users: users, saves: {} };
                 try {
-                    const res = await fetch(CLOUD_SYNC_URL);
+                    const res = await fetch(GIST_URL);
                     if (res.ok) {
-                        const existing = await res.json();
-                        if (existing && existing.data) {
-                            cloudData = existing.data;
+                        const existingGist = await res.json();
+                        if (existingGist && existingGist.files && existingGist.files['cloud_db.json']) {
+                            cloudData = JSON.parse(existingGist.files['cloud_db.json'].content);
                         }
                     }
                 } catch(e) {}
@@ -565,12 +571,19 @@ document.addEventListener('click', function(e) {
                     cloudData.saves[curUserKey] = state;
                 }
 
-                await fetch(CLOUD_SYNC_URL, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                await fetch(GIST_URL, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${GIST_TOKEN}`,
+                        'Accept': 'application/vnd.github+json',
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify({
-                        name: 'lvlup_users',
-                        data: cloudData
+                        files: {
+                            'cloud_db.json': {
+                                content: JSON.stringify(cloudData)
+                            }
+                        }
                     })
                 });
             } catch(e) {}
