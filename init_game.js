@@ -46,12 +46,9 @@
     };
 })();
 
-const localStorage = window.safeLocalStorage;
-const sessionStorage = window.safeSessionStorage;
-
 window.getGameSaveKey = function() {
     try {
-        const session = localStorage.getItem('lvlup_current_user') || sessionStorage.getItem('lvlup_current_user');
+        const session = window.safeLocalStorage.getItem('lvlup_current_user') || window.safeSessionStorage.getItem('lvlup_current_user');
         if (session) {
             const user = JSON.parse(session);
             if (user && user.id) {
@@ -135,7 +132,7 @@ window.handleSaveProfile = function(e) {
         
         const saveKey = (function() {
             try {
-                const session = localStorage.getItem('lvlup_current_user') || sessionStorage.getItem('lvlup_current_user');
+                const session = window.safeLocalStorage.getItem('lvlup_current_user') || window.safeSessionStorage.getItem('lvlup_current_user');
                 if (session) {
                     const user = JSON.parse(session);
                     if (user && user.id) {
@@ -148,7 +145,7 @@ window.handleSaveProfile = function(e) {
 
         let curState = {};
         try {
-            const raw = localStorage.getItem(saveKey);
+            const raw = window.safeLocalStorage.getItem(saveKey);
             if (raw) curState = JSON.parse(raw);
         } catch(e) {}
 
@@ -159,11 +156,11 @@ window.handleSaveProfile = function(e) {
         if (nameVal) {
             curState.customProfile.name = nameVal;
             try {
-                const session = localStorage.getItem('lvlup_current_user') || sessionStorage.getItem('lvlup_current_user');
+                const session = window.safeLocalStorage.getItem('lvlup_current_user') || window.safeSessionStorage.getItem('lvlup_current_user');
                 if (session) {
                     const u = JSON.parse(session);
                     u.name = nameVal;
-                    localStorage.setItem('lvlup_current_user', JSON.stringify(u));
+                    window.safeLocalStorage.setItem('lvlup_current_user', JSON.stringify(u));
                 }
             } catch(err) {}
         }
@@ -234,6 +231,9 @@ document.addEventListener('click', function(e) {
 
 
 (function() {
+    var localStorage = window.safeLocalStorage;
+    var sessionStorage = window.safeSessionStorage;
+
     window.DEFAULT_DUNGEONS = [
         { id: 'e1', rank: 'E', name: '운동', desc: '꾸준한 신체 단련 미션입니다.' },
         { id: 'e2', rank: 'E', name: '지식', desc: '꾸준한 지식 습득 미션입니다.' },
