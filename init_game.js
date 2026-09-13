@@ -536,12 +536,10 @@ document.addEventListener('click', function(e) {
                 const users = getUsers();
                 const curUserKey = getGameSaveKey();
 
-                if (state && curUserKey !== 'game_save_state_guest') {
+                if (state && curUserKey) {
                     safeLocalStorage.setItem(curUserKey, JSON.stringify(state));
                 }
 
-                const curSaveVal = safeLocalStorage.getItem(curUserKey);
-                
                 let cloudData = { users: users, saves: {} };
                 try {
                     const res = await fetch(CLOUD_SYNC_URL);
@@ -563,10 +561,8 @@ document.addEventListener('click', function(e) {
                 }
                 cloudData.users = Array.from(userMap.values());
 
-                if (curSaveVal && curUserKey !== 'game_save_state_guest') {
-                    try {
-                        cloudData.saves[curUserKey] = JSON.parse(curSaveVal);
-                    } catch(e) {}
+                if (state && curUserKey) {
+                    cloudData.saves[curUserKey] = state;
                 }
 
                 await fetch(CLOUD_SYNC_URL, {
@@ -578,11 +574,12 @@ document.addEventListener('click', function(e) {
                     })
                 });
             } catch(e) {}
-        }, 300);
+        }, 100);
     }
 
-    // Trigger initial cloud sync silently
+    // Trigger initial cloud sync silently on load
     syncFromCloud();
+    triggerCloudSave();
 
     window.saveState = function() {
         if (state) {
