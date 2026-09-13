@@ -1,0 +1,15 @@
+{
+  "users": [
+    { "id": "hunter@levelup.com", "pw": "1234", "name": "권민철" }
+  ],
+  "saves": {
+    "game_save_state_hunter_levelup_com": {
+      "level": 1,
+      "exp": 50,
+      "gold": 1500,
+      "stats": { "str": 10.5, "agi": 11, "int": 10, "wil": 10.5, "cha": 10 },
+      "customProfile": { "name": "권민철", "weight": 55, "height": 178 },
+      "dailyProgress": { "date": "2026-09-13", "completions": [true, true, true], "submitted": true }
+    }
+  }
+}

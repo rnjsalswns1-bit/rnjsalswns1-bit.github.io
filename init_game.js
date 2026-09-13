@@ -482,54 +482,68 @@ document.addEventListener('click', function(e) {
         if (isSyncingCloud) return;
         isSyncingCloud = true;
         try {
-            const res = await fetch(GIST_URL);
-            if (res.ok) {
-                const gistData = await res.json();
-                if (gistData && gistData.files && gistData.files['cloud_db.json']) {
-                    const contentStr = gistData.files['cloud_db.json'].content;
-                    const data = JSON.parse(contentStr);
-                    if (data && typeof data === 'object') {
-                        if (Array.isArray(data.users)) {
-                            const localUsers = getUsers();
-                            const userMap = new Map();
-                            DEFAULT_USERS.forEach(u => userMap.set(u.id.toLowerCase(), u));
-                            localUsers.forEach(u => userMap.set(u.id.toLowerCase(), u));
-                            data.users.forEach(u => userMap.set(u.id.toLowerCase(), u));
-                            saveUsers(Array.from(userMap.values()), false);
-                        }
-                        if (data.saves && typeof data.saves === 'object') {
-                            let updatedCurrent = false;
-                            const curKey = getGameSaveKey();
-                            for (const [sKey, sVal] of Object.entries(data.saves)) {
-                                if (sVal && typeof sVal === 'object') {
-                                    const currentLocalRaw = safeLocalStorage.getItem(sKey);
-                                    let currentExp = 0;
-                                    let currentLvl = 1;
-                                    if (currentLocalRaw) {
-                                        try {
-                                            const parsedLocal = JSON.parse(currentLocalRaw);
-                                            currentExp = parsedLocal.exp || 0;
-                                            currentLvl = parsedLocal.level || 1;
-                                        } catch(e) {}
-                                    }
-                                    const cloudExp = sVal.exp || 0;
-                                    const cloudLvl = sVal.level || 1;
+            let data = null;
+            // 1. Try same-origin static data/cloud_db.json first (100% immune to CORS and Edge Tracking Prevention blocks)
+            try {
+                const localRes = await fetch('data/cloud_db.json');
+                if (localRes.ok) {
+                    data = await localRes.json();
+                }
+            } catch(e) {}
 
-                                    if (!currentLocalRaw || cloudLvl > currentLvl || (cloudLvl === currentLvl && cloudExp >= currentExp)) {
-                                        safeLocalStorage.setItem(sKey, JSON.stringify(sVal));
-                                        if (sKey === curKey) {
-                                            updatedCurrent = true;
-                                        }
-                                    }
+            // 2. Try GitHub Gist cloud fetch
+            if (!data) {
+                try {
+                    const res = await fetch(GIST_URL);
+                    if (res.ok) {
+                        const gistData = await res.json();
+                        if (gistData && gistData.files && gistData.files['cloud_db.json']) {
+                            data = JSON.parse(gistData.files['cloud_db.json'].content);
+                        }
+                    }
+                } catch(e) {}
+            }
+
+            if (data && typeof data === 'object') {
+                if (Array.isArray(data.users)) {
+                    const localUsers = getUsers();
+                    const userMap = new Map();
+                    DEFAULT_USERS.forEach(u => userMap.set(u.id.toLowerCase(), u));
+                    localUsers.forEach(u => userMap.set(u.id.toLowerCase(), u));
+                    data.users.forEach(u => userMap.set(u.id.toLowerCase(), u));
+                    saveUsers(Array.from(userMap.values()), false);
+                }
+                if (data.saves && typeof data.saves === 'object') {
+                    let updatedCurrent = false;
+                    const curKey = getGameSaveKey();
+                    for (const [sKey, sVal] of Object.entries(data.saves)) {
+                        if (sVal && typeof sVal === 'object') {
+                            const currentLocalRaw = safeLocalStorage.getItem(sKey);
+                            let currentExp = 0;
+                            let currentLvl = 1;
+                            if (currentLocalRaw) {
+                                try {
+                                    const parsedLocal = JSON.parse(currentLocalRaw);
+                                    currentExp = parsedLocal.exp || 0;
+                                    currentLvl = parsedLocal.level || 1;
+                                } catch(e) {}
+                            }
+                            const cloudExp = sVal.exp || 0;
+                            const cloudLvl = sVal.level || 1;
+
+                            if (!currentLocalRaw || cloudLvl > currentLvl || (cloudLvl === currentLvl && cloudExp >= currentExp)) {
+                                safeLocalStorage.setItem(sKey, JSON.stringify(sVal));
+                                if (sKey === curKey) {
+                                    updatedCurrent = true;
                                 }
                             }
-                            if (updatedCurrent) {
-                                reloadStateFromStorage();
-                                if (!sessionStorage.getItem('__cloud_synced_reload')) {
-                                    sessionStorage.setItem('__cloud_synced_reload', 'true');
-                                    window.location.reload();
-                                }
-                            }
+                        }
+                    }
+                    if (updatedCurrent) {
+                        reloadStateFromStorage();
+                        if (!sessionStorage.getItem('__cloud_synced_reload')) {
+                            sessionStorage.setItem('__cloud_synced_reload', 'true');
+                            window.location.reload();
                         }
                     }
                 }
