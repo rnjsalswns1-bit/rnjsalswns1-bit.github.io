@@ -457,8 +457,24 @@ document.addEventListener('click', function(e) {
     }
 
     // Global Cloud Account & Save State Sync Protocol (Multi-PC Support)
+    // Global Cloud Account & Save State Sync Protocol (Multi-PC Support)
     const CLOUD_SYNC_URL = 'https://api.restful-api.dev/objects/ff808181a067127101a098a821760554';
     let isSyncingCloud = false;
+
+    function reloadStateFromStorage() {
+        try {
+            const curKey = getGameSaveKey();
+            const saved = safeLocalStorage.getItem(curKey);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (parsed && typeof parsed === 'object' && parsed.level !== undefined) {
+                    state = parsed;
+                    if (typeof applyGlobalState === 'function') applyGlobalState();
+                    if (typeof applyCustomSettings === 'function') applyCustomSettings();
+                }
+            }
+        } catch(e) {}
+    }
 
     async function syncFromCloud() {
         if (isSyncingCloud) return;
@@ -477,13 +493,33 @@ document.addEventListener('click', function(e) {
                         saveUsers(Array.from(userMap.values()), false);
                     }
                     if (data.data.saves && typeof data.data.saves === 'object') {
+                        let updatedCurrent = false;
+                        const curKey = getGameSaveKey();
                         for (const [sKey, sVal] of Object.entries(data.data.saves)) {
                             if (sVal && typeof sVal === 'object') {
-                                const currentLocal = safeLocalStorage.getItem(sKey);
-                                if (!currentLocal || JSON.stringify(sVal).length >= currentLocal.length) {
+                                const currentLocalRaw = safeLocalStorage.getItem(sKey);
+                                let currentExp = 0;
+                                let currentLvl = 1;
+                                if (currentLocalRaw) {
+                                    try {
+                                        const parsedLocal = JSON.parse(currentLocalRaw);
+                                        currentExp = parsedLocal.exp || 0;
+                                        currentLvl = parsedLocal.level || 1;
+                                    } catch(e) {}
+                                }
+                                const cloudExp = sVal.exp || 0;
+                                const cloudLvl = sVal.level || 1;
+
+                                if (!currentLocalRaw || cloudLvl > currentLvl || (cloudLvl === currentLvl && cloudExp >= currentExp)) {
                                     safeLocalStorage.setItem(sKey, JSON.stringify(sVal));
+                                    if (sKey === curKey) {
+                                        updatedCurrent = true;
+                                    }
                                 }
                             }
+                        }
+                        if (updatedCurrent) {
+                            reloadStateFromStorage();
                         }
                     }
                 }
@@ -499,6 +535,11 @@ document.addEventListener('click', function(e) {
             try {
                 const users = getUsers();
                 const curUserKey = getGameSaveKey();
+
+                if (state && curUserKey !== 'game_save_state_guest') {
+                    safeLocalStorage.setItem(curUserKey, JSON.stringify(state));
+                }
+
                 const curSaveVal = safeLocalStorage.getItem(curUserKey);
                 
                 let cloudData = { users: users, saves: {} };
@@ -537,15 +578,21 @@ document.addEventListener('click', function(e) {
                     })
                 });
             } catch(e) {}
-        }, 1000);
+        }, 300);
     }
 
     // Trigger initial cloud sync silently
     syncFromCloud();
 
-    function saveState() {
-        window.safeLocalStorage.setItem(getGameSaveKey(), JSON.stringify(state));
+    window.saveState = function() {
+        if (state) {
+            window.safeLocalStorage.setItem(getGameSaveKey(), JSON.stringify(state));
+        }
         triggerCloudSave();
+    };
+
+    function saveState() {
+        window.saveState();
     }
 
     function applyGlobalState() {
@@ -1496,7 +1543,11 @@ document.addEventListener('click', function(e) {
     }
 
     function saveState() {
-        localStorage.setItem(window.getGameSaveKey(), JSON.stringify(state));
+        if (typeof window.saveState === 'function') {
+            window.saveState();
+        } else {
+            localStorage.setItem(window.getGameSaveKey(), JSON.stringify(state));
+        }
     }
 
     // 2. Apply Custom Settings on load
