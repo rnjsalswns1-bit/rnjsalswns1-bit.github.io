@@ -673,56 +673,113 @@ document.addEventListener('click', function(e) {
                     return false;
                 }
 
-                const hashedPw = await window.hashPassword(pw);
-                let users = getUsers();
+                const isFirebaseConfigured = typeof window.hasRealFirebaseConfig === 'function' && window.hasRealFirebaseConfig() && window.initFirebaseApp();
 
-                if (currentMode === 'login') {
-                    let existingUser = users.find(u => u.id.toLowerCase() === id.toLowerCase());
-                    if (!existingUser) {
-                        // Automatically register new accounts on the fly
-                        existingUser = { id: id, pw: hashedPw, name: id.split('@')[0] };
-                        users.push(existingUser);
-                        saveUsers(users, false);
+                if (isFirebaseConfigured && window.auth) {
+                    // -------------------------------------------------------------
+                    // Mode A: Firebase Authentication Real Backend Integration
+                    // -------------------------------------------------------------
+                    if (currentMode === 'login') {
+                        try {
+                            showAlert('☁️ Firebase Authentication 로그인 시도 중...', false);
+                            const userCred = await window.auth.signInWithEmailAndPassword(id, pw);
+                            const firebaseUser = userCred.user;
+                            const uid = firebaseUser.uid;
+
+                            setCurrentUser({ id: firebaseUser.email, uid: uid, name: firebaseUser.email.split('@')[0] }, rememberMe ? rememberMe.checked : true);
+                            showAlert('🎉 Firebase Auth 로그인 성공! 클라우드 동기화 중...', false);
+                            
+                            if (typeof window.loadGameFromCloud === 'function') {
+                                await window.loadGameFromCloud(uid);
+                            }
+
+                            setTimeout(() => {
+                                window.location.href = 'dashboard.html';
+                            }, 500);
+                            return false;
+                        } catch (firebaseErr) {
+                            console.warn("Firebase Auth Login Error:", firebaseErr);
+                            showAlert('⚠️ Firebase Auth 로그인 오류: ' + (firebaseErr.message || firebaseErr.code), true);
+                            return false;
+                        }
+                    } else {
+                        // Signup Mode via Firebase Auth
+                        try {
+                            showAlert('☁️ Firebase Authentication 신규 계정 생성 중...', false);
+                            const userCred = await window.auth.createUserWithEmailAndPassword(id, pw);
+                            const firebaseUser = userCred.user;
+                            const uid = firebaseUser.uid;
+
+                            setCurrentUser({ id: firebaseUser.email, uid: uid, name: firebaseUser.email.split('@')[0] }, rememberMe ? rememberMe.checked : true);
+                            showAlert('🎉 Firebase Auth 계정이 성공적으로 생성되었습니다! Firestore 저장 중...', false);
+
+                            if (typeof window.saveGameToCloud === 'function' && typeof defaultState !== 'undefined') {
+                                await window.saveGameToCloud(defaultState, uid);
+                            }
+
+                            setTimeout(() => {
+                                window.location.href = 'dashboard.html';
+                            }, 500);
+                            return false;
+                        } catch (firebaseErr) {
+                            console.warn("Firebase Auth Signup Error:", firebaseErr);
+                            showAlert('⚠️ Firebase Auth 회원가입 오류: ' + (firebaseErr.message || firebaseErr.code), true);
+                            return false;
+                        }
                     }
-                    if (existingUser && (existingUser.pw === hashedPw || existingUser.pw === pw)) {
-                        existingUser.pw = hashedPw; // Migrate legacy plain passwords to hash
+                } else {
+                    // -------------------------------------------------------------
+                    // Mode B: LocalStorage Fallback (When firebase_config.js has placeholders)
+                    // -------------------------------------------------------------
+                    const hashedPw = await window.hashPassword(pw);
+                    let users = getUsers();
+
+                    if (currentMode === 'login') {
+                        let existingUser = users.find(u => u.id.toLowerCase() === id.toLowerCase());
+                        if (!existingUser) {
+                            existingUser = { id: id, pw: hashedPw, name: id.split('@')[0] };
+                            users.push(existingUser);
+                            saveUsers(users, false);
+                        }
+                        if (existingUser && (existingUser.pw === hashedPw || existingUser.pw === pw)) {
+                            existingUser.pw = hashedPw;
+                            saveUsers(users, false);
+                            setCurrentUser({ id: existingUser.id, name: existingUser.name }, rememberMe ? rememberMe.checked : true);
+                            showAlert('⚠️ 로컬 모드 접속 (Firebase 키 미설정: firebase_config.js 설정 필요)', false);
+                            
+                            if (typeof window.loadGameFromCloud === 'function') {
+                                await window.loadGameFromCloud(existingUser.id);
+                            }
+
+                            setTimeout(() => {
+                                window.location.href = 'dashboard.html';
+                            }, 600);
+                        } else {
+                            showAlert('시크릿 키(비밀번호)가 일치하지 않습니다.', true);
+                        }
+                    } else {
+                        // Local Signup mode
+                        const userExists = users.some(u => u.id.toLowerCase() === id.toLowerCase());
+                        if (userExists) {
+                            showAlert('이미 플레이어로 등록된 이메일 주소입니다. 로그인해주세요.', true);
+                            return false;
+                        }
+                        const newUser = { id: id, pw: hashedPw, name: id.split('@')[0] };
+                        users.push(newUser);
                         saveUsers(users, false);
-                        setCurrentUser({ id: existingUser.id, name: existingUser.name }, rememberMe ? rememberMe.checked : true);
-                        showAlert('로그인 성공! 클라우드 데이터 동기화 중...', false);
-                        
-                        // Fetch latest cloud save state before redirect
-                        if (typeof window.loadGameFromCloud === 'function') {
-                            await window.loadGameFromCloud(existingUser.id);
+                        setCurrentUser({ id: newUser.id, name: newUser.name }, rememberMe ? rememberMe.checked : true);
+                        showAlert('⚠️ 로컬 계정 생성 완료 (Firebase 키 미설정: firebase_config.js 설정 필요)', false);
+
+                        if (typeof window.saveGameToCloud === 'function' && typeof defaultState !== 'undefined') {
+                            await window.saveGameToCloud(defaultState, newUser.id);
                         }
 
                         setTimeout(() => {
                             window.location.href = 'dashboard.html';
-                        }, 400);
-                    } else {
-                        showAlert('시크릿 키(비밀번호)가 일치하지 않습니다.', true);
+                        }, 600);
                     }
-                } else {
-                    // Signup mode
-                    const userExists = users.some(u => u.id.toLowerCase() === id.toLowerCase());
-                    if (userExists) {
-                        showAlert('이미 플레이어로 등록된 이메일 주소입니다. 로그인해주세요.', true);
-                        return false;
-                    }
-                    const newUser = { id: id, pw: hashedPw, name: id.split('@')[0] };
-                    users.push(newUser);
-                    saveUsers(users, false);
-                    setCurrentUser({ id: newUser.id, name: newUser.name }, rememberMe ? rememberMe.checked : true);
-                    showAlert('신규 플레이어 계정이 생성되었습니다! 접속 중...', false);
-
-                    if (typeof window.saveGameToCloud === 'function' && typeof defaultState !== 'undefined') {
-                        await window.saveGameToCloud(defaultState, newUser.id);
-                    }
-
-                    setTimeout(() => {
-                        window.location.href = 'dashboard.html';
-                    }, 400);
+                    return false;
                 }
-                return false;
             };
 
             if (authForm) {
