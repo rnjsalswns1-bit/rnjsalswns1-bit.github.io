@@ -14,12 +14,13 @@
 ```javascript
 // firebase_config.js (줄 13-20)
 window.firebaseConfig = {
-    apiKey: "여기에_본인의_API_KEY_입력",
-    authDomain: "본인프로젝트.firebaseapp.com",
-    projectId: "본인프로젝트_ID",
-    storageBucket: "본인프로젝트.appspot.com",
-    messagingSenderId: "발급받은_SENDER_ID",
-    appId: "발급받은_APP_ID"
+    apiKey: "AIzaSyBw9pAS2oD7XPgdbnVN06oo0mvxiW08zNU",
+    authDomain: "level-up-life-11dbe.firebaseapp.com",
+    projectId: "level-up-life-11dbe",
+    storageBucket: "level-up-life-11dbe.firebasestorage.app",
+    messagingSenderId: "1040581542507",
+    appId: "1:1040581542507:web:e0a7d66524257e32bc272e",
+    measurementId: "G-54M2XJ4E98"
 };
 ```
 

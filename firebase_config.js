@@ -10,12 +10,13 @@
 
 // 1. User Editable Firebase Configuration (Required for Real Cloud Sync)
 window.firebaseConfig = {
-    apiKey: "YOUR_FIREBASE_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyBw9pAS2oD7XPgdbnVN06oo0mvxiW08zNU",
+    authDomain: "level-up-life-11dbe.firebaseapp.com",
+    projectId: "level-up-life-11dbe",
+    storageBucket: "level-up-life-11dbe.firebasestorage.app",
+    messagingSenderId: "1040581542507",
+    appId: "1:1040581542507:web:e0a7d66524257e32bc272e",
+    measurementId: "G-54M2XJ4E98"
 };
 
 // Global Firebase handles
