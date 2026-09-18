@@ -456,172 +456,37 @@ document.addEventListener('click', function(e) {
         localStorage.setItem(getGameSaveKey(), JSON.stringify(state));
     }
 
-    // Global Cloud Account & Save State Sync Protocol (Multi-PC Support)
-    // Global Cloud Account & Save State Sync Protocol (Powered by GitHub Gist Cloud Infrastructure)
-    const GIST_ID = '5a1c14209704777e68e4619dda33469c';
-    const GIST_TOKEN = ['gho_', 'we6eoHeApTVprUbw52k4aZ6Maq8Anm4Lcgoz'].join('');
-    const GIST_URL = `https://api.github.com/gists/${GIST_ID}`;
-    let isSyncingCloud = false;
-
-    function reloadStateFromStorage() {
-        try {
-            const curKey = getGameSaveKey();
-            const saved = safeLocalStorage.getItem(curKey);
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                if (parsed && typeof parsed === 'object' && parsed.level !== undefined) {
-                    state = parsed;
-                    if (typeof applyGlobalState === 'function') applyGlobalState();
-                    if (typeof applyCustomSettings === 'function') applyCustomSettings();
-                }
-            }
-        } catch(e) {}
-    }
-
-    async function syncFromCloud() {
-        if (isSyncingCloud) return;
-        isSyncingCloud = true;
-        try {
-            let data = null;
-            // 1. Try same-origin static data/cloud_db.json first (100% immune to CORS and Edge Tracking Prevention blocks)
-            try {
-                const localRes = await fetch('data/cloud_db.json');
-                if (localRes.ok) {
-                    data = await localRes.json();
-                }
-            } catch(e) {}
-
-            // 2. Try GitHub Gist cloud fetch
-            if (!data) {
-                try {
-                    const res = await fetch(GIST_URL);
-                    if (res.ok) {
-                        const gistData = await res.json();
-                        if (gistData && gistData.files && gistData.files['cloud_db.json']) {
-                            data = JSON.parse(gistData.files['cloud_db.json'].content);
-                        }
-                    }
-                } catch(e) {}
-            }
-
-            if (data && typeof data === 'object') {
-                if (Array.isArray(data.users)) {
-                    const localUsers = getUsers();
-                    const userMap = new Map();
-                    DEFAULT_USERS.forEach(u => userMap.set(u.id.toLowerCase(), u));
-                    localUsers.forEach(u => userMap.set(u.id.toLowerCase(), u));
-                    data.users.forEach(u => userMap.set(u.id.toLowerCase(), u));
-                    saveUsers(Array.from(userMap.values()), false);
-                }
-                if (data.saves && typeof data.saves === 'object') {
-                    let updatedCurrent = false;
-                    const curKey = getGameSaveKey();
-                    for (const [sKey, sVal] of Object.entries(data.saves)) {
-                        if (sVal && typeof sVal === 'object') {
-                            const currentLocalRaw = safeLocalStorage.getItem(sKey);
-                            let currentExp = 0;
-                            let currentLvl = 1;
-                            if (currentLocalRaw) {
-                                try {
-                                    const parsedLocal = JSON.parse(currentLocalRaw);
-                                    currentExp = parsedLocal.exp || 0;
-                                    currentLvl = parsedLocal.level || 1;
-                                } catch(e) {}
-                            }
-                            const cloudExp = sVal.exp || 0;
-                            const cloudLvl = sVal.level || 1;
-
-                            if (!currentLocalRaw || cloudLvl > currentLvl || (cloudLvl === currentLvl && cloudExp >= currentExp)) {
-                                safeLocalStorage.setItem(sKey, JSON.stringify(sVal));
-                                if (sKey === curKey) {
-                                    updatedCurrent = true;
-                                }
-                            }
-                        }
-                    }
-                    if (updatedCurrent) {
-                        reloadStateFromStorage();
-                        if (!sessionStorage.getItem('__cloud_synced_reload')) {
-                            sessionStorage.setItem('__cloud_synced_reload', 'true');
-                            window.location.reload();
-                        }
-                    }
-                }
-            }
-        } catch(e) {}
-        isSyncingCloud = false;
-    }
-
-    let cloudSaveTimer = null;
-    function triggerCloudSave() {
-        if (cloudSaveTimer) clearTimeout(cloudSaveTimer);
-        cloudSaveTimer = setTimeout(async () => {
-            try {
-                const users = getUsers();
-                const curUserKey = getGameSaveKey();
-
-                if (state && curUserKey) {
-                    safeLocalStorage.setItem(curUserKey, JSON.stringify(state));
-                }
-
-                let cloudData = { users: users, saves: {} };
-                try {
-                    const res = await fetch(GIST_URL);
-                    if (res.ok) {
-                        const existingGist = await res.json();
-                        if (existingGist && existingGist.files && existingGist.files['cloud_db.json']) {
-                            cloudData = JSON.parse(existingGist.files['cloud_db.json'].content);
-                        }
-                    }
-                } catch(e) {}
-
-                if (!cloudData.saves) cloudData.saves = {};
-                if (!cloudData.users) cloudData.users = users;
-
-                const userMap = new Map();
-                users.forEach(u => userMap.set(u.id.toLowerCase(), u));
-                if (Array.isArray(cloudData.users)) {
-                    cloudData.users.forEach(u => userMap.set(u.id.toLowerCase(), u));
-                }
-                cloudData.users = Array.from(userMap.values());
-
-                if (state && curUserKey) {
-                    cloudData.saves[curUserKey] = state;
-                }
-
-                await fetch(GIST_URL, {
-                    method: 'PATCH',
-                    headers: {
-                        'Authorization': `Bearer ${GIST_TOKEN}`,
-                        'Accept': 'application/vnd.github+json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        files: {
-                            'cloud_db.json': {
-                                content: JSON.stringify(cloudData)
-                            }
-                        }
-                    })
-                });
-            } catch(e) {}
-        }, 100);
-    }
-
-    // Trigger initial cloud sync silently on load
-    syncFromCloud();
-    triggerCloudSave();
-
+    // Unified Cloud Save & Load Protocol (Firebase Firestore Integration)
     window.saveState = function() {
         if (state) {
-            window.safeLocalStorage.setItem(getGameSaveKey(), JSON.stringify(state));
+            const saveKey = getGameSaveKey();
+            try {
+                window.safeLocalStorage.setItem(saveKey, JSON.stringify(state));
+            } catch(e) {}
+            if (typeof window.saveGameToCloud === 'function') {
+                window.saveGameToCloud(state);
+            }
         }
-        triggerCloudSave();
     };
 
     function saveState() {
         window.saveState();
     }
+
+    // Load game state from Firebase Firestore on page load
+    (async function initCloudStateOnLoad() {
+        const curUser = getCurrentUser();
+        if (curUser && curUser.id) {
+            try {
+                const cloudState = await window.loadGameFromCloud(curUser.id);
+                if (cloudState && typeof cloudState === 'object' && cloudState.level !== undefined) {
+                    state = cloudState;
+                    if (typeof applyGlobalState === 'function') applyGlobalState();
+                    if (typeof applyCustomSettings === 'function') applyCustomSettings();
+                }
+            } catch(e) {}
+        }
+    })();
 
     function applyGlobalState() {
         // Target header elements explicitly for robust updating
@@ -808,24 +673,31 @@ document.addEventListener('click', function(e) {
                     return false;
                 }
 
-                // Sync from cloud before checking credentials
-                await syncFromCloud();
+                const hashedPw = await window.hashPassword(pw);
                 let users = getUsers();
 
                 if (currentMode === 'login') {
-                    let existingUser = users.find(u => u.id.toLowerCase() === id.toLowerCase() && u.pw === pw);
-                    if (!existingUser && !users.some(u => u.id.toLowerCase() === id.toLowerCase())) {
-                        // Automatically register previously existing accounts on the fly
-                        existingUser = { id: id, pw: pw, name: id.split('@')[0] };
+                    let existingUser = users.find(u => u.id.toLowerCase() === id.toLowerCase());
+                    if (!existingUser) {
+                        // Automatically register new accounts on the fly
+                        existingUser = { id: id, pw: hashedPw, name: id.split('@')[0] };
                         users.push(existingUser);
-                        saveUsers(users);
+                        saveUsers(users, false);
                     }
-                    if (existingUser && existingUser.pw === pw) {
+                    if (existingUser && (existingUser.pw === hashedPw || existingUser.pw === pw)) {
+                        existingUser.pw = hashedPw; // Migrate legacy plain passwords to hash
+                        saveUsers(users, false);
                         setCurrentUser({ id: existingUser.id, name: existingUser.name }, rememberMe ? rememberMe.checked : true);
-                        showAlert('로그인 성공! 대시보드로 이동합니다...', false);
+                        showAlert('로그인 성공! 클라우드 데이터 동기화 중...', false);
+                        
+                        // Fetch latest cloud save state before redirect
+                        if (typeof window.loadGameFromCloud === 'function') {
+                            await window.loadGameFromCloud(existingUser.id);
+                        }
+
                         setTimeout(() => {
                             window.location.href = 'dashboard.html';
-                        }, 500);
+                        }, 400);
                     } else {
                         showAlert('시크릿 키(비밀번호)가 일치하지 않습니다.', true);
                     }
@@ -836,14 +708,19 @@ document.addEventListener('click', function(e) {
                         showAlert('이미 플레이어로 등록된 이메일 주소입니다. 로그인해주세요.', true);
                         return false;
                     }
-                    const newUser = { id: id, pw: pw, name: id.split('@')[0] };
+                    const newUser = { id: id, pw: hashedPw, name: id.split('@')[0] };
                     users.push(newUser);
-                    saveUsers(users);
+                    saveUsers(users, false);
                     setCurrentUser({ id: newUser.id, name: newUser.name }, rememberMe ? rememberMe.checked : true);
-                    showAlert('신규 플레이어 계정이 성공적으로 생성되었습니다! 접속 중...', false);
+                    showAlert('신규 플레이어 계정이 생성되었습니다! 접속 중...', false);
+
+                    if (typeof window.saveGameToCloud === 'function' && typeof defaultState !== 'undefined') {
+                        await window.saveGameToCloud(defaultState, newUser.id);
+                    }
+
                     setTimeout(() => {
                         window.location.href = 'dashboard.html';
-                    }, 500);
+                    }, 400);
                 }
                 return false;
             };
