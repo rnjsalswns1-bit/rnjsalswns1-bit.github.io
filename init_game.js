@@ -40,13 +40,24 @@
     window.safeSessionStorage = createSafeStore(true);
 })();
 
+window.getCurrentUser = function() {
+    try {
+        const session = (window.safeLocalStorage && window.safeLocalStorage.getItem('lvlup_current_user')) || 
+                        (window.safeSessionStorage && window.safeSessionStorage.getItem('lvlup_current_user')) ||
+                        localStorage.getItem('lvlup_current_user');
+        return session ? JSON.parse(session) : null;
+    } catch(e) {
+        return null;
+    }
+};
+
 window.getGameSaveKey = function() {
     try {
-        const session = window.safeLocalStorage.getItem('lvlup_current_user') || window.safeSessionStorage.getItem('lvlup_current_user');
-        if (session) {
-            const user = JSON.parse(session);
-            if (user && user.id) {
-                return 'game_save_state_' + user.id.toLowerCase().replace(/[^a-z0-9]/g, '_');
+        const user = window.getCurrentUser();
+        if (user) {
+            const keyId = user.uid || user.id;
+            if (keyId) {
+                return 'game_save_state_' + String(keyId).toLowerCase().replace(/[^a-z0-9_-]/g, '_');
             }
         }
     } catch(e) {}
@@ -124,18 +135,7 @@ window.handleSaveProfile = function(e) {
         const nameInput = document.getElementById('sys-setting-name-input');
         const nameVal = nameInput ? nameInput.value.trim() : '';
         
-        const saveKey = (function() {
-            try {
-                const session = window.safeLocalStorage.getItem('lvlup_current_user') || window.safeSessionStorage.getItem('lvlup_current_user');
-                if (session) {
-                    const user = JSON.parse(session);
-                    if (user && user.id) {
-                        return 'game_save_state_' + user.id.toLowerCase().replace(/[^a-z0-9]/g, '_');
-                    }
-                }
-            } catch(e) {}
-            return 'game_save_state_guest';
-        })();
+        const saveKey = window.getGameSaveKey();
 
         let curState = {};
         try {
@@ -169,7 +169,10 @@ window.handleSaveProfile = function(e) {
             const reader = new FileReader();
             reader.onload = function(ev) {
                 curState.customProfile.avatarUrl = ev.target.result;
-                localStorage.setItem(saveKey, JSON.stringify(curState));
+                window.safeLocalStorage.setItem(saveKey, JSON.stringify(curState));
+                if (typeof window.saveGameToCloud === 'function') {
+                    window.saveGameToCloud(curState);
+                }
                 alert('프로필 변경사항이 성공적으로 저장되었습니다!');
                 const modal = document.getElementById('system-settings-modal');
                 if (modal) modal.classList.add('hidden');
@@ -177,7 +180,10 @@ window.handleSaveProfile = function(e) {
             };
             reader.readAsDataURL(avatarInput.files[0]);
         } else {
-            localStorage.setItem(saveKey, JSON.stringify(curState));
+            window.safeLocalStorage.setItem(saveKey, JSON.stringify(curState));
+            if (typeof window.saveGameToCloud === 'function') {
+                window.saveGameToCloud(curState);
+            }
             alert('프로필 변경사항이 성공적으로 저장되었습니다!');
             const modal = document.getElementById('system-settings-modal');
             if (modal) modal.classList.add('hidden');
@@ -325,16 +331,7 @@ document.addEventListener('click', function(e) {
     };
 
     function getGameSaveKey() {
-        try {
-            const session = localStorage.getItem('lvlup_current_user') || sessionStorage.getItem('lvlup_current_user');
-            if (session) {
-                const user = JSON.parse(session);
-                if (user && user.id) {
-                    return 'game_save_state_' + user.id.toLowerCase().replace(/[^a-z0-9]/g, '_');
-                }
-            }
-        } catch(e) {}
-        return 'game_save_state_guest';
+        return (window.getGameSaveKey && window.getGameSaveKey()) || 'game_save_state_guest';
     }
 
     // Initialize or load state
@@ -342,12 +339,16 @@ document.addEventListener('click', function(e) {
     const saveKey = getGameSaveKey();
     let saved = localStorage.getItem(saveKey);
 
-    // Auto-Migration & Data Protection: If user key is empty/reset, copy from guest save data if available
+    // If saved state not found under primary saveKey, check legacy email-based saveKey if user session exists
     if (!saved || saved === 'null' || saved === '{}') {
-        const guestData = localStorage.getItem('game_save_state_guest');
-        if (guestData && saveKey !== 'game_save_state_guest') {
-            saved = guestData;
-            localStorage.setItem(saveKey, guestData);
+        const curU = (window.getCurrentUser && window.getCurrentUser()) || null;
+        if (curU && curU.id) {
+            const legacyEmailKey = 'game_save_state_' + String(curU.id).toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+            const legacySaved = localStorage.getItem(legacyEmailKey);
+            if (legacySaved && legacySaved !== 'null' && legacySaved !== '{}') {
+                saved = legacySaved;
+                localStorage.setItem(saveKey, legacySaved);
+            }
         }
     }
 
@@ -473,18 +474,37 @@ document.addEventListener('click', function(e) {
         window.saveState();
     }
 
+    // Global Cloud State Applicator
+    window.applyLoadedCloudState = function(cloudState) {
+        if (!cloudState || typeof cloudState !== 'object' || typeof cloudState.level !== 'number') return;
+        state = cloudState;
+        window.state = cloudState;
+        const currentSaveKey = getGameSaveKey();
+        try {
+            window.safeLocalStorage.setItem(currentSaveKey, JSON.stringify(state));
+        } catch(e) {}
+        if (typeof applyGlobalState === 'function') applyGlobalState();
+        if (typeof applyCustomSettings === 'function') applyCustomSettings();
+        if (typeof window.updateDashboardStatsUI === 'function') window.updateDashboardStatsUI();
+        if (typeof window.renderDailyQuests === 'function') window.renderDailyQuests();
+        if (typeof window.renderDungeons === 'function') window.renderDungeons();
+        window.dispatchEvent(new CustomEvent('gameStateLoaded', { detail: state }));
+        console.log("☁️ [init_game] 클라우드 상태 적용 완료! (Lv." + state.level + ", Gold: " + state.gold + ")");
+    };
+
     // Load game state from Firebase Firestore on page load
     (async function initCloudStateOnLoad() {
-        const curUser = getCurrentUser();
-        if (curUser && curUser.id) {
+        const curUser = (window.getCurrentUser && window.getCurrentUser()) || null;
+        if (curUser && (curUser.uid || curUser.id)) {
             try {
-                const cloudState = await window.loadGameFromCloud(curUser.id);
-                if (cloudState && typeof cloudState === 'object' && cloudState.level !== undefined) {
-                    state = cloudState;
-                    if (typeof applyGlobalState === 'function') applyGlobalState();
-                    if (typeof applyCustomSettings === 'function') applyCustomSettings();
+                const targetId = curUser.uid || curUser.id;
+                const cloudState = await window.loadGameFromCloud(targetId);
+                if (cloudState && typeof window.applyLoadedCloudState === 'function') {
+                    window.applyLoadedCloudState(cloudState);
                 }
-            } catch(e) {}
+            } catch(e) {
+                console.warn("initCloudStateOnLoad warning:", e);
+            }
         }
     })();
 
@@ -573,8 +593,8 @@ document.addEventListener('click', function(e) {
 
         function logoutUser() {
             try {
-                if (state) {
-                    localStorage.setItem('game_save_state_guest', JSON.stringify(state));
+                if (window.auth && typeof window.auth.signOut === 'function') {
+                    window.auth.signOut();
                 }
             } catch(e) {}
             localStorage.removeItem('lvlup_current_user');
@@ -587,9 +607,9 @@ document.addEventListener('click', function(e) {
         const currentPath = window.location.pathname.toLowerCase();
         const isProtected = protectedPages.some(page => currentPath.includes(page));
 
-        if (!getCurrentUser()) {
-            // Auto-login default user so any page works seamlessly from anywhere
-            setCurrentUser({ id: 'hunter@levelup.com', name: '성진우' }, true);
+        if (!getCurrentUser() && isProtected) {
+            window.location.href = 'login.html';
+            return;
         }
 
         // Add missing button & logout navigations
@@ -690,7 +710,10 @@ document.addEventListener('click', function(e) {
                             showAlert('🎉 Firebase Auth 로그인 성공! 클라우드 동기화 중...', false);
                             
                             if (typeof window.loadGameFromCloud === 'function') {
-                                await window.loadGameFromCloud(uid);
+                                const cloudData = await window.loadGameFromCloud(uid);
+                                if (cloudData && typeof window.applyLoadedCloudState === 'function') {
+                                    window.applyLoadedCloudState(cloudData);
+                                }
                             }
 
                             setTimeout(() => {
