@@ -214,10 +214,58 @@ window.saveGameToCloud = async function(state, forcedUserId = null) {
     });
 };
 
+// Scan this device's storage for any existing game character progress to migrate to cloud
+function findAnyLocalSaveData() {
+    try {
+        const currentKey = window.getGameSaveKey ? window.getGameSaveKey() : null;
+        if (currentKey) {
+            const raw = localStorage.getItem(currentKey);
+            if (raw && raw !== 'null' && raw !== '{}') {
+                try {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && (parsed.level > 1 || parsed.gold > 0 || parsed.exp > 0)) return parsed;
+                } catch(e) {}
+            }
+        }
+        for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && k.startsWith('game_save_state_')) {
+                const raw = localStorage.getItem(k);
+                if (raw && raw !== 'null' && raw !== '{}') {
+                    try {
+                        const parsed = JSON.parse(raw);
+                        if (parsed && (parsed.level > 1 || parsed.gold > 0 || parsed.exp > 0 || (parsed.stats && parsed.stats.str > 10))) {
+                            return parsed;
+                        }
+                    } catch(e) {}
+                }
+            }
+        }
+    } catch(e) {}
+    return null;
+}
+window.findAnyLocalSaveData = findAnyLocalSaveData;
+
 /**
  * Loads game state from Firebase Firestore: users/{userId}
  */
 window.loadGameFromCloud = async function(userId = null) {
+    const isReady = initFirebaseApp();
+    if (!isReady) {
+        return null;
+    }
+
+    // Wait up to 1.2s for Firebase Auth restoration if auth exists but currentUser is not yet ready
+    if (window.auth && !window.auth.currentUser) {
+        await new Promise((resolve) => {
+            const unsub = window.auth.onAuthStateChanged((u) => {
+                unsub();
+                resolve(u);
+            });
+            setTimeout(resolve, 1200);
+        });
+    }
+
     let targetUid = null;
     if (window.auth && window.auth.currentUser) {
         targetUid = window.auth.currentUser.uid;
@@ -227,7 +275,10 @@ window.loadGameFromCloud = async function(userId = null) {
         targetUid = getActiveUserId();
     }
 
-    if (!targetUid) return null;
+    if (!targetUid) {
+        return null;
+    }
+
     const cleanUserId = targetUid.trim();
     const saveKey = window.getGameSaveKey ? window.getGameSaveKey() : ('game_save_state_' + cleanUserId.replace(/[^a-zA-Z0-9_-]/g, '_'));
 
@@ -238,11 +289,6 @@ window.loadGameFromCloud = async function(userId = null) {
             localSaveData = JSON.parse(rawLocal);
         }
     } catch(e) {}
-
-    const isReady = initFirebaseApp();
-    if (!isReady) {
-        return localSaveData;
-    }
 
     try {
         let docId = cleanUserId;
@@ -263,19 +309,26 @@ window.loadGameFromCloud = async function(userId = null) {
                     }
                 } catch(e) {}
                 console.log("☁️ Firestore 클라우드에서 저장 데이터를 성공적으로 불러왔습니다! (UID: " + docId + ", Lv." + (cloudState.level || 1) + ")");
+                showCloudStatusToast("☁️ 클라우드 동기화 완료 (Lv." + (cloudState.level || 1) + ")", true);
                 return cloudState;
             }
         }
 
-        // Migrate local state to Firestore if doc doesn't exist and local data has genuine progress
-        if (localSaveData && (localSaveData.level > 1 || localSaveData.exp > 0 || localSaveData.gold > 0)) {
-            console.log("🔄 로컬 저장 데이터를 Firestore 클라우드로 마이그레이션 중...");
-            await window.saveGameToCloud(localSaveData, docId);
-            return localSaveData;
+        // If doc doesn't exist on Firestore: Search for ANY existing local character on this PC to migrate up
+        const anySave = findAnyLocalSaveData() || localSaveData;
+        if (anySave && (anySave.level > 1 || anySave.exp > 0 || anySave.gold > 0 || (anySave.stats && anySave.stats.str > 10))) {
+            console.log("🔄 기존 PC의 저장 데이터를 클라우드로 최초 업로드합니다... (Lv." + anySave.level + ")");
+            await window.saveGameToCloud(anySave, docId);
+            showCloudStatusToast("☁️ 기존 기기 데이터 클라우드 업로드 완료", true);
+            return anySave;
         }
     } catch (e) {
         console.error("Firebase Cloud Load Error:", e);
-        showCloudStatusToast("⚠️ 클라우드 로드 실패 - 로컬 데이터 사용", false);
+        if (e.code === 'permission-denied') {
+            showCloudStatusToast("⚠️ Firestore 접근 권한 거부 (Firebase 보안 규칙 확인 필요)", false);
+        } else {
+            showCloudStatusToast("⚠️ 클라우드 로드 실패: " + (e.message || e.code), false);
+        }
     }
 
     return localSaveData;
